@@ -23,19 +23,19 @@ endif
 # Add inputs and outputs from these tool invocations to the build variables 
 
 # All Target
-all: WaitFreeMemAlloc
+all: WaitFreePool
 
 # Tool invocations
-WaitFreeMemAlloc: $(OBJS) $(USER_OBJS)
+WaitFreePool: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
-	@echo 'Invoking: GCC C Linker'
-	gcc  -o "WaitFreeMemAlloc" $(OBJS) $(USER_OBJS) $(LIBS)
+	@echo 'Invoking: MacOS X C Linker'
+	gcc  -o "WaitFreePool" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 
 # Other Targets
 clean:
-	-$(RM) $(OBJS)$(C_DEPS)$(EXECUTABLES) WaitFreeMemAlloc
+	-$(RM) $(EXECUTABLES)$(OBJS)$(C_DEPS) WaitFreePool
 	-@echo ' '
 
 .PHONY: all clean dependents
