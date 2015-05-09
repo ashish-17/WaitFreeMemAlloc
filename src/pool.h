@@ -19,26 +19,11 @@ typedef struct {
 	int numberOfThreads;
 } Pool;
 
-Pool* createPool(int threads)
-{
-	Pool* pool = (Pool*)malloc(sizeof(Pool));
-	pool->threads = (Thread*)malloc(sizeof(Thread) * threads);
-	pool->numberOfThreads = threads;
+Pool* createPool(int threads);
 
-	return pool;
-}
+void deletePool(Pool* pool);
 
-void deletePool(Pool* pool)
-{
-	stackFree(pool->threads->stack);
-	free(pool->threads);
-	pool->numberOfThreads = 0;
-}
-
-Thread* getThread(Pool* pool, int index)
-{
-	return (pool->threads + sizeof(Thread)*index);
-}
+Thread* getThread(Pool* pool, int index);
 
 
 #endif /* WAITFREEMEMALLOC_SRC_POOL_H_ */

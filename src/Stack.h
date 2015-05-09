@@ -1,8 +1,11 @@
+#ifndef WAITFREEMEMALLOC_SRC_STACK_H_
+#define WAITFREEMEMALLOC_SRC_STACK_H_
+
 #include "AtomicStampedReference.h"
 
-typedef struct {
+typedef struct _StackElement {
 	void* value;
-	StackElement* next;
+	struct _StackElement* next;
 } StackElement;
 
 typedef struct {
@@ -21,13 +24,15 @@ bool stackIsEmpty(const Stack *stack);
 
 bool stackPush(Stack *stack, const void* element);
 
-StackElement* stackPop(Stack *stack);
+void* stackPop(Stack *stack);
 
 bool stackPushOwner(Stack *stack, const void* element);
 
 bool stackPushOther(Stack *stack, const void* element, AtomicStampedReference* oldTop);
 
-void* stackPopOwner(Stack stack);
+void* stackPopOwner(Stack *stack);
 
-void* stackPopOther(Stack stack);
+void* stackPopOther(Stack *stack);
 
+
+#endif /* WAITFREEMEMALLOC_SRC_STACK_H_ */

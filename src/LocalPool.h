@@ -10,6 +10,7 @@
 
 #include "commons.h"
 #include "pool.h"
+#include "Chunk.h"
 
 Pool* createLocalPool(int numThreads);
 

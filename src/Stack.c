@@ -21,6 +21,35 @@ bool stackIsEmpty(const Stack *stack)
 		return false;
 }
 
+bool stackPush(Stack *stack, const void* element) {
+	StackElement *node = (StackElement*)malloc(sizeof(StackElement));
+	node->value = malloc(stack->elementSize);
+	memcpy(node->value, element, stack->elementSize);
+
+	node->next = (StackElement*)stack->top->atomicRef->reference;
+
+	stack->top->atomicRef->reference = node;
+
+	return true;
+}
+
+void* stackPop(Stack *stack) {
+	void* nodeValue = malloc(stack->elementSize);
+
+	StackElement* oldTop =  (StackElement* )stack->top->atomicRef->reference;
+	stack->top->atomicRef->reference = oldTop->next;
+
+	memcpy(nodeValue, oldTop->value, stack->elementSize);
+
+	free(oldTop->value);
+	oldTop->value = NULL;
+
+	free(oldTop);
+	oldTop = NULL;
+
+	return nodeValue;
+}
+
 bool stackPushOwner(Stack *stack, const void* element)
 {
 	StackElement *node = (StackElement*)malloc(sizeof(StackElement));
@@ -45,7 +74,7 @@ bool stackPushOther(Stack *stack, const void* element, AtomicStampedReference* o
 	return compareAndSet(stack->top, NULL, node, oldTop->atomicRef->integer, (oldTop->atomicRef->integer + 1));
 }
 
-void* stackPopOwner(Stack stack)
+void* stackPopOwner(Stack* stack)
 {
 	AtomicStampedReference *oldTop = stack->top;
 	StackElement *nextTopReference = ((StackElement*)(oldTop->atomicRef->reference))->next;
@@ -55,7 +84,7 @@ void* stackPopOwner(Stack stack)
 		return NULL;
 }
 
-void* stackPopOther(Stack stack,)
+void* stackPopOther(Stack* stack)
 {
 	AtomicStampedReference *oldTop = stack->top;
 	StackElement *nextTopReference = ((StackElement*)(oldTop->atomicRef->reference))->next;

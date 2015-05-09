@@ -6,6 +6,7 @@
  */
 
 #include "LocalPool.h"
+#include "Stack.h"
 
 Pool* createLocalPool(int numThreads)
 {

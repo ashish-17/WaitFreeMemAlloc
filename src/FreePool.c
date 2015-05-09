@@ -7,6 +7,7 @@
 
 #include "FreePool.h"
 #include "Chunk.h"
+#include "Stack.h"
 
 Pool* createFreePool(int numThreads)
 {

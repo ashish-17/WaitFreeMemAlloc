@@ -6,6 +6,7 @@
  */
 
 #include "FullPool.h"
+#include "Stack.h"
 
 Pool* createFullPool(int numThreads)
 {
