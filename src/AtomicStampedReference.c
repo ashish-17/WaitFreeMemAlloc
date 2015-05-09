@@ -1,14 +1,16 @@
 #include "AtomicStampedReference.h"
-#include "stdatomic.h"
+#include "commons.h"
+#include <stdatomic.h>
 
-struct ReferenceIntegerPair* createReferenceIntegerPair(void* ref, int i) { //changed the header.. now returning a pointer instead of void
-	struct ReferenceIntegerPair* pair = (struct ReferenceIntegerPair*)malloc(sizeof(struct ReferenceIntegerPair)); //added.. shouldn't we first free memory pointed by pair
+ReferenceIntegerPair* createReferenceIntegerPair(void* ref, int i) {
+	//changed the header.. now returning a pointer instead of void
+	ReferenceIntegerPair* pair = (ReferenceIntegerPair*)malloc(sizeof(ReferenceIntegerPair)); //added.. shouldn't we first free memory pointed by pair
 	pair->reference = ref; pair->integer = i;
 	return pair;
 }
 
 void createAtomicStampedReference(AtomicStampedReference* current, void* initialRef, int initialStamp) {
-	current->atomicRef = (struct ReferenceIntegerPair*)malloc(sizeof(struct ReferenceIntegerPair));
+	current->atomicRef = (ReferenceIntegerPair*)malloc(sizeof(ReferenceIntegerPair));
 	current->atomicRef->reference = initialRef;
 	current->atomicRef->integer = initialStamp;
 }

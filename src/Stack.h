@@ -13,15 +13,15 @@ typedef struct {
 	int numberOfElements;
 } Stack;
 
-void stackCreate(struct Stack *stack, int elementSize);
+void stackCreate(Stack *stack, int elementSize);
 
-void stackFree(struct Stack *stack);
+void stackFree(Stack *stack);
 
-bool stackIsEmpty(const struct Stack *stack);
+bool stackIsEmpty(const Stack *stack);
 
-bool stackPush(struct Stack *stack, const void* element);
+bool stackPush(Stack *stack, const void* element);
 
-StackElement* stackPop(struct Stack *stack);
+StackElement* stackPop(Stack *stack);
 
 bool stackPushOwner(Stack *stack, const void* element);
 

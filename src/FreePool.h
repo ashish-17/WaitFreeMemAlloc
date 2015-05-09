@@ -9,6 +9,8 @@
 #define WAITFREEMEMALLOC_SRC_FREEPOOL_H_
 
 #include "commons.h"
+#include "pool.h"
+#include "Chunk.h"
 
 Pool* createFreePool(int numThreads);
 

@@ -9,6 +9,7 @@
 #define WAITFREEMEMALLOC_SRC_FULLPOOL_H_
 
 #include "commons.h"
+#include "pool.h"
 
 Pool* createFullPool(int numThreads);
 

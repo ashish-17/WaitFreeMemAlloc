@@ -9,6 +9,7 @@
 #define WAITFREEMEMALLOC_SRC_LOCALPOOL_H_
 
 #include "commons.h"
+#include "pool.h"
 
 Pool* createLocalPool(int numThreads);
 

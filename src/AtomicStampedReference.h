@@ -11,7 +11,7 @@ typedef struct {
 	ReferenceIntegerPair* atomicRef;
 } AtomicStampedReference;
 
-void createReferenceIntegerPair(ReferenceIntegerPair *pair, void* ref, int i);
+ReferenceIntegerPair* createReferenceIntegerPair(void* ref, int i);
 
 void createAtomicStampedReference(AtomicStampedReference* current, void* initialRef, int initialStamp);
 
