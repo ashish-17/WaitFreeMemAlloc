@@ -5,6 +5,7 @@
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
 ../src/AtomicStampedReference.c \
+../src/Chunk.c \
 ../src/FreePool.c \
 ../src/FullPool.c \
 ../src/LocalPool.c \
@@ -14,6 +15,7 @@ C_SRCS += \
 
 OBJS += \
 ./src/AtomicStampedReference.o \
+./src/Chunk.o \
 ./src/FreePool.o \
 ./src/FullPool.o \
 ./src/LocalPool.o \
@@ -23,6 +25,7 @@ OBJS += \
 
 C_DEPS += \
 ./src/AtomicStampedReference.d \
+./src/Chunk.d \
 ./src/FreePool.d \
 ./src/FullPool.d \
 ./src/LocalPool.d \

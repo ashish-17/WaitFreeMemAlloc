@@ -2,7 +2,7 @@
  * pool.h
  *
  *  Created on: May 8, 2015
- *      Author: nteg
+ *      Author: Archita
  */
 
 #ifndef WAITFREEMEMALLOC_SRC_POOL_H_

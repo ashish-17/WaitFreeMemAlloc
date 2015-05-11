@@ -2,7 +2,7 @@
  * LocalPool.h
  *
  *  Created on: May 8, 2015
- *      Author: nteg
+ *      Author: Archita
  */
 
 #ifndef WAITFREEMEMALLOC_SRC_LOCALPOOL_H_

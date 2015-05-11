@@ -3,9 +3,13 @@
 
 void stackCreate(Stack *stack, int elementSize)
 {
+	//printf("In stackCreate\n");
+	stack->top = (AtomicStampedReference*) malloc(sizeof(AtomicStampedReference));
 	createAtomicStampedReference(stack->top, NULL, 0);
 	stack->elementSize = elementSize;
+	printf("Inside create stack and size of chunk is %d\n", stack->elementSize);
 	stack->numberOfElements = 0;
+	//printf("leaving stackCreate\n");
 }
 
 void stackFree(Stack *stack)
@@ -22,14 +26,17 @@ bool stackIsEmpty(const Stack *stack)
 }
 
 bool stackPush(Stack *stack, const void* element) {
+	printf("inside stackPush\n");
 	StackElement *node = (StackElement*)malloc(sizeof(StackElement));
+	printf("allocated a node\n");
 	node->value = malloc(stack->elementSize);
+	printf("the elementSize is %u\n",stack->elementSize);
 	memcpy(node->value, element, stack->elementSize);
-
+	printf("after memcpy\n");
 	node->next = (StackElement*)stack->top->atomicRef->reference;
 
 	stack->top->atomicRef->reference = node;
-
+	printf("reached here\n");
 	return true;
 }
 
@@ -77,9 +84,10 @@ bool stackPushOther(Stack *stack, const void* element, AtomicStampedReference* o
 void* stackPopOwner(Stack* stack)
 {
 	AtomicStampedReference *oldTop = stack->top;
+	void *oldValue = ((StackElement*)oldTop->atomicRef->reference)->value;
 	StackElement *nextTopReference = ((StackElement*)(oldTop->atomicRef->reference))->next;
 	if (compareAndSet(stack->top, oldTop->atomicRef->reference, nextTopReference, oldTop->atomicRef->integer, (oldTop->atomicRef->integer+1)))
-		return ((StackElement*)oldTop->atomicRef->reference)->value;
+		return oldValue;
 	else
 		return NULL;
 }
@@ -87,11 +95,12 @@ void* stackPopOwner(Stack* stack)
 void* stackPopOther(Stack* stack)
 {
 	AtomicStampedReference *oldTop = stack->top;
+	void *oldValue = ((StackElement*)oldTop->atomicRef->reference)->value;
 	StackElement *nextTopReference = ((StackElement*)(oldTop->atomicRef->reference))->next;
 	if (nextTopReference == NULL)
 		return NULL;
 	if (compareAndSet(stack->top, oldTop->atomicRef->reference, nextTopReference, oldTop->atomicRef->integer, (oldTop->atomicRef->integer+1)))
-			return ((StackElement*)oldTop->atomicRef->reference)->value;
+			return oldValue;
 	else
 		return NULL;
 }

@@ -10,9 +10,11 @@ ReferenceIntegerPair* createReferenceIntegerPair(void* ref, int i) {
 }
 
 void createAtomicStampedReference(AtomicStampedReference* current, void* initialRef, int initialStamp) {
+	//printf("In createAtomicStampedReference\n");
 	current->atomicRef = (ReferenceIntegerPair*)malloc(sizeof(ReferenceIntegerPair));
 	current->atomicRef->reference = initialRef;
 	current->atomicRef->integer = initialStamp;
+	//printf("leaving createAtomicStampedReference\n");
 }
 
 bool compareAndSet(AtomicStampedReference* current,
