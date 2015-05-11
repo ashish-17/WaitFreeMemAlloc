@@ -6,7 +6,6 @@
  */
 
 #include "FreePool.h"
-#include "Chunk.h"
 #include "Stack.h"
 
 Pool* createFreePool(int numThreads)
@@ -22,7 +21,12 @@ Chunk* getFromFreePool(Pool* pool, int threadIndex) {
 }
 
 bool putInFreePool(Pool* pool, int threadIndex, Chunk* chunk) {
+	/*printf("inside putInFreePool with threadIndex %d\n", threadIndex);
+	printf("Inside putInfreePool the valeue of pool ptr is %u\n", pool);
+	printf("Inside putInfreePool the valeue of Thread ptr is %u\n", pool->threads);*/
 	Thread* thread = getThread(pool, threadIndex);
+	/*printf("inside putinFreePool the value of thread ptr is %u\n", thread);
+	printf("Stack ptr in putInFreePool %u\n", thread->stack);
+	printf("Stack element size = %d\n", thread->stack->elementSize);*/
 	return stackPush(thread->stack, chunk);
 }
-

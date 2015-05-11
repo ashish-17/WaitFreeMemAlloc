@@ -1,5 +1,6 @@
 src/test.d: ../src/test.c ../src/Stack.h ../src/AtomicStampedReference.h \
- ../src/commons.h ../src/Chunk.h ../src/localPool.h ../src/pool.h
+ ../src/commons.h ../src/Chunk.h ../src/Block.h ../src/LocalPool.h \
+ ../src/pool.h ../src/FreePool.h ../src/FullPool.h
 
 ../src/Stack.h:
 
@@ -9,6 +10,12 @@ src/test.d: ../src/test.c ../src/Stack.h ../src/AtomicStampedReference.h \
 
 ../src/Chunk.h:
 
-../src/localPool.h:
+../src/Block.h:
+
+../src/LocalPool.h:
 
 ../src/pool.h:
+
+../src/FreePool.h:
+
+../src/FullPool.h:

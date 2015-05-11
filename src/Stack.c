@@ -3,13 +3,13 @@
 
 void stackCreate(Stack *stack, int elementSize)
 {
-	//printf("In stackCreate\n");
+	printf("In stackCreate\n");
 	stack->top = (AtomicStampedReference*) malloc(sizeof(AtomicStampedReference));
 	createAtomicStampedReference(stack->top, NULL, 0);
 	stack->elementSize = elementSize;
-	printf("Inside create stack and size of chunk is %d\n", stack->elementSize);
+	//printf("Inside create stack and size of chunk is %d\n", stack->elementSize);
 	stack->numberOfElements = 0;
-	//printf("leaving stackCreate\n");
+	printf("leaving stackCreate\n");
 }
 
 void stackFree(Stack *stack)
@@ -26,17 +26,19 @@ bool stackIsEmpty(const Stack *stack)
 }
 
 bool stackPush(Stack *stack, const void* element) {
-	printf("inside stackPush\n");
+	//printf("inside stackPush\n");
 	StackElement *node = (StackElement*)malloc(sizeof(StackElement));
-	printf("allocated a node\n");
+	//printf("allocated a node\n");
 	node->value = malloc(stack->elementSize);
-	printf("the elementSize is %u\n",stack->elementSize);
+	//printf("the elementSize in stackPush is %u\n",stack->elementSize);
+	//printf("CDSC\n");
+	//printf("in stackPush the element is %d\n", element->value);
 	memcpy(node->value, element, stack->elementSize);
-	printf("after memcpy\n");
+	//printf("after memcpy\n");
 	node->next = (StackElement*)stack->top->atomicRef->reference;
 
 	stack->top->atomicRef->reference = node;
-	printf("reached here\n");
+	//printf("reached here\n");
 	return true;
 }
 

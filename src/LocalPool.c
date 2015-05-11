@@ -21,11 +21,11 @@ Chunk* getFromLocalPool(Pool* pool, int threadIndex) {
 }
 
 bool putInLocalPool(Pool* pool, int threadIndex, Chunk* chunk) {
-	printf("inside putInLocalPool with threadIndex %d\n", threadIndex);
+	//printf("inside putInLocalPool with threadIndex %d\n", threadIndex);
 	Thread* thread = getThread(pool, threadIndex);
-	printf("Stack ptr in putInLocakPool %u\n", thread->stack);
-	printf("Stack element size = %u\n", thread->stack->elementSize);
+	//printf("Stack ptr in putInLocakPool %u\n", thread->stack);
+	//printf("Stack element size = %d\n", thread->stack->elementSize);
 	bool res = stackPush(thread->stack, chunk);
-	printf("returned from stackPush\n");
+	//printf("returned from stackPush\n");
 	return res;
 }
