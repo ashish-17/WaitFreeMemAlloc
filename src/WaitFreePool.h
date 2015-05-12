@@ -10,24 +10,10 @@
 #include "pool.h"
 #include "Block.h"
 
-typedef struct {
-	bool needHelp;
-	int timestamp;
-} Helper;
+bool createWaitFreePool(int m, int n, int c, int C);
 
-typedef struct{
-	Helper *helpers;
-	int numberOfHelpers;
-} Announce;
+Block* allocate(int threadId);
 
-typedef struct {
-	int noOfOps;
-	int lastDonated;
-} Donor;
-
-typedef struct{
-	Donor *donors;
-	int noOfDonors;
-} Info;
+void freeMem(int threadId, Block* block);
 
 #endif /* WAITFREEMEMALLOC_SRC_WAITFREEPOOL_H_ */
