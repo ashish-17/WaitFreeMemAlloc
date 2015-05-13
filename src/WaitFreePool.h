@@ -10,7 +10,7 @@
 #include "pool.h"
 #include "Block.h"
 
-bool createWaitFreePool(int m, int n, int c, int C);
+void createWaitFreePool(int m, int n, int c, int C);
 
 Block* allocate(int threadId);
 

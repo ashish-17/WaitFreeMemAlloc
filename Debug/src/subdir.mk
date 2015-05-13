@@ -7,37 +7,46 @@ C_SRCS += \
 ../src/AtomicStampedReference.c \
 ../src/Block.c \
 ../src/Chunk.c \
+../src/Client.c \
 ../src/FreePool.c \
 ../src/FullPool.c \
 ../src/LocalPool.c \
+../src/RandomGenerator.c \
 ../src/Stack.c \
 ../src/WaitFreePool.c \
 ../src/pool.c \
-../src/test.c 
+../src/test.c \
+../src/testMulti.c 
 
 OBJS += \
 ./src/AtomicStampedReference.o \
 ./src/Block.o \
 ./src/Chunk.o \
+./src/Client.o \
 ./src/FreePool.o \
 ./src/FullPool.o \
 ./src/LocalPool.o \
+./src/RandomGenerator.o \
 ./src/Stack.o \
 ./src/WaitFreePool.o \
 ./src/pool.o \
-./src/test.o 
+./src/test.o \
+./src/testMulti.o 
 
 C_DEPS += \
 ./src/AtomicStampedReference.d \
 ./src/Block.d \
 ./src/Chunk.d \
+./src/Client.d \
 ./src/FreePool.d \
 ./src/FullPool.d \
 ./src/LocalPool.d \
+./src/RandomGenerator.d \
 ./src/Stack.d \
 ./src/WaitFreePool.d \
 ./src/pool.d \
-./src/test.d 
+./src/test.d \
+./src/testMulti.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes

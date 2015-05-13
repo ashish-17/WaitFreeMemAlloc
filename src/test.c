@@ -307,7 +307,7 @@ void testChunk() {
 	}
 }
 
-int main() {
+int somemain() {
 
 	//testStack();
 	//testLocalPool(); // have to update as chunk definition has been changed

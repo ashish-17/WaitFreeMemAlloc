@@ -3,13 +3,13 @@
 
 void stackCreate(Stack *stack, int elementSize)
 {
-	printf("In stackCreate\n");
+	//printf("In stackCreate\n");
 	stack->top = (AtomicStampedReference*) malloc(sizeof(AtomicStampedReference));
 	createAtomicStampedReference(stack->top, NULL, 0);
 	stack->elementSize = elementSize;
 	//printf("Inside create stack and size of chunk is %d\n", stack->elementSize);
 	stack->numberOfElements = 0;
-	printf("leaving stackCreate\n");
+	//printf("leaving stackCreate\n");
 }
 
 void stackFree(Stack *stack)

@@ -62,13 +62,15 @@ void createWaitFreePool(int m, int n, int c, int C) {
 
 	Chunk *chunk;
 	Block *block;
+	int blockNumber = 0;
 
 	// Set-up of initial local pools
 	for(int j = 0; j < numOfThreads ; j++) {
 		for(int i = 0; i < 1; i++) {
 			chunk = createChunk(chunk,numOfBlocksPerChunk);
 			for(int k = 0; k < numOfBlocksPerChunk; k++) {
-				block = createBlock(j*numOfThreads + i*numOfChunksPerThread + k);
+				block = createBlock(blockNumber);
+				blockNumber++;
 				putInChunk(chunk, block);
 			}
 			putInLocalPool(memory->localPool,j,chunk);
@@ -80,7 +82,8 @@ void createWaitFreePool(int m, int n, int c, int C) {
 		for(int i = 0; i < numOfChunksPerThread - 1; i++) {
 			chunk = createChunk(chunk,numOfBlocksPerChunk);
 			for(int k = 0; k < numOfBlocksPerChunk; k++) {
-				block = createBlock(j*numOfThreads + i*numOfChunksPerThread + k);
+				block = createBlock(blockNumber);
+				blockNumber++;
 				putInChunk(chunk, block);
 			}
 			putInOwnFullPool(memory->fullPool,j,chunk);
@@ -92,7 +95,7 @@ void createWaitFreePool(int m, int n, int c, int C) {
 	memory->announce->helpers = (Helper*) malloc(sizeof(Helper)*numOfThreads);
 	memory->announce->numOfHelpers = numOfThreads;
 	for(int i = 0; i < numOfThreads; i++) {
-		Helper* helperEntry = getHelperEntry(memory->announce,i);
+		Helper* helperEntry = getHelperEntry(i);
 		helperEntry->needHelp = false;
 		helperEntry->timestamp = 0;
 	}
@@ -102,11 +105,17 @@ void createWaitFreePool(int m, int n, int c, int C) {
 	memory->info->donors = (Donor*) malloc(sizeof(Donor)*numOfThreads);
 	memory->info->numOfDonors = numOfThreads;
 	for(int i = 0; i < numOfThreads; i++) {
-		Donor* donorEntry = getDonorEntry(memory->info,i);
+		Donor* donorEntry = getDonorEntry(i);
 		donorEntry->lastDonated = 0;
 		donorEntry->noOfOps = 0;
 	}
 }
+
+Block* allocate(int threadId) {}
+void freeMem(int threadId, Block *block) {}
+
+
+/*
 
 Block* allocate(int threadId) {
 
@@ -237,3 +246,4 @@ bool donate(int threadId, Chunk *chunk) {
 	return false;
 }
 
+*/
