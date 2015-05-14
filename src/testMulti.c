@@ -108,6 +108,6 @@ void testMultiFullPool() {
 }
 
 
-int main() {
+int summain() {
 	testMultiFullPool();
 }

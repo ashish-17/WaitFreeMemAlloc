@@ -21,6 +21,8 @@ Chunk* createChunk(Chunk *chunk, int number);
 
 bool isChunkEmpty(Chunk *chunk);
 
+bool chunkHasSpace(Chunk *chunk);
+
 Block* getFromChunk(Chunk *chunk);
 
 bool putInChunk(Chunk *chunk, Block *block);

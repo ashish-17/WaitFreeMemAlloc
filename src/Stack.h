@@ -34,5 +34,4 @@ void* stackPopOwner(Stack *stack);
 
 void* stackPopOther(Stack *stack);
 
-
 #endif /* WAITFREEMEMALLOC_SRC_STACK_H_ */

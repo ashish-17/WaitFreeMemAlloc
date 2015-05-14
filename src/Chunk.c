@@ -13,7 +13,14 @@ Chunk* createChunk(Chunk *chunk, int number) {
 }
 
 bool isChunkEmpty(Chunk *chunk) {
-	return stackIsEmpty(chunk->stack);
+	return (stackIsEmpty(chunk->stack));
+}
+
+bool chunkHasSpace(Chunk *chunk) {
+	if (chunk->numOfBlocks != chunk->stack->numberOfElements)
+		return true;
+	else
+		return false;
 }
 
 Block* getFromChunk(Chunk *chunk) {
@@ -21,5 +28,7 @@ Block* getFromChunk(Chunk *chunk) {
 }
 
 bool putInChunk(Chunk *chunk, Block *block) {
-	stackPush(chunk->stack, block);
+	bool res = stackPush(chunk->stack, block);
+	//printf("chunksize %d\n", chunk->stack->numberOfElements);
+	return res;
 }

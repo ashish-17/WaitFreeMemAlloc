@@ -31,13 +31,18 @@ bool stackPush(Stack *stack, const void* element) {
 	//printf("allocated a node\n");
 	node->value = malloc(stack->elementSize);
 	//printf("the elementSize in stackPush is %u\n",stack->elementSize);
+	//printf("the element in stackPush is %u\n",element);
 	//printf("CDSC\n");
 	//printf("in stackPush the element is %d\n", element->value);
+
 	memcpy(node->value, element, stack->elementSize);
-	//printf("after memcpy\n");
+	//node->value = element;
+
+	//printf("after memcpy node value = %u\n",node->value);
 	node->next = (StackElement*)stack->top->atomicRef->reference;
 
 	stack->top->atomicRef->reference = node;
+	stack->numberOfElements++;
 	//printf("reached here\n");
 	return true;
 }
@@ -56,8 +61,11 @@ void* stackPop(Stack *stack) {
 	free(oldTop);
 	oldTop = NULL;
 
+	stack->numberOfElements--;
+
 	return nodeValue;
 }
+
 
 bool stackPushOwner(Stack *stack, const void* element)
 {

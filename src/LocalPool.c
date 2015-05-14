@@ -17,15 +17,19 @@ Pool* createLocalPool(int numThreads)
 
 Chunk* getFromLocalPool(Pool* pool, int threadIndex) {
 	Thread* thread = getThread(pool, threadIndex);
-	return stackPop(thread->stack);
+	//printf("getFromLocalPool thread ptr = %u\n", thread);
+	Chunk* chunk =  stackPop(thread->stack);
+	//printf("getFromLocalPool chunk ptr = %u\n", chunk);
+	return chunk;
 }
 
 bool putInLocalPool(Pool* pool, int threadIndex, Chunk* chunk) {
-	//printf("inside putInLocalPool with threadIndex %d\n", threadIndex);
+	//printf("putInLocalPool: Chunk's stack ptr: %u\n", chunk->stack);
 	Thread* thread = getThread(pool, threadIndex);
 	//printf("Stack ptr in putInLocakPool %u\n", thread->stack);
 	//printf("Stack element size = %d\n", thread->stack->elementSize);
 	bool res = stackPush(thread->stack, chunk);
+	//printf("putInLocalPool: after pushing Chunk ptr: %u\n", thread->stack->top->atomicRef->reference);
 	//printf("returned from stackPush\n");
 	return res;
 }
