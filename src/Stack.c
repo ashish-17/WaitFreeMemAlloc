@@ -66,7 +66,6 @@ void* stackPop(Stack *stack) {
 	return nodeValue;
 }
 
-
 bool stackPushOwner(Stack *stack, const void* element)
 {
 	StackElement *node = (StackElement*)malloc(sizeof(StackElement));
@@ -94,23 +93,59 @@ bool stackPushOther(Stack *stack, const void* element, AtomicStampedReference* o
 void* stackPopOwner(Stack* stack)
 {
 	AtomicStampedReference *oldTop = stack->top;
+	if(stack->top->atomicRef->reference == NULL){
+		printf("stackPopOwner: stack was empty\n");
+	}
 	void *oldValue = ((StackElement*)oldTop->atomicRef->reference)->value;
 	StackElement *nextTopReference = ((StackElement*)(oldTop->atomicRef->reference))->next;
 	if (compareAndSet(stack->top, oldTop->atomicRef->reference, nextTopReference, oldTop->atomicRef->integer, (oldTop->atomicRef->integer+1)))
 		return oldValue;
-	else
+	else {
+		printf("stackPopOwner: CAS failed\n");
 		return NULL;
+	}
 }
+
+
 
 void* stackPopOther(Stack* stack)
 {
-	AtomicStampedReference *oldTop = stack->top;
-	void *oldValue = ((StackElement*)oldTop->atomicRef->reference)->value;
+	void *nodeValue = malloc(stack->elementSize);
+	//printf("stackPopOther:\n");
+	ReferenceIntegerPair *oldTop = (ReferenceIntegerPair*)stack->top->atomicRef;
+	//printf("stackPopOther: oldTop = %u\n",oldTop);
+	//printf("stackPopOther: currentTop = %u, expected top = %u\n", stack->top->atomicRef->reference, (oldTop->reference));
+	if (stack->top->atomicRef->reference == NULL) {
+		//printf("stackPopOther: stack was already empty \n");
+		return NULL;
+	}
+	//printf("stackPopOther: victim's stack value")
+	StackElement *nextTopReference = ((StackElement*)(oldTop->reference))->next;
+	if (nextTopReference == NULL) {
+		//printf("stackPopOther: stack had only one chunk \n");
+		return NULL;
+	}
+	if (compareAndSet(stack->top, oldTop->reference, ((StackElement*)oldTop->reference)->next, oldTop->integer, (oldTop->integer + 1))) {
+		//printf("stackPopOther: inside CAS \n");
+		memcpy(nodeValue, ((StackElement*)oldTop->reference)->value, stack->elementSize);
+		free(((StackElement*)oldTop->reference)->value);
+		((StackElement*)oldTop->reference)->value = NULL;
+		free(((StackElement*)oldTop->reference));
+		return nodeValue;
+	}
+	else
+	{
+		printf("stackPopOther: CAS failed\n");
+		free(nodeValue);
+		return NULL;
+	}
+	/*void *oldValue = ((StackElement*)oldTop->atomicRef->reference)->value;
 	StackElement *nextTopReference = ((StackElement*)(oldTop->atomicRef->reference))->next;
 	if (nextTopReference == NULL)
 		return NULL;
+	printf("stackPopOther: before CAS \n");
 	if (compareAndSet(stack->top, oldTop->atomicRef->reference, nextTopReference, oldTop->atomicRef->integer, (oldTop->atomicRef->integer+1)))
 			return oldValue;
 	else
-		return NULL;
+		return NULL;*/
 }

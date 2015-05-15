@@ -21,8 +21,14 @@ bool isFullPoolEmpty(Pool* pool, int threadIndex) {
 }
 
 Chunk* getFromOtherFullPool(Pool* pool, int threadIndex) {
+
+	//printf("inside getFromOtherFullPool\n");
+	//printf("getFromOtheFullPool: is victim %d stack Empty %d\n", threadIndex, stackIsEmpty(getThread(pool,threadIndex)->stack));
 	Thread* thread = getThread(pool, threadIndex);
-	return (Chunk*)stackPopOther(thread->stack);
+	//printf("getFromOtheFullPool: thread ptr = %u\n", thread);
+	Chunk* chunk = stackPopOther(thread->stack);
+	//printf("getFromOtheFullPool: chunk ptr = %u\n", chunk);
+	return chunk;
 }
 
 Chunk* getFromOwnFullPool(Pool* pool, int threadIndex) {
