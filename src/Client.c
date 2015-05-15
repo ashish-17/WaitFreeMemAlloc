@@ -7,9 +7,9 @@
 
 
 #define NUM_THREADS 3
-#define NUM_BLOCKS 24
+#define NUM_BLOCKS 30
 #define CHUNK_SIZE 2
-#define NUM_DONATION_STEPS 10
+#define NUM_DONATION_STEPS 1
 
 /*typedef struct {
 	Memory *memory;

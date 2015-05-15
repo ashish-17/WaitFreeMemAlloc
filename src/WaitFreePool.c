@@ -66,9 +66,12 @@ void createWaitFreePool(int m, int n, int c, int C) {
 	int numOfChunks = m/c;
 	int numOfChunksPerThread = numOfChunks/numOfThreads;
 
+	//numOfThreads = n + 1;
 	memory->fullPool = createFullPool(numOfThreads);
 	memory->localPool = createLocalPool(numOfThreads);
 	memory->freePool = createFreePool(numOfThreads);
+
+	numOfThreads = n;
 	memory->m = m; memory->n = n; memory->c = c; memory->C = C;
 
 	Chunk *chunk;
@@ -112,6 +115,7 @@ void createWaitFreePool(int m, int n, int c, int C) {
 	}
 	 */
 
+	//numOfThreads = n + 1;
 	memory->announce = (Announce*)malloc(sizeof(Announce));
 	memory->announce->helpers = (AtomicStampedReference*) malloc(sizeof(AtomicStampedReference)*numOfThreads);
 	for(int i = 0; i < numOfThreads; i++) {
@@ -127,7 +131,7 @@ void createWaitFreePool(int m, int n, int c, int C) {
 	memory->info->numOfDonors = numOfThreads;
 	for(int i = 0; i < numOfThreads; i++) {
 		Donor* donorEntry = getDonorEntry(i);
-		donorEntry->lastDonated = 0;
+		donorEntry->lastDonated = i;
 		donorEntry->noOfOps = 0;
 	}
 
@@ -142,9 +146,9 @@ Block* allocate(int threadId) {
 	int threadToBeHelped;
 	//Helper *announceOfThreadToBeHelped;
 	AtomicStampedReference *announceOfThreadToBeHelped;
-
+	//printf("allocate: threadID = %d\n", threadId);
 	Chunk* chunk = getFromLocalPool(memory->localPool, threadId);
-	//printf("allocate: threadID = %d, numOfBlocksInChunk = %u\n", threadId, chunk->stack->numberOfElements);
+	//printf("allocate: threadID = %d, chunk ptr = %u\n", threadId, chunk);
 	if (!isChunkEmpty(chunk)) {
 		Block *block = getFromChunk(chunk);
 		putInLocalPool(memory->localPool, threadId, chunk);
@@ -153,53 +157,55 @@ Block* allocate(int threadId) {
 	else {
 		//printf("allocate: threadId = %d: chunk in localPool is empty\n", threadId);
 		putInFreePool(memory->freePool,threadId,chunk);
-		if (isFullPoolEmpty(memory->fullPool,threadId)) {
-			printf("allocate: threadId = %d: *****fullPool is empty******\n", threadId);
-			//getHelperEntry(threadId)->needHelp = true;
-			*(bool*)getHelperEntry(threadId)->atomicRef->reference = true;
-			stolenChunk = NULL;
-			for(int i = 1; i <= memory->n; i++) {
-				threadToBeHelped = (threadId + i) % memory->n;
-				announceOfThreadToBeHelped = getHelperEntry(threadToBeHelped);
-				//if(announceOfThreadToBeHelped->needHelp) {
-				if(*(bool*)announceOfThreadToBeHelped->atomicRef->reference) {
-					printf("allocate: threadId = %d: going to help thread %d\n", threadId, threadToBeHelped);
-					stolenChunk = doHelp(threadId, threadToBeHelped, stolenChunk, announceOfThreadToBeHelped);
+		while (true) { // handling call to allocate again
+			if (isFullPoolEmpty(memory->fullPool,threadId)) {
+				printf("allocate: threadId = %d: *****fullPool is empty******\n", threadId);
+				//getHelperEntry(threadId)->needHelp = true;
+				*(bool*)getHelperEntry(threadId)->atomicRef->reference = true;
+				stolenChunk = NULL;
+				for(int i = 1; i <= memory->n; i++) {
+					threadToBeHelped = (threadId + i) % memory->n;
+					announceOfThreadToBeHelped = getHelperEntry(threadToBeHelped);
+					//if(announceOfThreadToBeHelped->needHelp) {
+					if(*(bool*)announceOfThreadToBeHelped->atomicRef->reference) {
+						printf("allocate: threadId = %d: going to help thread %d\n", threadId, threadToBeHelped);
+						stolenChunk = doHelp(threadId, threadToBeHelped, stolenChunk, announceOfThreadToBeHelped);
+					}
+				}
+				if (stolenChunk != NULL) {
+					printf("allocate: threadId = %d: stolenChunk was not null. Putting in own fullPool\n", threadId);
+					putInOwnFullPool(memory->fullPool, threadId, stolenChunk);
+					printf("allocate: threadId = %d: stolenChunk was not null. Putting in own fullPool successful\n", threadId);
 				}
 			}
-			if (stolenChunk != NULL) {
-				printf("allocate: threadId = %d: stolenChunk was not null. Putting in own fullPool\n", threadId);
-				putInOwnFullPool(memory->fullPool, threadId, stolenChunk);
-				printf("allocate: threadId = %d: stolenChunk was not null. Putting in own fullPool successful\n", threadId);
-			}
-		}
 
-		while(true) {
-			//printf("allocate: threadId = %d, isFullPoolEmpty = %d\n", threadId, isFullPoolEmpty(memory->fullPool,threadId));
-			chunk = getFromOwnFullPool(memory->fullPool,threadId);
-			//printf("allocate: threadId = %d, after removing a chunk, isFullPoolEmpty = %d\n", threadId, isFullPoolEmpty(memory->fullPool,threadId));
-			if (chunk != NULL) {
-				if (getDonorEntry(threadId)->noOfOps != memory->C) {
-					//printf("allocate: threadId = %d: noOfOps = %d\n", threadId,getDonorEntry(threadId)->noOfOps);
-					getDonorEntry(threadId)->noOfOps++;
-					putInLocalPool(memory->localPool, threadId, chunk);
-					return getFromChunk(chunk);
+			while(true) {
+				//printf("allocate: threadId = %d, isFullPoolEmpty = %d\n", threadId, isFullPoolEmpty(memory->fullPool,threadId));
+				chunk = getFromOwnFullPool(memory->fullPool,threadId);
+				//printf("allocate: threadId = %d, after removing a chunk, isFullPoolEmpty = %d\n", threadId, isFullPoolEmpty(memory->fullPool,threadId));
+				if (chunk != NULL) {
+					if (getDonorEntry(threadId)->noOfOps != memory->C) {
+						//printf("allocate: threadId = %d: noOfOps = %d\n", threadId,getDonorEntry(threadId)->noOfOps);
+						getDonorEntry(threadId)->noOfOps++;
+						putInLocalPool(memory->localPool, threadId, chunk);
+						return getFromChunk(chunk);
+					}
+					else {
+						getDonorEntry(threadId)->noOfOps = 0;
+						if (!donate(threadId, chunk)) {
+							putInLocalPool(memory->localPool, threadId, chunk);
+							return getFromChunk(chunk);
+						}
+						else {
+							break;
+						}
+					}
 				}
-			}
-			else {
-				getDonorEntry(threadId)->noOfOps = 0;
-				if (!donate(threadId, chunk)) {
-					putInLocalPool(memory->localPool, threadId, chunk);
-					return getFromChunk(chunk);
-				}
-				else {
-					break;
-				}
-			}
+			} // while(true)
+			printf("allocate: threadId = %d: calling allocate again\n", threadId);
+			//return allocate(threadId);
 		}
 	}
-	printf("allocate: threadId = %d: calling allocate again\n", threadId);
-	allocate(threadId);
 }
 
 //Chunk* doHelp(int threadToBeHelped, Chunk *stolenChunk, Helper *announceOfThreadToBeHelped) {
@@ -290,31 +296,37 @@ void freeMem(int threadId, Block *block) {
 }
 
 bool donate(int threadId, Chunk *chunk) {
-	int i = (getDonorEntry(threadId)->lastDonated + 1) % memory->n;
+	printf("donate: threadID %d\n", threadId);
+	int i = (getDonorEntry(threadId)->lastDonated + 1) % (memory->n);
 	bool *tempBoolObj;
 
 	do {
+		printf("donate: threadID %d, trying to donate to %d\n", threadId, i);
 		//Helper *announceOfThreadToBeHelped = getHelperEntry(i);
 		AtomicStampedReference *announceOfThreadToBeHelped = getHelperEntry(i);
 		AtomicStampedReference* oldTop = getThread(memory->fullPool, i)->stack->top;
+		printf("donate: threadId = %d, oldTop.reference= %u, oldTop.TS = %d\n", threadId, oldTop->atomicRef->reference,oldTop->atomicRef->integer);
 		//int oldTS = announceOfThreadToBeHelped->timestamp;
 		int oldTS = announceOfThreadToBeHelped->atomicRef->integer;
 		if (*(bool*)announceOfThreadToBeHelped->atomicRef->reference == true) {
+			printf("donate: threadID %d, %d needed help\n", threadId, i);
 			if (putInOtherFullPool(memory->fullPool, i, chunk, oldTop)) {
 				//getHelperEntry(i)->compareAndSet(...);
+				printf("donate: threadID %d, successfully donated to %d\n", threadId, i);
 				tempBoolObj = (bool*)malloc(sizeof(bool));
 				*tempBoolObj = false;
 				compareAndSet(getHelperEntry(i),announceOfThreadToBeHelped->atomicRef->reference, tempBoolObj, announceOfThreadToBeHelped->atomicRef->integer, (announceOfThreadToBeHelped->atomicRef->integer + 1));
 				getDonorEntry(threadId)->lastDonated = i;
 				return true;
 			}
+			printf("donate: threadID %d, donation to %d failed: someone else helped\n", threadId, i);
 			//getHelperEntry(i)->compareAndSet(...);
 			tempBoolObj = (bool*)malloc(sizeof(bool));
 			*tempBoolObj = false;
 			compareAndSet(getHelperEntry(i),announceOfThreadToBeHelped->atomicRef->reference, tempBoolObj, announceOfThreadToBeHelped->atomicRef->integer, (announceOfThreadToBeHelped->atomicRef->integer + 1));
 		}
-		i = (i + 1) % memory->n;
-	} while(i != (getDonorEntry(threadId)->lastDonated + 1) % memory->n);
+		i = (i + 1) % (memory->n);
+	} while(i != (getDonorEntry(threadId)->lastDonated + 1) % (memory->n));
 	return false;
 }
 

@@ -51,6 +51,9 @@ void* stackPop(Stack *stack) {
 	void* nodeValue = malloc(stack->elementSize);
 
 	StackElement* oldTop =  (StackElement* )stack->top->atomicRef->reference;
+	if (oldTop == NULL) {
+		return NULL;
+	}
 	stack->top->atomicRef->reference = oldTop->next;
 
 	memcpy(nodeValue, oldTop->value, stack->elementSize);
@@ -95,6 +98,7 @@ void* stackPopOwner(Stack* stack)
 	AtomicStampedReference *oldTop = stack->top;
 	if(stack->top->atomicRef->reference == NULL){
 		printf("stackPopOwner: stack was empty\n");
+		return NULL;
 	}
 	void *oldValue = ((StackElement*)oldTop->atomicRef->reference)->value;
 	StackElement *nextTopReference = ((StackElement*)(oldTop->atomicRef->reference))->next;

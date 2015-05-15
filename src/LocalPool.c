@@ -17,9 +17,9 @@ Pool* createLocalPool(int numThreads)
 
 Chunk* getFromLocalPool(Pool* pool, int threadIndex) {
 	Thread* thread = getThread(pool, threadIndex);
-	//printf("getFromLocalPool thread ptr = %u\n", thread);
+	//printf("getFromLocalPool: threadId %d, stack ptr = %u\n",threadIndex, thread->stack);
 	Chunk* chunk =  stackPop(thread->stack);
-	//printf("getFromLocalPool chunk ptr = %u\n", chunk);
+	//printf("getFromLocalPool: threadId %d, chunk ptr = %u\n", threadIndex, chunk);
 	return chunk;
 }
 
