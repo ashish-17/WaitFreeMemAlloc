@@ -4,31 +4,42 @@ Chunk* createChunk(Chunk *chunk, int number) {
 	chunk = (Chunk*) malloc(sizeof(Chunk));
 	//printf("chunk ptr in createChunk= %u\n", chunk);
 	//printf("chunk ptr= %u\n", chunk->stack);
-	chunk->stack = (Stack*)malloc(sizeof(Stack));
-	stackCreate(chunk->stack, sizeof(Block));
+	chunk->stack = (StackArray*) malloc(sizeof(StackArray));
+	stackArrayCreate(chunk->stack, sizeof(Block), number);
 	//printf("stack ptr= %u\n", chunk->stack);
-	chunk->numOfBlocks = number;
+	//chunk->numOfBlocks = number;
 
 	return chunk;
 }
 
 bool isChunkEmpty(Chunk *chunk) {
-	return (stackIsEmpty(chunk->stack));
+	return (stackArrayIsEmpty(chunk->stack));
 }
 
 bool chunkHasSpace(Chunk *chunk) {
-	if (chunk->numOfBlocks != chunk->stack->numberOfElements)
+	return (!StackArrayIsFull(chunk->stack));
+	/*if (chunk->numOfBlocks != chunk->stack->numberOfElements)
 		return true;
 	else
-		return false;
+		return false;*/
 }
 
-Block* getFromChunk(Chunk *chunk) {
-	return stackPop(chunk->stack);
+Block* getFromChunkUncontended(Chunk *chunk) {
+	return stackArrayPopUncontended(chunk->stack);
 }
 
-bool putInChunk(Chunk *chunk, Block *block) {
-	bool res = stackPush(chunk->stack, block);
+bool putInChunkUncontended(Chunk *chunk, Block *block) {
+	bool res = stackArrayPushUncontended(chunk->stack, block);
+	//printf("chunksize %d\n", chunk->stack->numberOfElements);
+	return res;
+}
+
+Block* getFromChunkContended(Chunk *chunk) {
+	return stackArrayPopContended(chunk->stack);
+}
+
+bool putInChunkContended(Chunk *chunk, Block *block) {
+	bool res = stackArrayPushContended(chunk->stack, block);
 	//printf("chunksize %d\n", chunk->stack->numberOfElements);
 	return res;
 }

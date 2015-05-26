@@ -7,7 +7,7 @@
 
 
 #define NUM_THREADS 4
-#define NUM_BLOCKS 80
+#define NUM_BLOCKS 32
 #define CHUNK_SIZE 2
 #define NUM_DONATION_STEPS 2
 
@@ -60,7 +60,7 @@ void* tester(void *threadId) {
 	pthread_exit(NULL);
 }
 
-int main4() {
+int somemain2() {
 
 	//Wrapper wrapper = (Wrapper*) malloc(sizeof(Wrapper));
 	createWaitFreePool(NUM_BLOCKS, NUM_THREADS, CHUNK_SIZE, NUM_DONATION_STEPS);

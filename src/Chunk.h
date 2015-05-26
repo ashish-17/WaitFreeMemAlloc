@@ -10,11 +10,11 @@
 
 #include "Block.h"
 #include <stdbool.h>
-#include "Stack.h"
+#include "StackArray.h"
 
 typedef struct {
-	Stack* stack;
-	int numOfBlocks;
+	StackArray* stack;
+	//int numOfBlocks;
 } Chunk;
 
 Chunk* createChunk(Chunk *chunk, int number);
@@ -23,8 +23,13 @@ bool isChunkEmpty(Chunk *chunk);
 
 bool chunkHasSpace(Chunk *chunk);
 
-Block* getFromChunk(Chunk *chunk);
+Block* getFromChunkUncontended(Chunk *chunk);
 
-bool putInChunk(Chunk *chunk, Block *block);
+bool putInChunkUncontended(Chunk *chunk, Block *block);
+
+Block* getFromChunkContended(Chunk *chunk);
+
+bool putInChunkContended(Chunk *chunk, Block *block);
+
 
 #endif /* WAITFREEMEMALLOC_SRC_CHUNK_H_ */

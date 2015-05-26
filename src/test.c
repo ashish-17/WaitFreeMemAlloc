@@ -14,7 +14,7 @@
 #include "pool.h"
 #include "Block.h"
 
-void testStack() {
+/*void testStack() {
 	Stack * stack = (Stack*)malloc(sizeof(Stack));
 	int noOfOps = 0;
 
@@ -306,7 +306,7 @@ void testChunk() {
 		printf("Block value %d\n", getFromChunk(chunk)->memBlock);
 	}
 }
-
+*/
 int somemain() {
 
 	//testStack();

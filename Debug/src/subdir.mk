@@ -11,6 +11,7 @@ C_SRCS += \
 ../src/FreePool.c \
 ../src/FullPool.c \
 ../src/LocalPool.c \
+../src/Queue.c \
 ../src/RandomGenerator.c \
 ../src/Stack.c \
 ../src/StackArray.c \
@@ -27,6 +28,7 @@ OBJS += \
 ./src/FreePool.o \
 ./src/FullPool.o \
 ./src/LocalPool.o \
+./src/Queue.o \
 ./src/RandomGenerator.o \
 ./src/Stack.o \
 ./src/StackArray.o \
@@ -43,6 +45,7 @@ C_DEPS += \
 ./src/FreePool.d \
 ./src/FullPool.d \
 ./src/LocalPool.d \
+./src/Queue.d \
 ./src/RandomGenerator.d \
 ./src/Stack.d \
 ./src/StackArray.d \

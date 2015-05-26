@@ -85,7 +85,7 @@ void createWaitFreePool(int m, int n, int c, int C) {
 			for(int k = 0; k < numOfBlocksPerChunk; k++) {
 				block = createBlock(blockNumber);
 				blockNumber++;
-				putInChunk(chunk, block);
+				putInChunkUncontended(chunk, block);
 			}
 			putInLocalPool(memory->localPool,j,chunk);
 		}
@@ -98,7 +98,7 @@ void createWaitFreePool(int m, int n, int c, int C) {
 			for(int k = 0; k < numOfBlocksPerChunk; k++) {
 				block = createBlock(blockNumber);
 				blockNumber++;
-				putInChunk(chunk, block);
+				putInChunkUncontended(chunk, block);
 			}
 			putInOwnFullPool(memory->fullPool,j,chunk);
 		}
@@ -150,7 +150,7 @@ Block* allocate(int threadId) {
 	Chunk* chunk = getFromLocalPool(memory->localPool, threadId);
 	//printf("allocate: threadID = %d, chunk ptr = %u\n", threadId, chunk);
 	if (!isChunkEmpty(chunk)) {
-		Block *block = getFromChunk(chunk);
+		Block *block = getFromChunkUncontended(chunk);
 		putInLocalPool(memory->localPool, threadId, chunk);
 		return block;
 	}
@@ -188,13 +188,13 @@ Block* allocate(int threadId) {
 						//printf("allocate: threadId = %d: noOfOps = %d\n", threadId,getDonorEntry(threadId)->noOfOps);
 						getDonorEntry(threadId)->noOfOps++;
 						putInLocalPool(memory->localPool, threadId, chunk);
-						return getFromChunk(chunk);
+						return getFromChunkUncontended(chunk);
 					}
 					else {
 						getDonorEntry(threadId)->noOfOps = 0;
 						if (!donate(threadId, chunk)) {
 							putInLocalPool(memory->localPool, threadId, chunk);
-							return getFromChunk(chunk);
+							return getFromChunkUncontended(chunk);
 						}
 						else {
 							break;
@@ -260,7 +260,7 @@ void freeMem(int threadId, Block *block) {
 	//printf("freeMem: threadID = %d, chunk ptr = %u\n", threadId, chunk);
 	if (chunkHasSpace(chunk)) {
 		//printf("freeMem: threadId = %d: chunk in localPool has space\n", threadId);
-		putInChunk(chunk,block);
+		putInChunkUncontended(chunk,block);
 		putInLocalPool(memory->localPool,threadId, chunk);
 		//printf("freeMem: threadID = %d, chunk ptr = %u\n", threadId, chunk);
 		//putInLocalPool(memory->localPool,threadId,chunk);
@@ -273,13 +273,13 @@ void freeMem(int threadId, Block *block) {
 				getDonorEntry(threadId)->noOfOps = 0;
 				if(donate(threadId, chunk)) {
 					chunk = getFromFreePool(memory->freePool, threadId);
-					putInChunk(chunk, block);
+					putInChunkUncontended(chunk, block);
 					putInLocalPool(memory->localPool, threadId, chunk);
 					return;
 				}
 				else if (putInOwnFullPool(memory->fullPool, threadId, chunk)) {
 					chunk = getFromFreePool(memory->freePool, threadId);
-					putInChunk(chunk, block);
+					putInChunkUncontended(chunk, block);
 					putInLocalPool(memory->localPool,threadId, chunk);
 					return;
 				}
@@ -287,7 +287,7 @@ void freeMem(int threadId, Block *block) {
 			else if (putInOwnFullPool(memory->fullPool, threadId, chunk)) {
 				getDonorEntry(threadId)->noOfOps++;
 				chunk = getFromFreePool(memory->freePool, threadId);
-				putInChunk(chunk, block);
+				putInChunkUncontended(chunk, block);
 				putInLocalPool(memory->localPool,threadId, chunk);
 				return;
 			}
