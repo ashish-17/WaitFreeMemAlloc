@@ -6,10 +6,10 @@
 #include "Stack.h"
 
 
-#define NUM_THREADS 3
-#define NUM_BLOCKS 30
+#define NUM_THREADS 4
+#define NUM_BLOCKS 80
 #define CHUNK_SIZE 2
-#define NUM_DONATION_STEPS 1
+#define NUM_DONATION_STEPS 2
 
 /*typedef struct {
 	Memory *memory;
@@ -24,7 +24,7 @@ void* tester(void *threadId) {
 	int flag = 0; // 0 -> allocate 1 -> free
 
 	srand(time(NULL));
-	int totalNumOfOps = randint(30);
+	int totalNumOfOps = randint(50);
 	printf("In thread %d, the totalNumOfOps %d\n", (int)threadId, totalNumOfOps);
 	Stack* stack = (Stack*) malloc(sizeof(Stack));
 	stackCreate(stack, sizeof(Block));
@@ -60,7 +60,7 @@ void* tester(void *threadId) {
 	pthread_exit(NULL);
 }
 
-int main() {
+int main4() {
 
 	//Wrapper wrapper = (Wrapper*) malloc(sizeof(Wrapper));
 	createWaitFreePool(NUM_BLOCKS, NUM_THREADS, CHUNK_SIZE, NUM_DONATION_STEPS);

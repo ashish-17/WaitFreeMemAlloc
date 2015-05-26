@@ -8,12 +8,15 @@
 #include "Block.h"
 #include <pthread.h>
 #include "RandomGenerator.h"
+#include "StackArray.h"
 
-#define NUM_THREADS 5
+#define NUM_THREADS 2
 #define NUM_CHUNKS_PER_THREAD 15
 #define NUM_BLOCKS_PER_CHUNK 3
+#define NUM_BLKS_IN_STACK 3
 
 Pool *fullPool;
+StackArray *stack;
 
 void* testMultiFullPool1(void *threadId) {
 	printf("Hre... in thread %d\n", (int)threadId);
@@ -107,7 +110,54 @@ void testMultiFullPool() {
 	pthread_exit(NULL);
 }
 
+void testStackArray1(void *threadId) {
+	int numOfBlocks = NUM_BLKS_IN_STACK;
+	printf("Here... in thread %d\n", (int)threadId);
 
-int summain() {
-	testMultiFullPool();
+	for (int i = 0; i < numOfBlocks; i++) {
+		int temp = (int)threadId * numOfBlocks + i;
+		Block *block = createBlock(temp);
+		printf("thread = %d pushing the block = %d was successful = %d\n", (int)threadId, temp, stackArrayPushContended(stack,block));
+	}
+
+	for (int i = 0; i < numOfBlocks; i++) {
+		Block *block = stackArrayPopContended(stack);
+		if (block == NULL) {
+			printf("Thread = %d, didn't get the block\n",(int)threadId);
+		}
+		else {
+			printf("Thread = %d, block just popped = %d\n", (int)threadId, block->memBlock);
+		}
+	}
+}
+
+
+void testStackArray() {
+	int numOfElements = NUM_THREADS * NUM_BLKS_IN_STACK;
+
+	stack = (StackArray*)malloc(sizeof(StackArray));
+	stackArrayCreate(stack, sizeof(Block), numOfElements-1);
+
+	int rc;
+	pthread_t threads[NUM_THREADS];
+	for (int t = 0; t < NUM_THREADS; t++) {
+		printf("In main: creating thread %d\n", t);
+		rc = pthread_create(&threads[t], NULL, testStackArray1, (void *)t);
+		if (rc){
+			printf("ERROR; return code from pthread_create() is %d\n", rc);
+			exit(-1);
+		}
+	}
+
+	void *status;
+	for (int t = 0; t < NUM_THREADS; t++) {
+		rc = pthread_join(threads[t], &status);
+	}
+	printf("Test Client\n");
+	pthread_exit(NULL);
+}
+
+int main() {
+	//testMultiFullPool();
+	testStackArray();
 }

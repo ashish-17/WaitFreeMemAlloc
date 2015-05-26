@@ -312,11 +312,12 @@ int somemain() {
 	//testStack();
 	//testLocalPool(); // have to update as chunk definition has been changed
 	//testFreePool();
-	testFullPool();
+	//testFullPool();
 
 	//testPoolsTogether(); // have to update as chunk definition has been changed
 
 	//testChunk();
+
 
 	printf("Test client");
 	return 0;
