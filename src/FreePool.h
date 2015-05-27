@@ -9,13 +9,20 @@
 #define WAITFREEMEMALLOC_SRC_FREEPOOL_H_
 
 #include "commons.h"
-#include "pool.h"
 #include "Chunk.h"
+#include "StackPool.h"
+#include "QueuePool.h"
 
-Pool* createFreePool(int numThreads);
+StackPool* createFreePoolUC(int numThreads);
 
-Chunk* getFromFreePool(Pool* pool, int threadIndex);
+Chunk* getFromFreePoolUC(StackPool* pool, int threadIndex);
 
-bool putInFreePool(Pool* pool, int threadIndex, Chunk* chunk);
+bool putInFreePoolUC(StackPool* pool, int threadIndex, Chunk* chunk);
+
+QueuePool* createFreePoolC(int numThreads);
+
+Chunk* getFromFreePoolC(QueuePool* pool, int threadIndex);
+
+bool putInFreePoolC(QueuePool* pool, int threadIndex, Chunk* chunk);
 
 #endif /* WAITFREEMEMALLOC_SRC_FREEPOOL_H_ */

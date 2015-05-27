@@ -26,4 +26,6 @@ bool queueEnq(Queue *queue, const void* element);
 
 void* queueDeq(Queue *queue);
 
+void queueFree(Queue *queue);
+
 #endif /* WAITFREEMEMALLOC_SRC_QUEUE_H_ */

@@ -12,11 +12,12 @@ C_SRCS += \
 ../src/FullPool.c \
 ../src/LocalPool.c \
 ../src/Queue.c \
+../src/QueuePool.c \
 ../src/RandomGenerator.c \
 ../src/Stack.c \
 ../src/StackArray.c \
+../src/StackPool.c \
 ../src/WaitFreePool.c \
-../src/pool.c \
 ../src/test.c \
 ../src/testMulti.c 
 
@@ -29,11 +30,12 @@ OBJS += \
 ./src/FullPool.o \
 ./src/LocalPool.o \
 ./src/Queue.o \
+./src/QueuePool.o \
 ./src/RandomGenerator.o \
 ./src/Stack.o \
 ./src/StackArray.o \
+./src/StackPool.o \
 ./src/WaitFreePool.o \
-./src/pool.o \
 ./src/test.o \
 ./src/testMulti.o 
 
@@ -46,11 +48,12 @@ C_DEPS += \
 ./src/FullPool.d \
 ./src/LocalPool.d \
 ./src/Queue.d \
+./src/QueuePool.d \
 ./src/RandomGenerator.d \
 ./src/Stack.d \
 ./src/StackArray.d \
+./src/StackPool.d \
 ./src/WaitFreePool.d \
-./src/pool.d \
 ./src/test.d \
 ./src/testMulti.d 
 

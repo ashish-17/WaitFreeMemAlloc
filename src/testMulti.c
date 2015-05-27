@@ -4,19 +4,19 @@
 //#include "LocalPool.h"
 //#include "FreePool.h"
 #include "FullPool.h"
-#include "pool.h"
 #include "Block.h"
 #include <pthread.h>
 #include "RandomGenerator.h"
 #include "StackArray.h"
 #include "Queue.h"
+#include "StackPool.h"
 
 #define NUM_THREADS 3
 #define NUM_CHUNKS_PER_THREAD 15
 #define NUM_BLOCKS_PER_CHUNK 3
 #define NUM_BLKS_IN_STACK 13
 
-Pool *fullPool;
+StackPool *fullPool;
 StackArray *stack;
 Queue *queue;
 

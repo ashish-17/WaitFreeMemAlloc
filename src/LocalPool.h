@@ -9,13 +9,13 @@
 #define WAITFREEMEMALLOC_SRC_LOCALPOOL_H_
 
 #include "commons.h"
-#include "pool.h"
 #include "Chunk.h"
+#include "StackPool.h"
 
-Pool* createLocalPool(int numThreads);
+StackPool* createLocalPool(int numThreads);
 
-Chunk* getFromLocalPool(Pool* pool, int threadIndex);
+Chunk* getFromLocalPool(StackPool* pool, int threadIndex);
 
-bool putInLocalPool(Pool* pool, int threadIndex, Chunk* chunk);
+bool putInLocalPool(StackPool* pool, int threadIndex, Chunk* chunk);
 
 #endif /* WAITFREEMEMALLOC_SRC_LOCALPOOL_H_ */

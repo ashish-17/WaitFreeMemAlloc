@@ -14,6 +14,10 @@ void queueCreate(Queue *queue, int elementSize) {
 	queue->elementSize  = elementSize;
 }
 
+void queueFree(Queue *queue) {
+
+}
+
 bool queueEnq(Queue *queue, const void* element) {
 	QueueElement *queueElement = createNode(element);
 	//printf("queueEnq: value = %u, next ptr = %u\n", queueElement->value, queueElement->next);

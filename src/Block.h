@@ -4,9 +4,10 @@
 #include "commons.h"
 
 typedef struct {
+	int threadId;
 	int memBlock;
 }Block;
 
-Block* createBlock(int number);
+Block* createBlock(int threadId, int number);
 
 #endif /* WAITFREEMEMALLOC_SRC_BLOCK_H_ */

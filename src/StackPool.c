@@ -4,19 +4,20 @@
  *  Created on: May 9, 2015
  *      Author: Archita
  */
+#include "StackPool.h"
+
 #include "commons.h"
-#include "pool.h"
 #include "Chunk.h"
 
-Pool* createPool(int threads)
+StackPool* createStackPool(int threads)
 {
-	Pool* pool = (Pool*)malloc(sizeof(Pool));
-	pool->threads = (Thread*)malloc(sizeof(Thread) * threads);
+	StackPool* pool = (StackPool*)malloc(sizeof(StackPool));
+	pool->threads = (StackThread*)malloc(sizeof(StackThread) * threads);
 	pool->numberOfThreads = threads;
 
 	for (int i = 0; i < threads; i++) {
 		//printf("Thread ptr = %u \n", getThread(pool, i));
-		Thread* ptr = getThread(pool, i);
+		StackThread* ptr = getStackThread(pool, i);
 		ptr->stack = (Stack*)malloc(sizeof(Stack));
 		//printf("Stack ptr = %u\n", ptr->stack);
 		//printf("Inside create pool and size of chunk is %u\n", sizeof(Chunk));
@@ -26,14 +27,14 @@ Pool* createPool(int threads)
 	return pool;
 }
 
-void deletePool(Pool* pool)
+void deleteStackPool(StackPool* pool)
 {
 	stackFree(pool->threads->stack);
 	free(pool->threads);
 	pool->numberOfThreads = 0;
 }
 
-Thread* getThread(Pool* pool, int index)
+StackThread* getStackThread(StackPool* pool, int index)
 {
 	/*printf("Pool address %u\n", pool);
 	printf("address of stacks %u\n", pool->threads);*/

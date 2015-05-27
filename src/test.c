@@ -11,8 +11,8 @@
 #include "LocalPool.h"
 #include "FreePool.h"
 #include "FullPool.h"
-#include "pool.h"
 #include "Block.h"
+#include "StackPool.h"
 
 /*void testStack() {
 	Stack * stack = (Stack*)malloc(sizeof(Stack));

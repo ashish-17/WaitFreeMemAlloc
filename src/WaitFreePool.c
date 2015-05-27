@@ -25,9 +25,9 @@ typedef struct{
 } Info;
 
 typedef struct _Memory {
-	Pool* fullPool;
-	Pool* localPool;
-	Pool* freePool;
+	StackPool* fullPool;
+	StackPool* localPool;
+	StackPool* freePool;
 	Announce* announce;
 	Info* info;
 	int m;
@@ -220,12 +220,12 @@ Chunk* doHelp(int threadId, int threadToBeHelped, Chunk *stolenChunk, AtomicStam
 		return stolenChunk;
 	}
 
-	AtomicStampedReference* oldTop = getThread(memory->fullPool, threadToBeHelped)->stack->top;
+	AtomicStampedReference* oldTop = getStackThread(memory->fullPool, threadToBeHelped)->stack->top;
 	if (stolenChunk == NULL) {
 		//printf("doHelp: threadId %d, stolenChunk is null\n",threadId);
 		//printf("doHelp: threadId %d, top reference = %u\n",threadId,getThread(memory->fullPool, threadToBeHelped)->stack->top->atomicRef->reference);
 		//printf("doHelp: threadId %d, current annTS = %d, old annTS = %d\n",threadId, getHelperEntry(threadToBeHelped)->atomicRef->integer, announceOfThreadToBeHelped->atomicRef->integer);
-		while ((getThread(memory->fullPool, threadToBeHelped)->stack->top->atomicRef->reference == NULL) && (getHelperEntry(threadToBeHelped)->atomicRef->integer == announceOfThreadToBeHelped->atomicRef->integer)) {
+		while ((getStackThread(memory->fullPool, threadToBeHelped)->stack->top->atomicRef->reference == NULL) && (getHelperEntry(threadToBeHelped)->atomicRef->integer == announceOfThreadToBeHelped->atomicRef->integer)) {
 			printf("doHelp: threadId %d, inside while\n",threadId);
 			stolenChunk = getFromOtherFullPool(memory->fullPool, i);
 			//printf("doHelp: victim = %d\n",i);
@@ -239,7 +239,7 @@ Chunk* doHelp(int threadId, int threadToBeHelped, Chunk *stolenChunk, AtomicStam
 	}
 
 	bool *tempBoolObj;
-	if ((getThread(memory->fullPool, threadToBeHelped)->stack->top->atomicRef->reference == NULL) && (getHelperEntry(threadToBeHelped)->atomicRef->integer == announceOfThreadToBeHelped->atomicRef->integer)) {
+	if ((getStackThread(memory->fullPool, threadToBeHelped)->stack->top->atomicRef->reference == NULL) && (getHelperEntry(threadToBeHelped)->atomicRef->integer == announceOfThreadToBeHelped->atomicRef->integer)) {
 		if (putInOtherFullPool(memory->fullPool, threadToBeHelped, stolenChunk, oldTop)) {
 			tempBoolObj = (bool*)malloc(sizeof(bool));
 			*tempBoolObj = false;
@@ -304,7 +304,7 @@ bool donate(int threadId, Chunk *chunk) {
 		printf("donate: threadID %d, trying to donate to %d\n", threadId, i);
 		//Helper *announceOfThreadToBeHelped = getHelperEntry(i);
 		AtomicStampedReference *announceOfThreadToBeHelped = getHelperEntry(i);
-		AtomicStampedReference* oldTop = getThread(memory->fullPool, i)->stack->top;
+		AtomicStampedReference* oldTop = getStackThread(memory->fullPool, i)->stack->top;
 		printf("donate: threadId = %d, oldTop.reference= %u, oldTop.TS = %d\n", threadId, oldTop->atomicRef->reference,oldTop->atomicRef->integer);
 		//int oldTS = announceOfThreadToBeHelped->timestamp;
 		int oldTS = announceOfThreadToBeHelped->atomicRef->integer;

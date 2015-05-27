@@ -8,41 +8,41 @@
 #include "FullPool.h"
 #include "Stack.h"
 
-Pool* createFullPool(int numThreads)
+StackPool* createFullPool(int numThreads)
 {
-	Pool* fullPool = createPool(numThreads);
+	StackPool* fullPool = createStackPool(numThreads);
 
 	return fullPool;
 }
 
-bool isFullPoolEmpty(Pool* pool, int threadIndex) {
-	Thread* thread = getThread(pool, threadIndex);
+bool isFullPoolEmpty(StackPool* pool, int threadIndex) {
+	StackThread* thread = getStackThread(pool, threadIndex);
 	return (stackIsEmpty(thread->stack));
 }
 
-Chunk* getFromOtherFullPool(Pool* pool, int threadIndex) {
+Chunk* getFromOtherFullPool(StackPool* pool, int threadIndex) {
 
 	//printf("inside getFromOtherFullPool\n");
 	//printf("getFromOtheFullPool: is victim %d stack Empty %d\n", threadIndex, stackIsEmpty(getThread(pool,threadIndex)->stack));
-	Thread* thread = getThread(pool, threadIndex);
+	StackThread* thread = getStackThread(pool, threadIndex);
 	//printf("getFromOtheFullPool: thread ptr = %u\n", thread);
 	Chunk* chunk = stackPopOther(thread->stack);
 	//printf("getFromOtheFullPool: chunk ptr = %u\n", chunk);
 	return chunk;
 }
 
-Chunk* getFromOwnFullPool(Pool* pool, int threadIndex) {
-	Thread* thread = getThread(pool, threadIndex);
+Chunk* getFromOwnFullPool(StackPool* pool, int threadIndex) {
+	StackThread* thread = getStackThread(pool, threadIndex);
 	return (Chunk*)stackPopOwner(thread->stack);
 }
 
-bool putInOtherFullPool(Pool* pool, int threadIndex, Chunk* chunk, AtomicStampedReference* oldTop) {
-	Thread* thread = getThread(pool, threadIndex);
+bool putInOtherFullPool(StackPool* pool, int threadIndex, Chunk* chunk, AtomicStampedReference* oldTop) {
+	StackThread* thread = getStackThread(pool, threadIndex);
 	return stackPushOther(thread->stack, chunk, oldTop);
 }
 
-bool putInOwnFullPool(Pool* pool, int threadIndex, Chunk* chunk) {
-	Thread* thread = getThread(pool, threadIndex);
+bool putInOwnFullPool(StackPool* pool, int threadIndex, Chunk* chunk) {
+	StackThread* thread = getStackThread(pool, threadIndex);
 	return stackPushOwner(thread->stack, chunk);
 }
 

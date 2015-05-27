@@ -9,19 +9,19 @@
 #define WAITFREEMEMALLOC_SRC_FULLPOOL_H_
 
 #include "commons.h"
-#include "pool.h"
 #include "Chunk.h"
+#include "StackPool.h"
 
-Pool* createFullPool(int numThreads);
+StackPool* createFullPool(int numThreads);
 
-bool isFullPoolEmpty(Pool* pool, int threadIndex);
+bool isFullPoolEmpty(StackPool* pool, int threadIndex);
 
-Chunk* getFromOtherFullPool(Pool* pool, int threadIndex);
+Chunk* getFromOtherFullPool(StackPool* pool, int threadIndex);
 
-Chunk* getFromOwnFullPool(Pool* pool, int threadIndex);
+Chunk* getFromOwnFullPool(StackPool* pool, int threadIndex);
 
-bool putInOtherFullPool(Pool* pool, int threadIndex, Chunk* chunk, AtomicStampedReference* oldTop);
+bool putInOtherFullPool(StackPool* pool, int threadIndex, Chunk* chunk, AtomicStampedReference* oldTop);
 
-bool putInOwnFullPool(Pool* pool, int threadIndex, Chunk* chunk);
+bool putInOwnFullPool(StackPool* pool, int threadIndex, Chunk* chunk);
 
 #endif /* WAITFREEMEMALLOC_SRC_FULLPOOL_H_ */
