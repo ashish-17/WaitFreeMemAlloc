@@ -9,7 +9,7 @@
 #include "commons.h"
 #include "Chunk.h"
 
-QueuePool* createQueuePool(int threads)
+QueuePool* createQueuePool(int threads, int elementSize)
 {
 	QueuePool* pool = (QueuePool*)malloc(sizeof(QueuePool));
 	pool->threads = (QueueThread*)malloc(sizeof(QueueThread) * threads);
@@ -21,7 +21,8 @@ QueuePool* createQueuePool(int threads)
 		ptr->queue = (Queue*)malloc(sizeof(Queue));
 		//printf("Stack ptr = %u\n", ptr->stack);
 		//printf("Inside create pool and size of chunk is %u\n", sizeof(Chunk));
-		queueCreate(ptr->queue, sizeof(Chunk));
+		queueCreate(ptr->queue, elementSize);
+		printf("createQueuePool: queuePtr: %u, headPtr = %u, TailPtr = %u\n", ptr->queue, ptr->queue->head, ptr->queue->tail);
 	}
 	//printf("after pool create the address of thread ptr is %u\n", pool->threads);
 	return pool;

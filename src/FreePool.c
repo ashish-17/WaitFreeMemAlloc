@@ -8,6 +8,7 @@
 #include "FreePool.h"
 #include "Stack.h"
 #include "Queue.h"
+#include "Chunk.h"
 
 StackPool* createFreePoolUC(int numThreads) {
 	StackPool* freePool = createStackPool(numThreads);
@@ -31,7 +32,7 @@ bool putInFreePoolUC(StackPool* pool, int threadIndex, Chunk* chunk) {
 }
 
 QueuePool* createFreePoolC(int numThreads) {
-	QueuePool* freePool = createQueuePool(numThreads);
+	QueuePool* freePool = createQueuePool(numThreads, sizeof(Chunk));
 	return freePool;
 }
 

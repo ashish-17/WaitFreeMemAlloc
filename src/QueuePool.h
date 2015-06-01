@@ -19,7 +19,7 @@ typedef struct {
 	int numberOfThreads;
 } QueuePool;
 
-QueuePool* createQueuePool(int threads);
+QueuePool* createQueuePool(int threads, int elementSize);
 
 void deleteQueuePool(QueuePool* pool);
 

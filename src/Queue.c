@@ -11,6 +11,7 @@ QueueElement* createNode(void *value) {
 void queueCreate(Queue *queue, int elementSize) {
 	queue->head = createNode(NULL);
 	queue->tail = queue->head;
+	//printf("queueCreate: queuePtr = %u, headPtr = %u, TailPtr = %u \n", queue, queue->head, queue->tail);
 	queue->elementSize  = elementSize;
 }
 
@@ -39,9 +40,11 @@ bool queueEnq(Queue *queue, const void* element) {
 }
 
 void* queueDeq(Queue *queue) {
+	//printf("queueDeq: queuePtr: %u, q->head: %u, q->tail: %u, q->head->next: %u \n",queue, queue->head, queue->tail, queue->head->next);
 	QueueElement *first = queue->head;
 	QueueElement *last = queue->tail;
 	QueueElement *next = first->next;
+	//printf("queueDeq: firstPtr: %u, lastPtr: %u, first->next: %u \n",first, last, next);
 	//printf("in deq \n");
 	if (first == queue->head) { // someone else dequeued
 		//printf("first == queue->head\n");

@@ -6,8 +6,8 @@
 #include "Stack.h"
 
 
-#define NUM_THREADS 4
-#define NUM_BLOCKS 32
+#define NUM_THREADS 2   // 3
+#define NUM_BLOCKS  16    // 24
 #define CHUNK_SIZE 2
 #define NUM_DONATION_STEPS 2
 
@@ -35,13 +35,13 @@ void* tester(void *threadId) {
 		//printf("In thread %d, the flag %d\n", (int)threadId, flag);
 		if (flag <= 7) {
 			numOfAllocBlocks++;
-			Block* block = allocate((int)threadId);
-			printf("thread %d allocated the block %d\n",(int)threadId, block->memBlock);
+			Block* block = allocate((int)threadId, 0);
+			printf("thread %d allocated the block %d with block number %d\n",(int)threadId, block->memBlock, block->threadId);
 			stackPush(stack,block);
 		}
 		else {
 			if (numOfAllocBlocks == 0) {
-				printf("tester: threadId = %d: noOfAllocBlocks %d\n",(int) threadId, numOfAllocBlocks);
+				//printf("tester: threadId = %d: noOfAllocBlocks %d\n",(int) threadId, numOfAllocBlocks);
 				continue;
 			}
 			else {
@@ -60,7 +60,7 @@ void* tester(void *threadId) {
 	pthread_exit(NULL);
 }
 
-int somemain2() {
+int main() {
 
 	//Wrapper wrapper = (Wrapper*) malloc(sizeof(Wrapper));
 	createWaitFreePool(NUM_BLOCKS, NUM_THREADS, CHUNK_SIZE, NUM_DONATION_STEPS);

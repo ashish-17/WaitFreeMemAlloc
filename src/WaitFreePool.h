@@ -1,18 +1,13 @@
 #ifndef WAITFREEMEMALLOC_SRC_WAITFREEPOOL_H_
 #define WAITFREEMEMALLOC_SRC_WAITFREEPOOL_H_
 
-#include "stdio.h"
-#include "Stack.h"
-#include "Chunk.h"
-#include "LocalPool.h"
-#include "FreePool.h"
-#include "FullPool.h"
 #include "Block.h"
-#include "StackPool.h"
+#include "commons.h"
+
 
 void createWaitFreePool(int m, int n, int c, int C);
 
-Block* allocate(int threadId);
+Block* allocate(int threadId, bool toBePassed);
 
 void freeMem(int threadId, Block* block);
 

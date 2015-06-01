@@ -1,4 +1,13 @@
 #include "WaitFreePool.h"
+#include "commons.h"
+#include "StackPool.h"
+#include "QueuePool.h"
+#include "Stack.h"
+#include "Chunk.h"
+#include "LocalPool.h"
+#include "FreePool.h"
+#include "FullPool.h"
+#include "SharedPools.h"
 
 /*typedef struct {
 	bool needHelp;
@@ -17,6 +26,7 @@ typedef struct {
 typedef struct {
 	int noOfOps;
 	int lastDonated;
+	int numOfPassed;
 } Donor;
 
 typedef struct{
@@ -27,7 +37,9 @@ typedef struct{
 typedef struct _Memory {
 	StackPool* fullPool;
 	StackPool* localPool;
-	StackPool* freePool;
+	StackPool* freePoolUC;
+	QueuePool* freePoolC;
+	SharedQueuePools *sharedQueuePools;
 	Announce* announce;
 	Info* info;
 	int m;
@@ -41,8 +53,9 @@ Memory* memory = NULL;
 //Chunk* doHelp(int threadToBeHelped, Chunk *stolenChunk, Helper *announceOfThreadToBeHelped);
 Chunk* doHelp(int threadId, int threadToBeHelped, Chunk *stolenChunk, AtomicStampedReference *announceOfThreadToBeHelped);
 bool donate(int threadId, Chunk *chunk);
-Block* allocate(int threadId);
+Block* allocate(int threadId, bool toBePassed);
 void freeMem(int threadId, Block *block);
+Chunk* moveFromSharedQueuePools(int threadId);
 
 /*Helper* getHelperEntry(int index) {
 	return (memory->announce->helpers + index);
@@ -69,7 +82,9 @@ void createWaitFreePool(int m, int n, int c, int C) {
 	//numOfThreads = n + 1;
 	memory->fullPool = createFullPool(numOfThreads);
 	memory->localPool = createLocalPool(numOfThreads);
-	memory->freePool = createFreePool(numOfThreads);
+	memory->freePoolUC = createFreePoolUC(numOfThreads);
+	memory->freePoolC = createFreePoolC(numOfThreads);
+	memory->sharedQueuePools = createSharedQueuePools(numOfThreads);
 
 	numOfThreads = n;
 	memory->m = m; memory->n = n; memory->c = c; memory->C = C;
@@ -83,7 +98,7 @@ void createWaitFreePool(int m, int n, int c, int C) {
 		for(int i = 0; i < 1; i++) {
 			chunk = createChunk(chunk,numOfBlocksPerChunk);
 			for(int k = 0; k < numOfBlocksPerChunk; k++) {
-				block = createBlock(blockNumber);
+				block = createBlock(-1, blockNumber); //set the owner of the block to be -1 initially
 				blockNumber++;
 				putInChunkUncontended(chunk, block);
 			}
@@ -96,7 +111,7 @@ void createWaitFreePool(int m, int n, int c, int C) {
 		for(int i = 0; i < numOfChunksPerThread - 1; i++) {
 			chunk = createChunk(chunk,numOfBlocksPerChunk);
 			for(int k = 0; k < numOfBlocksPerChunk; k++) {
-				block = createBlock(blockNumber);
+				block = createBlock(-1, blockNumber);
 				blockNumber++;
 				putInChunkUncontended(chunk, block);
 			}
@@ -129,10 +144,12 @@ void createWaitFreePool(int m, int n, int c, int C) {
 	memory->info = (Info*)malloc(sizeof(Info));
 	memory->info->donors = (Donor*) malloc(sizeof(Donor)*numOfThreads);
 	memory->info->numOfDonors = numOfThreads;
+	//memory->info->numOfPassed = 0;
 	for(int i = 0; i < numOfThreads; i++) {
 		Donor* donorEntry = getDonorEntry(i);
 		donorEntry->lastDonated = i;
 		donorEntry->noOfOps = 0;
+		donorEntry->numOfPassed = 0;
 	}
 
 	//memory->n = 2;
@@ -140,23 +157,38 @@ void createWaitFreePool(int m, int n, int c, int C) {
 
 
 
-Block* allocate(int threadId) {
+Block* allocate(int threadId, bool toBePassed) {
 
 	Chunk *stolenChunk;
+	Block *block;
 	int threadToBeHelped;
+	bool addInFreePoolC = false;
 	//Helper *announceOfThreadToBeHelped;
 	AtomicStampedReference *announceOfThreadToBeHelped;
 	//printf("allocate: threadID = %d\n", threadId);
 	Chunk* chunk = getFromLocalPool(memory->localPool, threadId);
 	//printf("allocate: threadID = %d, chunk ptr = %u\n", threadId, chunk);
 	if (!isChunkEmpty(chunk)) {
-		Block *block = getFromChunkUncontended(chunk);
+		block = getFromChunkUncontended(chunk);
+		block->threadId = threadId;
 		putInLocalPool(memory->localPool, threadId, chunk);
+		if (toBePassed) {
+			getDonorEntry(threadId)->numOfPassed++;
+			if (getDonorEntry(threadId)->numOfPassed %  memory->c == 1) {
+				addInFreePoolC = true;
+			}
+		}
 		return block;
 	}
 	else {
 		//printf("allocate: threadId = %d: chunk in localPool is empty\n", threadId);
-		putInFreePool(memory->freePool,threadId,chunk);
+		if (addInFreePoolC) {
+			putInFreePoolC(memory->freePoolC, threadId, chunk);
+			addInFreePoolC = false;
+		}
+		else {
+			putInFreePoolUC(memory->freePoolUC, threadId, chunk);
+		}
 		while (true) { // handling call to allocate again
 			if (isFullPoolEmpty(memory->fullPool,threadId)) {
 				printf("allocate: threadId = %d: *****fullPool is empty******\n", threadId);
@@ -188,13 +220,17 @@ Block* allocate(int threadId) {
 						//printf("allocate: threadId = %d: noOfOps = %d\n", threadId,getDonorEntry(threadId)->noOfOps);
 						getDonorEntry(threadId)->noOfOps++;
 						putInLocalPool(memory->localPool, threadId, chunk);
-						return getFromChunkUncontended(chunk);
+						block = getFromChunkUncontended(chunk);
+						block->threadId = threadId;
+						return block;
 					}
 					else {
 						getDonorEntry(threadId)->noOfOps = 0;
 						if (!donate(threadId, chunk)) {
 							putInLocalPool(memory->localPool, threadId, chunk);
-							return getFromChunkUncontended(chunk);
+							block = getFromChunkUncontended(chunk);
+							block->threadId = threadId;
+							return block;
 						}
 						else {
 							break;
@@ -235,6 +271,13 @@ Chunk* doHelp(int threadId, int threadToBeHelped, Chunk *stolenChunk, AtomicStam
 			}
 			//printf("doHelp: dtealAttempt failed\n");
 			i = (i + 1) % memory->n;
+			if (i == 0) {
+				stolenChunk = moveFromSharedQueuePools(threadId);
+				if (stolenChunk != NULL) {
+					break;
+				}
+				printf("allocate: threadID : %d, returned from moveFreomSQP\n", threadId);
+			}
 		}
 	}
 
@@ -256,7 +299,12 @@ Chunk* doHelp(int threadId, int threadToBeHelped, Chunk *stolenChunk, AtomicStam
 void freeMem(int threadId, Block *block) {
 
 	//printf("freeMem: threadID = %d, entered freeMem\n", threadId);
-	Chunk *chunk = getFromLocalPool(memory->localPool,threadId);
+	Chunk *chunk;
+	if (block->threadId != threadId) {
+		putInSharedQueuePools(memory->sharedQueuePools, block->threadId, threadId, block);
+		return;
+	}
+	chunk = getFromLocalPool(memory->localPool,threadId);
 	//printf("freeMem: threadID = %d, chunk ptr = %u\n", threadId, chunk);
 	if (chunkHasSpace(chunk)) {
 		//printf("freeMem: threadId = %d: chunk in localPool has space\n", threadId);
@@ -269,27 +317,45 @@ void freeMem(int threadId, Block *block) {
 	else {
 		//printf("freeMem: threadID = %d, chunk in localPool doesn't have space\n", threadId);
 		while(true) {
-			if (getDonorEntry(threadId)->noOfOps == memory->C) {
+			if (getDonorEntry(threadId)->noOfOps == memory->C) { // have to donate
 				getDonorEntry(threadId)->noOfOps = 0;
-				if(donate(threadId, chunk)) {
-					chunk = getFromFreePool(memory->freePool, threadId);
-					putInChunkUncontended(chunk, block);
-					putInLocalPool(memory->localPool, threadId, chunk);
+				if(donate(threadId, chunk)) { // donation successful
+					chunk = getFromFreePoolUC(memory->freePoolUC, threadId); // get a chunk from freePoolUC
+					if (chunk == NULL) { // not multiples of c were passed to other threads
+						putInSharedQueuePools(memory->sharedQueuePools, block->threadId, threadId, block);
+						return;
+					}
+					else { // freePoolUC had chunks
+						putInChunkUncontended(chunk, block);
+						putInLocalPool(memory->localPool, threadId, chunk);
+						return;
+					}
+				} // donation unsuccessful
+				else if (putInOwnFullPool(memory->fullPool, threadId, chunk)) { //move full chunk to fullPool
+					chunk = getFromFreePoolUC(memory->freePoolUC, threadId);
+					if (chunk == NULL) { // not multiples of c were passed to other threads
+						putInSharedQueuePools(memory->sharedQueuePools, block->threadId, threadId, block);
+						return;
+					}
+					else {
+						putInChunkUncontended(chunk, block);
+						putInLocalPool(memory->localPool,threadId, chunk);
+						return;
+					}
+				}
+			} // donation is not needed
+			else if (putInOwnFullPool(memory->fullPool, threadId, chunk)) {
+				getDonorEntry(threadId)->noOfOps++;
+				chunk = getFromFreePoolUC(memory->freePoolUC, threadId);
+				if (chunk == NULL) { // not multiples of c were passed to other threads
+					putInSharedQueuePools(memory->sharedQueuePools, block->threadId, threadId, block);
 					return;
 				}
-				else if (putInOwnFullPool(memory->fullPool, threadId, chunk)) {
-					chunk = getFromFreePool(memory->freePool, threadId);
+				else {
 					putInChunkUncontended(chunk, block);
 					putInLocalPool(memory->localPool,threadId, chunk);
 					return;
 				}
-			}
-			else if (putInOwnFullPool(memory->fullPool, threadId, chunk)) {
-				getDonorEntry(threadId)->noOfOps++;
-				chunk = getFromFreePool(memory->freePool, threadId);
-				putInChunkUncontended(chunk, block);
-				putInLocalPool(memory->localPool,threadId, chunk);
-				return;
 			}
 		}
 	}
@@ -330,3 +396,39 @@ bool donate(int threadId, Chunk *chunk) {
 	return false;
 }
 
+Chunk* moveFromSharedQueuePools(int threadId) {
+	printf("moveFromSQP: threadID: %d\n", threadId);
+	int primThread = 0, secThread = 0;
+	Block *block;
+	Chunk* chunk;
+	for (primThread = 0; primThread < memory->n; primThread++) {
+		for (secThread = 0; secThread < memory->n; secThread++) {
+			//printf("moveFromSQP: threadID: %d primThread: %d, secThread: %d\n", threadId, primThread, secThread);
+			block = getFromSharedQueuePools(memory->sharedQueuePools, primThread, secThread);
+			//printf("moveFromSQP: threadID: %d block ptr : %u\n", threadId, block);
+			if (block != NULL) {
+				if (chunkHasSpace(getQueueThread(memory->freePoolC, primThread)->queue->head->next->value)) {
+					if (putInChunkContended(getQueueThread(memory->freePoolC, primThread)->queue->head->next->value, block)) {
+						continue; // now go to next secThread
+					}
+					else {
+						// do sth with the removed block
+						putInSharedQueuePools(memory->sharedQueuePools, primThread, threadId, block);
+					}
+				}
+				else { //chunk doesn't have space.try moving the chunk to fullPool
+					chunk = getFromFreePoolC(memory->freePoolC, primThread);
+					if (chunk != NULL) {
+						return chunk;
+					}
+					else {
+						putInSharedQueuePools(memory->sharedQueuePools, primThread, threadId, block);
+						// do sth with the removed block
+					}
+				}
+			}
+			//printf("moveFromSQP: threadID: %d came here\n", threadId);
+		}
+	}
+	return NULL;
+}

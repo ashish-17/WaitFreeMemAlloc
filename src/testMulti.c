@@ -85,7 +85,7 @@ void testMultiFullPool() {
 		for(int i = 0; i < numOfChunks; i++) {
 			Chunk *chunk = createChunk(chunk,numOfBlocks);
 			for(int k = 0; k < numOfBlocks; k++) {
-				Block* block = createBlock(blockNumer);
+				Block* block = createBlock(blockNumer, j);
 				blockNumer++;
 				putInChunkUncontended(chunk, block);
 			}
@@ -118,7 +118,7 @@ void testStackArray1(void *threadId) {
 
 	for (int i = 0; i < numOfBlocks; i++) {
 		int temp = (int)threadId * numOfBlocks + i;
-		Block *block = createBlock(temp);
+		Block *block = createBlock(temp, (int)threadId);
 		printf("thread = %d pushing the block = %d was successful = %d\n", (int)threadId, temp, stackArrayPushUncontended(stack,block));
 	}
 
@@ -165,7 +165,7 @@ void testQueue1(void *threadId) {
 	if ((int)threadId == 0) {
 		for (int i = 0; i < numOfBlocks; i++) {
 			int temp = (int)threadId * numOfBlocks + i;
-			Block *block = createBlock(temp);
+			Block *block = createBlock(temp, (int)threadId);
 			printf("thread = %d pushing the block = %d was successful = %d\n", (int)threadId, temp, queueEnq(queue,block));
 		}
 		//printf("tail ptr = %u, block ptr = %u\n", queue->tail, queue->tail->value);
@@ -210,7 +210,7 @@ void testQueue() {
 }
 
 
-int main() {
+int smain() {
 	//testMultiFullPool();
 	//testStackArray();
 	testQueue();

@@ -3,6 +3,7 @@
 
 #include "commons.h"
 #include "QueuePool.h"
+#include "Block.h"
 
 typedef struct {
 	QueuePool* sharedQueuePool;
@@ -18,5 +19,9 @@ SharedQueuePools* createSharedQueuePools(int threads);
 void deleteSharedQueuePools(SharedQueuePools* pool);
 
 SharedQueuePool* getSharedQueuePool(SharedQueuePools* pool, int index);
+
+void* getFromSharedQueuePools(SharedQueuePools* pool, int threadIndex, int secThreadIndex);
+
+bool putInSharedQueuePools(SharedQueuePools* pool, int threadIndex, int secThreadIndex, Block *block);
 
 #endif /* WAITFREEMEMALLOC_SRC_PRODUCERCONSUMER_H_ */
