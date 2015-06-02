@@ -11,11 +11,6 @@
 #define CHUNK_SIZE 2
 #define NUM_DONATION_STEPS 2
 
-/*typedef struct {
-	Memory *memory;
-	int threadId;
-} Wrapper;
- */
 
 // The actual tester
 void* tester(void *threadId) {
@@ -60,7 +55,7 @@ void* tester(void *threadId) {
 	pthread_exit(NULL);
 }
 
-int main() {
+int symain() {
 
 	//Wrapper wrapper = (Wrapper*) malloc(sizeof(Wrapper));
 	createWaitFreePool(NUM_BLOCKS, NUM_THREADS, CHUNK_SIZE, NUM_DONATION_STEPS);

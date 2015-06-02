@@ -10,6 +10,7 @@
 #include "Queue.h"
 #include "Chunk.h"
 
+
 StackPool* createFreePoolUC(int numThreads) {
 	StackPool* freePool = createStackPool(numThreads);
 	return freePool;
@@ -38,10 +39,13 @@ QueuePool* createFreePoolC(int numThreads) {
 
 Chunk* getFromFreePoolC(QueuePool* pool, int threadIndex) {
 	QueueThread* thread = getQueueThread(pool, threadIndex);
-		return queueDeq(thread->queue);
+	return queueDeq(thread->queue);
 }
 
 bool putInFreePoolC(QueuePool* pool, int threadIndex, Chunk* chunk) {
-		QueueThread* thread = getQueueThread(pool, threadIndex);
-		return queueEnq(thread->queue, chunk);
+	printf("putInFreePoolC: threadId : %d\n", threadIndex);
+	QueueThread* thread = getQueueThread(pool, threadIndex);
+	return queueEnq(thread->queue, chunk);
 }
+
+

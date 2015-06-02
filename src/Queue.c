@@ -1,4 +1,5 @@
 #include "Queue.h"
+#include "Block.h"
 
 QueueElement* createNode(void *value) {
 	//printf("createNode blk ptr = %u\n", value);
@@ -18,17 +19,38 @@ void queueCreate(Queue *queue, int elementSize) {
 void queueFree(Queue *queue) {
 
 }
-
-bool queueEnq(Queue *queue, const void* element) {
+/*
+bool queueEnq1(Queue *queue, const void* element) {
 	QueueElement *queueElement = createNode(element);
-	//printf("queueEnq: value = %u, next ptr = %u\n", queueElement->value, queueElement->next);
+	printf("queueEnq1: value = %u, next ptr = %u\n", queueElement->value, queueElement->next);
 	QueueElement *last = queue->tail;
 	QueueElement *next = last->next;
 	if (last == queue->tail) {
 		if (next == NULL) {
 			if (atomic_compare_exchange_strong(&last->next, &next, queueElement)) {
 				atomic_compare_exchange_strong(&queue->tail, &last, queueElement);
-		//		printf("queueEnq: tailvalue = %u, next ptr = %u\n", queue->tail->value, queue->tail->next);
+				//printf("queueEnq: tailValue = %d, headValue = %d\n", ((Block*)(queue->tail->value))->memBlock, ((Block*)(queue->head->value))->memBlock);
+				return true;
+			}
+		}
+		else {
+			atomic_compare_exchange_strong(&queue->tail, &last, next);
+		}
+	}
+	return false;
+}*/
+
+bool queueEnq(Queue *queue, const void* element) {
+	QueueElement *queueElement = createNode(element);
+	//printf("queueEnq: value = %u, blkPtr = %u, next ptr = %u\n", queueElement->value, element, queueElement->next);
+	QueueElement *last = queue->tail;
+	QueueElement *next = last->next;
+	if (last == queue->tail) {
+		if (next == NULL) {
+			if (atomic_compare_exchange_strong(&last->next, &next, queueElement)) {
+				atomic_compare_exchange_strong(&queue->tail, &last, queueElement);
+				//printf("queueEnq: tailValue = %d, headValue = %d\n", ((Block*)(queue->tail->value))->memBlock, ((Block*)(queue->head->next->value))->memBlock);
+				//printf("queueEnq: tailValue = %d \n", ((Block*)(queue->tail->value))->memBlock);
 				return true;
 			}
 		}

@@ -19,6 +19,7 @@ typedef struct {
 //	int numberOfElements;
 } Queue;
 
+//bool queueEnq1(Queue *queue, const void* element);
 
 void queueCreate(Queue *queue, int elementSize);
 
