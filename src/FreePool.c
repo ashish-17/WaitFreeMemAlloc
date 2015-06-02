@@ -37,9 +37,9 @@ QueuePool* createFreePoolC(int numThreads) {
 	return freePool;
 }
 
-Chunk* getFromFreePoolC(QueuePool* pool, int threadIndex) {
+Chunk* getFromFreePoolC(QueuePool* pool, int threadIndex, QueueElement *oldQueueHead) {
 	QueueThread* thread = getQueueThread(pool, threadIndex);
-	return queueDeq(thread->queue);
+	return queueDeq(thread->queue, oldQueueHead);
 }
 
 bool putInFreePoolC(QueuePool* pool, int threadIndex, Chunk* chunk) {

@@ -21,7 +21,7 @@ bool putInFreePoolUC(StackPool* pool, int threadIndex, Chunk* chunk);
 
 QueuePool* createFreePoolC(int numThreads);
 
-Chunk* getFromFreePoolC(QueuePool* pool, int threadIndex);
+Chunk* getFromFreePoolC(QueuePool* pool, int threadIndex, QueueElement *oldQueueHead);
 
 bool putInFreePoolC(QueuePool* pool, int threadIndex, Chunk* chunk);
 

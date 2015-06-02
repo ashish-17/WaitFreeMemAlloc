@@ -61,9 +61,13 @@ bool queueEnq(Queue *queue, const void* element) {
 	return false;
 }
 
-void* queueDeq(Queue *queue) {
+bool isQueueEmpty(Queue *queue) {
+	return (queue->head == queue->tail);
+}
+
+void* queueDeq(Queue *queue, QueueElement *oldQueueHead) {
 	//printf("queueDeq: queuePtr: %u, q->head: %u, q->tail: %u, q->head->next: %u \n",queue, queue->head, queue->tail, queue->head->next);
-	QueueElement *first = queue->head;
+	QueueElement *first = oldQueueHead;
 	QueueElement *last = queue->tail;
 	QueueElement *next = first->next;
 	//printf("queueDeq: firstPtr: %u, lastPtr: %u, first->next: %u \n",first, last, next);

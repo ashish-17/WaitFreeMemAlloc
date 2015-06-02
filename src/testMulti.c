@@ -173,7 +173,7 @@ void testQueue1(void *threadId) {
 	}
 	else {
 		for (int i = 0; i < numOfBlocks; i++) {
-			Block *block = queueDeq(queue);
+			Block *block = queueDeq(queue, queue->head);
 			if (block == NULL) {
 				printf("Thread = %d, didn't get the block\n",(int)threadId);
 			}

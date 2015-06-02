@@ -7,8 +7,8 @@
 
 
 #define NUM_THREADS 3   // 3
-#define NUM_BLOCKS  18   // 24
-#define CHUNK_SIZE 3
+#define NUM_BLOCKS 12   // 24
+#define CHUNK_SIZE 2
 #define NUM_DONATION_STEPS 10
 
 
@@ -30,14 +30,14 @@ void* producer(void *threadID) {
 		//int con = 1 + randint(NUM_THREADS - 1);
 		while (true) {
 			con = randint(NUM_THREADS);
-			if (con != 0) {
+			if ((con != 0) && (con != 1)){
 				break;
 			}
 		}
 		//printf("Producer: consumer chosen = %d\n", con);
 		pthread_mutex_lock(&the_mutex[con]);	/* protect buffer */
 		while (buffer[con] != NULL)	{	       /* If there is something in the buffer then wait */
-			 //printf("Producer: %d waiting for consumer to consume \n",con);
+			//printf("Producer: %d waiting for consumer to consume \n",con);
 			pthread_cond_wait(&condp[con], &the_mutex[con]);
 		}
 		printf("Producer passing block %d to thread %d\n", block->memBlock, con);
@@ -71,6 +71,47 @@ void* consumer(void *threadID) {
 	pthread_exit(0);
 }
 
+void* normalExec(void *threadID) {
+	int threadId = (int*) threadID;
+	int numOfAllocBlocks = 0;
+	int flag = 0; // 0 -> allocate 1 -> free
+
+	srand(time(NULL));
+	int totalNumOfOps = randint(50);
+	printf("In thread %d, the totalNumOfOps %d\n", (int)threadId, totalNumOfOps);
+	Stack* stack = (Stack*) malloc(sizeof(Stack));
+	stackCreate(stack, sizeof(Block));
+
+	while(totalNumOfOps > 0) {
+		flag = randint(11);
+
+		//printf("In thread %d, the flag %d\n", (int)threadId, flag);
+		if (flag <= 7) {
+			numOfAllocBlocks++;
+			Block* block = allocate((int)threadId, 0);
+			printf("thread %d allocated the block %d with block number %d\n",(int)threadId, block->memBlock, block->threadId);
+			stackPush(stack,block);
+		}
+		else {
+			if (numOfAllocBlocks == 0) {
+				//printf("tester: threadId = %d: noOfAllocBlocks %d\n",(int) threadId, numOfAllocBlocks);
+				continue;
+			}
+			else {
+				printf("tester: threadId = %d: noOfAllocBlocks %d\n",(int) threadId, numOfAllocBlocks);
+				numOfAllocBlocks--;
+				Block *block = stackPop(stack);
+				//printf("thread %d trying to free the block %d\n",(int)threadId, block->memBlock);
+				freeMem((int)threadId, block);
+				printf("thread %d freed the block %d\n",(int)threadId, block->memBlock);
+			}
+		}
+		totalNumOfOps--;
+		//printf("thread %d totalNumOfOps remaining %d\n",(int)threadId, totalNumOfOps);
+	}
+	printf("thread %d is FINSISHED\n",(int)threadId);
+	pthread_exit(NULL);
+}
 
 int main() {
 
@@ -90,6 +131,8 @@ int main() {
 		printf("In main: creating thread %d\n", t);
 		if (t == 0)
 			rc = pthread_create(&threads[t], NULL, producer, (void *)t);
+		else if (t == 1)
+			rc = pthread_create(&threads[t], NULL, normalExec, (void *)t);
 		else
 			rc = pthread_create(&threads[t], NULL, consumer, (void *)t);
 		if (rc){

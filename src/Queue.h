@@ -23,9 +23,11 @@ typedef struct {
 
 void queueCreate(Queue *queue, int elementSize);
 
+bool isQueueEmpty(Queue *queue);
+
 bool queueEnq(Queue *queue, const void* element);
 
-void* queueDeq(Queue *queue);
+void* queueDeq(Queue *queue, QueueElement *oldQueueHead);
 
 void queueFree(Queue *queue);
 

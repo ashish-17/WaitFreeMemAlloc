@@ -281,6 +281,7 @@ Chunk* doHelp(int threadId, int threadToBeHelped, Chunk *stolenChunk, AtomicStam
 			i = (i + 1) % memory->n;
 			if (i == 0) {
 				stolenChunk = moveFromSharedQueuePools(threadId);
+				//printf("allocate: threadID : %d, returned from moveFreomSQP with stolenChunk %u\n", threadId, stolenChunk);
 				if (stolenChunk != NULL) {
 					break;
 				}
@@ -410,35 +411,60 @@ Chunk* moveFromSharedQueuePools(int threadId) {
 	int primThread = 0, secThread = 0;
 	Block *block;
 	Chunk* chunk;
+	QueueElement *oldQueueHead;
 	for (primThread = 0; primThread < memory->n; primThread++) {
 		for (secThread = 0; secThread < memory->n; secThread++) {
-			printf("moveFromSQP: threadID: %d primThread: %d, secThread: %d\n", threadId, primThread, secThread);
+			//printf("moveFromSQP: threadID: %d primThread: %d, secThread: %d\n", threadId, primThread, secThread);
 			block = getFromSharedQueuePools(memory->sharedQueuePools, primThread, secThread);
-			printf("moveFromSQP: threadID: %d block ptr : %u\n", threadId, block);
+			//printf("moveFromSQP: threadID: %d block ptr : %u\n", threadId, block);
 			if (block != NULL) {
-				printf("moveFromSQP: queuePtr = %u\n", getQueueThread(memory->freePoolC, primThread)->queue);
-				printf("moveFromSQP: HeadPtr = %u\n", getQueueThread(memory->freePoolC, primThread)->queue->head);
-				printf("moveFromSQP: nextPtr = %u\n", getQueueThread(memory->freePoolC, primThread)->queue->head->next);
-				printf("moveFromSQP: chunkPtr = %u\n", getQueueThread(memory->freePoolC, primThread)->queue->head->next->value);
-				if (chunkHasSpace(getQueueThread(memory->freePoolC, primThread)->queue->head->next->value)) {
-					if (putInChunkContended(getQueueThread(memory->freePoolC, primThread)->queue->head->next->value, block)) {
-						continue; // now go to next secThread
+				//printf("block was not null\n");
+				//printf("moveFromSQP: queuePtr = %u\n", getQueueThread(memory->freePoolC, primThread)->queue);
+				//printf("moveFromSQP: HeadPtr = %u\n", getQueueThread(memory->freePoolC, primThread)->queue->head);
+				//printf("moveFromSQP: nextPtr = %u\n", getQueueThread(memory->freePoolC, primThread)->queue->head->next);
+				//printf("moveFromSQP: chunkPtr = %u\n", getQueueThread(memory->freePoolC, primThread)->queue->head->next->value);
+				oldQueueHead = getQueueThread(memory->freePoolC, primThread)->queue->head;
+				if (!isQueueEmpty(getQueueThread(memory->freePoolC, primThread)->queue)) {
+					if (chunkHasSpace(oldQueueHead->next->value)) {
+						if (putInChunkContended(getQueueThread(memory->freePoolC, primThread)->queue->head->next->value, block)) {
+							continue; // now go to next secThread
+						}
+						else {
+							// do sth with the removed block
+							putInSharedQueuePools(memory->sharedQueuePools, primThread, threadId, block);
+						}
 					}
-					else {
-						// do sth with the removed block
-						putInSharedQueuePools(memory->sharedQueuePools, primThread, threadId, block);
+					else { //chunk doesn't have space.try moving the chunk to fullPool
+						chunk = getFromFreePoolC(memory->freePoolC, primThread, oldQueueHead);
+						if (chunk != NULL) {
+							printf("moveFromSQP: moving block %d to SQP %d\n",block->memBlock, threadId);
+							putInSharedQueuePools(memory->sharedQueuePools, primThread, threadId, block);
+							return chunk;
+						}
+						else {
+							putInSharedQueuePools(memory->sharedQueuePools, primThread, threadId, block);
+							// do sth with the removed block
+						}
 					}
 				}
-				else { //chunk doesn't have space.try moving the chunk to fullPool
-					chunk = getFromFreePoolC(memory->freePoolC, primThread);
-					if (chunk != NULL) {
-						printf("moveFromSQP: moving block %d to SQP %d\n",block->memBlock, threadId);
-						putInSharedQueuePools(memory->sharedQueuePools, primThread, threadId, block);
-						return chunk;
-					}
-					else {
-						putInSharedQueuePools(memory->sharedQueuePools, primThread, threadId, block);
-						// do sth with the removed block
+				else {
+					putInSharedQueuePools(memory->sharedQueuePools, primThread, threadId, block);
+				}
+			}
+			else {
+				//printf("block was null\n");
+				//printf("moveFromSQP: queuePtr = %u\n", getQueueThread(memory->freePoolC, primThread)->queue);
+				//printf("moveFromSQP: HeadPtr = %u\n", getQueueThread(memory->freePoolC, primThread)->queue->head);
+				//printf("moveFromSQP: nextPtr = %u\n", getQueueThread(memory->freePoolC, primThread)->queue->head->next);
+				//printf("moveFromSQP: chunkPtr = %u\n", getQueueThread(memory->freePoolC, primThread)->queue->head->next->value);
+				oldQueueHead = getQueueThread(memory->freePoolC, primThread)->queue->head;
+				if (!isQueueEmpty(getQueueThread(memory->freePoolC, primThread)->queue)) {
+					if (!chunkHasSpace(oldQueueHead->next->value)) {
+						//printf("moveFromSMP: threadId = %d block was null but chunk was full\n", threadId);
+						chunk = getFromFreePoolC(memory->freePoolC, primThread, oldQueueHead);
+						if (chunk != NULL) {
+							return chunk;
+						}
 					}
 				}
 			}

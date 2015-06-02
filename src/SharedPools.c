@@ -28,7 +28,7 @@ void* getFromSharedQueuePools(SharedQueuePools* pool, int threadIndex, int secTh
 	SharedQueuePool* queuePool = getSharedQueuePool(pool, threadIndex);
 	Queue *queue = getQueueThread(queuePool->sharedQueuePool, secThreadIndex)->queue;
 	//printf("getFromSQP: threadId = %d, queuePtr = %u\n", threadIndex, queue);
-	return queueDeq(queue);
+	return queueDeq(queue, queue->head);
 }
 
 bool putInSharedQueuePools(SharedQueuePools* pool, int threadIndex, int secThreadIndex, Block* block) {
