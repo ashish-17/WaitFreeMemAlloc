@@ -6,10 +6,12 @@
 #include "Stack.h"
 
 
-#define NUM_THREADS 3   // 3
-#define NUM_BLOCKS 12   // 24
+#define NUM_THREADS 6   // 3
+#define NUM_BLOCKS 36   // 24
 #define CHUNK_SIZE 2
-#define NUM_DONATION_STEPS 10
+#define NUM_DONATION_STEPS 2
+#define NUM_PRODUCERS 2
+#define NUM_NORMAL_THREADS 2
 
 
 #define MAX 10000000000			/* Numbers to produce */
@@ -30,7 +32,7 @@ void* producer(void *threadID) {
 		//int con = 1 + randint(NUM_THREADS - 1);
 		while (true) {
 			con = randint(NUM_THREADS);
-			if ((con != 0) && (con != 1)){
+			if (con >= NUM_PRODUCERS + NUM_NORMAL_THREADS){
 				break;
 			}
 		}
@@ -40,7 +42,7 @@ void* producer(void *threadID) {
 			//printf("Producer: %d waiting for consumer to consume \n",con);
 			pthread_cond_wait(&condp[con], &the_mutex[con]);
 		}
-		printf("Producer passing block %d to thread %d\n", block->memBlock, con);
+		printf("Producer %d passing block %d to thread %d\n", threadId, block->memBlock, con);
 		buffer[con] = block;
 		pthread_cond_signal(&condc[con]);	/* wake up consumer */
 		pthread_mutex_unlock(&the_mutex[con]);	/* release the buffer */
@@ -129,9 +131,9 @@ int main() {
 	pthread_t threads[NUM_THREADS];
 	for (int t = 0; t < NUM_THREADS; t++) {
 		printf("In main: creating thread %d\n", t);
-		if (t == 0)
+		if (t < NUM_PRODUCERS)
 			rc = pthread_create(&threads[t], NULL, producer, (void *)t);
-		else if (t == 1)
+		else if ((t >= NUM_PRODUCERS) && (t < NUM_PRODUCERS + NUM_NORMAL_THREADS))
 			rc = pthread_create(&threads[t], NULL, normalExec, (void *)t);
 		else
 			rc = pthread_create(&threads[t], NULL, consumer, (void *)t);

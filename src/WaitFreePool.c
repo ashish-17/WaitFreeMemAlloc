@@ -384,7 +384,8 @@ bool donate(int threadId, Chunk *chunk) {
 		//printf("donate: threadId = %d, oldTop.reference= %u, oldTop.TS = %d\n", threadId, oldTop->atomicRef->reference,oldTop->atomicRef->integer);
 		//int oldTS = announceOfThreadToBeHelped->timestamp;
 		int oldTS = announceOfThreadToBeHelped->atomicRef->integer;
-		if (*(bool*)announceOfThreadToBeHelped->atomicRef->reference == true) {
+		//	if (*(bool*)announceOfThreadToBeHelped->atomicRef->reference == true)
+		if ((*(bool*)announceOfThreadToBeHelped->atomicRef->reference == true) && (getStackThread(memory->fullPool, i)->stack->top->atomicRef->reference == NULL) && (getHelperEntry(i)->atomicRef->integer == announceOfThreadToBeHelped->atomicRef->integer)) {
 			printf("donate: threadID %d, %d needed help\n", threadId, i);
 			if (putInOtherFullPool(memory->fullPool, i, chunk, oldTop)) {
 				//getHelperEntry(i)->compareAndSet(...);
