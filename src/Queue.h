@@ -1,9 +1,8 @@
 #ifndef WAITFREEMEMALLOC_SRC_QUEUE_H_
 #define WAITFREEMEMALLOC_SRC_QUEUE_H_
 
-#include <stdbool.h>
 #include <stdatomic.h>
-#include <stdio.h>
+#include "commons.h"
 
 typedef struct _QueueElement {
 	void* value;
