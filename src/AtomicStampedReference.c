@@ -22,6 +22,11 @@ bool compareAndSet(AtomicStampedReference* current,
 		void* newReference,
 		int expectedStamp,
 		int newStamp) {
+	/*
+	 * Make a copy of current->atomicRef
+	 * AtomicStampedReference* copy = current->atomicRef;
+	 * free if atomic_*** sucesss
+	 */
 	return  (expectedReference == current->atomicRef->reference &&
 			expectedStamp == current->atomicRef->integer &&
 			((newReference == current->atomicRef->reference &&
@@ -33,8 +38,17 @@ bool compareAndSet(AtomicStampedReference* current,
 void set(AtomicStampedReference* current, void* newReference, int newStamp) {
 	if (newReference != current->atomicRef->reference || newStamp != current->atomicRef->integer)
 	{
+		/*
+			 * Make a copy of current->atomicRef
+			 * AtomicStampedReference* copy = current->atomicRef;
+			 * free if atomic_*** sucesss
+			 */
 		current->atomicRef = createReferenceIntegerPair(newReference, newStamp);
 		current->atomicRef->reference = newReference;
 		current->atomicRef->integer = newStamp;
+
+		/*
+		 * free copy
+		 */
 	}
 }

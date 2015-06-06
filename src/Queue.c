@@ -87,7 +87,12 @@ void* queueDeq(Queue *queue, QueueElement *oldQueueHead) {
 		}
 		else {
 			void *element = next->value;
+			/*
+			 * copy queue->head
+			 * and if atomic_*** success to free copy pointer
+			 */
 			if (atomic_compare_exchange_strong(&queue->head, &first, next)) {
+
 				//printf("dequeuing successful\n");
 				return element;
 			}
