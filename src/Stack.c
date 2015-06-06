@@ -29,13 +29,13 @@ bool stackPush(Stack *stack, const void* element) {
 	//printf("inside stackPush\n");
 	StackElement *node = (StackElement*)malloc(sizeof(StackElement));
 	//printf("allocated a node\n");
-	node->value = malloc(stack->elementSize);
+	node->value = element;
 	//printf("the elementSize in stackPush is %u\n",stack->elementSize);
 	//printf("the element in stackPush is %u\n",element);
 	//printf("CDSC\n");
 	//printf("in stackPush the element is %d\n", element->value);
 
-	memcpy(node->value, element, stack->elementSize);
+	//memcpy(node->value, element, stack->elementSize);
 	//node->value = element;
 
 	//printf("after memcpy node value = %u\n",node->value);
@@ -48,18 +48,14 @@ bool stackPush(Stack *stack, const void* element) {
 }
 
 void* stackPop(Stack *stack) {
-	void* nodeValue = malloc(stack->elementSize);
-
-	StackElement* oldTop =  (StackElement* )stack->top->atomicRef->reference;
+	StackElement* oldTop = (StackElement*) stack->top->atomicRef->reference;
 	if (oldTop == NULL) {
 		return NULL;
 	}
+
 	stack->top->atomicRef->reference = oldTop->next;
 
-	memcpy(nodeValue, oldTop->value, stack->elementSize);
-
-	free(oldTop->value);
-	oldTop->value = NULL;
+	void* nodeValue = oldTop->value;
 
 	free(oldTop);
 	oldTop = NULL;
@@ -72,9 +68,7 @@ void* stackPop(Stack *stack) {
 bool stackPushOwner(Stack *stack, const void* element)
 {
 	StackElement *node = (StackElement*)malloc(sizeof(StackElement));
-	node->value = malloc(stack->elementSize);
-	memcpy(node->value, element, stack->elementSize);
-
+	node->value = element;
 	node->next = (StackElement*)stack->top->atomicRef->reference;
 
 	AtomicStampedReference* oldTop = stack->top;
@@ -85,9 +79,7 @@ bool stackPushOwner(Stack *stack, const void* element)
 bool stackPushOther(Stack *stack, const void* element, AtomicStampedReference* oldTop)
 {
 	StackElement *node = (StackElement*)malloc(sizeof(StackElement));
-	node->value = malloc(stack->elementSize);
-	memcpy(node->value, element, stack->elementSize);
-
+	node->value = element;
 	node->next = (StackElement*)stack->top->atomicRef->reference;
 
 	return compareAndSet(stack->top, NULL, node, oldTop->atomicRef->integer, (oldTop->atomicRef->integer + 1));
@@ -102,19 +94,18 @@ void* stackPopOwner(Stack* stack)
 	}
 	void *oldValue = ((StackElement*)oldTop->atomicRef->reference)->value;
 	StackElement *nextTopReference = ((StackElement*)(oldTop->atomicRef->reference))->next;
-	if (compareAndSet(stack->top, oldTop->atomicRef->reference, nextTopReference, oldTop->atomicRef->integer, (oldTop->atomicRef->integer+1)))
+	if (compareAndSet(stack->top, oldTop->atomicRef->reference, nextTopReference, oldTop->atomicRef->integer, (oldTop->atomicRef->integer+1))) {
+		free(oldTop);
 		return oldValue;
+	}
 	else {
 		printf("stackPopOwner: CAS failed\n");
 		return NULL;
 	}
 }
 
-
-
 void* stackPopOther(Stack* stack)
 {
-	void *nodeValue = malloc(stack->elementSize);
 	//printf("stackPopOther:\n");
 	ReferenceIntegerPair *oldTop = (ReferenceIntegerPair*)stack->top->atomicRef;
 	//printf("stackPopOther: oldTop = %u\n",oldTop);
@@ -130,17 +121,14 @@ void* stackPopOther(Stack* stack)
 		return NULL;
 	}
 	if (compareAndSet(stack->top, oldTop->reference, ((StackElement*)oldTop->reference)->next, oldTop->integer, (oldTop->integer + 1))) {
+		void* poppedItem = ((StackElement*)oldTop->reference)->value;
 		//printf("stackPopOther: inside CAS \n");
-		memcpy(nodeValue, ((StackElement*)oldTop->reference)->value, stack->elementSize);
-		free(((StackElement*)oldTop->reference)->value);
-		((StackElement*)oldTop->reference)->value = NULL;
 		free(((StackElement*)oldTop->reference));
-		return nodeValue;
+		return poppedItem;
 	}
 	else
 	{
 		printf("stackPopOther: CAS failed\n");
-		free(nodeValue);
 		return NULL;
 	}
 	/*void *oldValue = ((StackElement*)oldTop->atomicRef->reference)->value;

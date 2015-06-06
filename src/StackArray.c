@@ -19,7 +19,19 @@ void stackArrayCreate(StackArray *stack, int elementSize, int maxElements) {
 }
 
 void stackArrayFree(StackArray *stack) {
+	for (int i = 0; i < stack->maxElements + 1; i++) {
+		StackArrayElement* element = getStackArrayElement(stack, i);
+		if (element != NULL && element->value != NULL) {
+			free(element->value);
+			element->value = NULL;
+		}
+	}
 
+	free(stack->elements);
+	stack->elements = NULL;
+	stack->top = NULL;
+	stack->elementSize = 0;
+	stack->maxElements = 0;
 }
 
 bool stackArrayIsEmpty(const StackArray *stack) {
