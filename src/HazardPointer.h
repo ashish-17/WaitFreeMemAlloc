@@ -18,8 +18,8 @@ FreeQueue* getFreeQueue(FreeQueue *queue, int index) {
 	return (queue + index);
 }
 
-int* getHP(int *hazardPointers, int priIndex, int secIndex) {
-	return ()
+int* getHP(int *hazardPointers, int numberOfHP, int priIndex, int secIndex) {
+	return (hazardPointers + (priIndex*numberOfHP) + secIndex);
 }
 
 void hpStructureCreate(HPStructure *hpStructure, int noOfThreads, int noOfHP) {
@@ -32,7 +32,7 @@ void hpStructureCreate(HPStructure *hpStructure, int noOfThreads, int noOfHP) {
 	hpStructure->hazardPointers = (int*) malloc(sizeof(int) * noOfThreads * noOfHP);
 	for (int i = 0; i < noOfThreads; i++) {
 		for (int j = 0; j < noOfHP; j++) {
-			getHP(hpStructure->hazardPointers, i, j) = NULL;
+			getHP(hpStructure->hazardPointers, hpStructure->numberOfHP, i, j) = NULL;
 		}
 	}
 }
