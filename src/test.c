@@ -13,6 +13,7 @@
 #include "FullPool.h"
 #include "Block.h"
 #include "StackPool.h"
+#include "CircularQueue.h"
 
 /*void testStack() {
 	Stack * stack = (Stack*)malloc(sizeof(Stack));
@@ -26,7 +27,7 @@
 	// Testing stackPush()
 	for(int i = 1; i <= 10; i++) {
 		int *ptr = (int*) malloc(sizeof(int));
-		*ptr = i;
+ *ptr = i;
 		printf("Pushing the value using stackPush i=%d\n",i);
 		stackPush(stack, ptr);
 	}
@@ -46,7 +47,7 @@
 	// Testing stackPushOwner()
 	for(int i = 1; i <= 10; i++) {
 		int *ptr = (int*) malloc(sizeof(int));
-		*ptr = i;
+ *ptr = i;
 		printf("Pushing the value using pushOwner i=%d\n",i);
 		stackPushOwner(stack, ptr);
 		noOfOps++;
@@ -70,7 +71,7 @@
 	// Testing stackPushOther()
 	for(int i = 1; i <= 10; i++) {
 		int *ptr = (int*) malloc(sizeof(int));
-		*ptr = i;
+ *ptr = i;
 		bool out = stackPushOther(stack, ptr,stack->top);
 		printf("Pushing the value using pushOther i=%d succeeded with %d\n", i, out);
 		if (out)
@@ -80,7 +81,7 @@
 	//Testing stackPopOther()
 	// Adding one extra node to test stackPopOther
 	int *ptr1 = (int*) malloc(sizeof(int));
-	*ptr1 = 2;
+ *ptr1 = 2;
 	stackPush(stack,ptr1);
 	while(!stackIsEmpty(stack)) {
 		int* ptr = (int*)stackPopOther(stack);
@@ -306,9 +307,60 @@ void testChunk() {
 		printf("Block value %d\n", getFromChunk(chunk)->memBlock);
 	}
 }
-*/
-int somemain() {
+ */
 
+void testCircularQueue() {
+	int numOfElements = 5;
+	CircularQueue *queue = (CircularQueue*) malloc(sizeof(CircularQueue));
+	//printf("queuePtr = %u\n", queue);
+	circularQueueCreate(queue, sizeof(int*), numOfElements);
+	//printf("baseAddressPtr = %u\n", queue->baseAddress);
+
+	for(int i = 0; i < numOfElements + 1; i++) {
+		int* element = (int*) malloc(sizeof(int));
+		*element = i;
+		//printf("elementPtr = %u\n", element);
+		printf("element %d successfully enqueued %u \n", i, circularQueueEnq(queue, element));
+	}
+
+	for (int i = 0; i < numOfElements + 1; i++) {
+		int *element = circularQueueDeq(queue);
+		if (element)
+			printf("element %d dequeued \n", *element);
+		else
+			printf("queueIsEmpty\n");
+	}
+	for(int i = 0; i < numOfElements - 1; i++) {
+		int* element = (int*) malloc(sizeof(int));
+		*element = i;
+		//printf("elementPtr = %u\n", element);
+		printf("element %d successfully enqueued %u \n", i, circularQueueEnq(queue, element));
+	}
+	for (int i = 0; i < 1; i++) {
+		int *element = circularQueueDeq(queue);
+		if (element)
+			printf("element %d dequeued \n", *element);
+		else
+			printf("queueIsEmpty\n");
+	}
+	for(int i = 0; i < numOfElements - 1; i++) {
+		int* element = (int*) malloc(sizeof(int));
+		*element = i;
+		//printf("elementPtr = %u\n", element);
+		printf("element %d successfully enqueued %u \n", i, circularQueueEnq(queue, element));
+	}
+	for (int i = 0; i < numOfElements ; i++) {
+		int *element = circularQueueDeq(queue);
+		if (element)
+			printf("element %d dequeued \n", *element);
+		else
+			printf("queueIsEmpty\n");
+	}
+}
+
+int main() {
+
+	printf("hello world\n");
 	//testStack();
 	//testLocalPool(); // have to update as chunk definition has been changed
 	//testFreePool();
@@ -317,7 +369,7 @@ int somemain() {
 	//testPoolsTogether(); // have to update as chunk definition has been changed
 
 	//testChunk();
-
+	testCircularQueue();
 
 	printf("Test client");
 	return 0;

@@ -1,25 +1,13 @@
 #include "CircularQueue.h"
 
-typedef struct _CircularQueueElement {
-	void* value;
-} CircularQueueElement;
-
-typedef struct {
-	CircularQueueElement *head;
-	CircularQueueElement *tail;
-
-	CircularQueueElement *baseAddress;
-	int elementSize;
-	int maxNumberOfElements;
-} CircularQueue;
 
 CircularQueueElement * getCircularQueueElement(CircularQueue *queue, int index) {
 	return (queue->baseAddress + index);
 }
 
 void circularQueueCreate(CircularQueue *queue, int elementSize, int noOfElements) {
-	queue->head = malloc(sizeof(CircularQueueElement) * noOfElements);
-	queue->tail = queue->head;
+	queue->baseAddress = (CircularQueueElement*) malloc(sizeof(CircularQueueElement) * noOfElements);
+	queue->head = queue->tail = -1;
 	queue->elementSize = elementSize;
 	queue->maxNumberOfElements = noOfElements;
 
@@ -30,23 +18,34 @@ void circularQueueCreate(CircularQueue *queue, int elementSize, int noOfElements
 
 bool circularQueueEnq(CircularQueue *queue, const void* element) {
 	if ((queue->tail + 1) % queue->maxNumberOfElements == queue->head) {
+		//printf("circularQueue full \n");
 		return false;
 	}
 	else {
-		queue->tail->value = element;
 		queue->tail = (queue->tail + 1) % queue->maxNumberOfElements;
+		//printf("tailValue = %d\n", queue->tail);
+		//printf("address of QueueElement %d is %u", queue->tail, getCircularQueueElement(queue, queue->tail));
+		getCircularQueueElement(queue, queue->tail)->value = element;
+		if(queue->head == -1) {
+			queue->head = queue->tail;
+		}
 		return true;
 	}
 }
 
 void* circularQueueDeq(CircularQueue *queue) {
-	if (queue->head == queue->tail) {
+	if (queue->head == -1) {
 		return NULL;
 	}
 	else {
-		void *element = queue->head->value;
-		queue->head->value = NULL;
-		queue->head = (queue->head + 1) % queue->maxNumberOfElements;
+		void *element = getCircularQueueElement(queue, queue->head)->value;
+		getCircularQueueElement(queue, queue->head)->value = NULL;
+		if (queue->head == queue->tail) {
+			queue->head = queue->tail = -1;
+		}
+		else {
+			queue->head = (queue->head + 1) % queue->maxNumberOfElements;
+		}
 		return element;
 	}
 }

@@ -2,6 +2,7 @@
 #define WAITFREEMEMALLOC_SRC_HAZARDPOINTER_H_
 
 #include "commons.h"
+#include "CircularQueue.h"
 
 typedef struct {
 	CircularQueue* queue;
@@ -9,32 +10,17 @@ typedef struct {
 
 typedef struct {
 	FreeQueue* freeQueues;
-	int *hazardPointers;
+	int **hazardPointers;
+	int *roundCounters;
 	int numberOfThreads;
 	int numberOfHP;
 }HPStructure;
 
-FreeQueue* getFreeQueue(FreeQueue *queue, int index) {
-	return (queue + index);
-}
+HPStructure *globalHPStructure = NULL;
 
-int* getHP(int *hazardPointers, int numberOfHP, int priIndex, int secIndex) {
-	return (hazardPointers + (priIndex*numberOfHP) + secIndex);
-}
 
-void hpStructureCreate(HPStructure *hpStructure, int noOfThreads, int noOfHP) {
-	hpStructure->freeQueues = (FreeQueue*) malloc(sizeof(FreeQueue) * noOfThreads);
-	for (int i = 0; i < noOfThreads; i++) {
-		CircularQueue *queue = getFreeQueue(hpStructure->freeQueues, i)->queue;
-		queue = (CircularQueue*) malloc(sizeof(CircularQueue));
-		circularQueueCreate(queue, sizeof(int *), noOfThreads * noOfHP);
-	}
-	hpStructure->hazardPointers = (int*) malloc(sizeof(int) * noOfThreads * noOfHP);
-	for (int i = 0; i < noOfThreads; i++) {
-		for (int j = 0; j < noOfHP; j++) {
-			getHP(hpStructure->hazardPointers, hpStructure->numberOfHP, i, j) = NULL;
-		}
-	}
-}
+void hpStructureCreate(HPStructure *hpStructure, int noOfThreads, int noOfHP);
+
+void freeMemHP(HPStructure *hpStructure, int threadId, void *ptr);
 
 #endif /* WAITFREEMEMALLOC_SRC_HAZARDPOINTER_H_ */
