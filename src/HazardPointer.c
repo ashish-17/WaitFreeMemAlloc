@@ -33,52 +33,77 @@ bool isMarked(void *value) {
 void hpStructureCreate(HPStructure *hpStructure, int noOfThreads, int noOfHP) {
 	hpStructure->freeQueues = (FreeQueue*) malloc(sizeof(FreeQueue) * noOfThreads);
 	for (int i = 0; i < noOfThreads; i++) {
-		CircularQueue *queue = getFreeQueue(hpStructure->freeQueues, i)->queue;
-		queue = (CircularQueue*) malloc(sizeof(CircularQueue));
-		circularQueueCreate(queue, sizeof(int *), noOfThreads * noOfHP);
+		getFreeQueue(hpStructure->freeQueues, i)->queue = (CircularQueue*) malloc(sizeof(CircularQueue));
+		circularQueueCreate(getFreeQueue(hpStructure->freeQueues, i)->queue, sizeof(int *), noOfThreads * noOfHP);
 	}
+	//printf("created Circular queues\n");
 	// pushing sentinel nodes in all the circular queues
 	for (int i = 0; i < noOfThreads; i++) {
 		CircularQueue *queue = getFreeQueue(hpStructure->freeQueues, i)->queue;
+		//printf("CQueuePtr = %u\n", queue);
 		for (int j = 1; j < noOfHP * noOfThreads; j++) {
 			circularQueueEnq(queue, NULL);
 		}
 	}
-
+	//printf("initialized Circular queues with NULL values\n");
 	hpStructure->hazardPointers = (int**) malloc(sizeof(int *) * noOfThreads * noOfHP);
 	for (int i = 0; i < noOfThreads * noOfHP; i++) {
 		hpStructure->hazardPointers[i] = NULL;
 	}
-
+	//printf("created hazardPointersArray\n");
 	hpStructure->roundCounters = (int*) malloc(sizeof(int) * noOfThreads);
 	for (int i = 0; i < noOfThreads; i++) {
 		hpStructure->roundCounters[i] = 0;
 	}
 
+	hpStructure->topPointers = (int*) malloc(sizeof(int) * noOfThreads);
+	for (int i = 0; i < noOfThreads; i++) {
+		hpStructure->roundCounters[i] = 0;
+	}
+	//printf("created roundCounters\n");
 	hpStructure->numberOfHP = noOfHP;
 	hpStructure->numberOfThreads = noOfThreads;
 }
 
 void freeMemHP(HPStructure *hpStructure, int threadId, void *ptr) {
-	circularQueueEnq(getFreeQueue(hpStructure->freeQueues, threadId), ptr);
+	bool flag = circularQueueEnq(getFreeQueue(hpStructure->freeQueues, threadId)->queue, ptr);
+	//printf("threadId = %d enqueue was successful = %u \n", threadId, flag);
 	void* node = NULL;
 	while (node == NULL) {
+		//printf("came here\n");
+		//printf("threadId = %d roundCounter = %u\n", threadId, hpStructure->roundCounters[threadId]);
+		//printf("threadId = %d, size of queue = %d\n", threadId,hpStructure->numberOfHP * hpStructure->numberOfThreads);
 		void *inspect = hpStructure->hazardPointers[hpStructure->roundCounters[threadId]];
-		hpStructure->roundCounters[threadId]++;
+		hpStructure->roundCounters[threadId] = (hpStructure->roundCounters[threadId] + 1) % (hpStructure->numberOfHP * hpStructure->numberOfThreads);
+		//printf("threadId = %d roundCounter = %u\n", threadId, hpStructure->roundCounters[threadId]);
+		//printf("threadId = %d inspectPtr = %u\n", threadId, inspect);
 		if (inspect != NULL) {
 			inspect = setMark(inspect, 1);
 		}
-		node = circularQueueDeq(getFreeQueue(hpStructure->freeQueues, threadId));
+		node = circularQueueDeq(getFreeQueue(hpStructure->freeQueues, threadId)->queue);
+		//printf("threadId = %d nodePtr = %u dequeued\n", threadId, node);
 		if (node == NULL) {
+			//printf("threadId = %d node dequeued was null\n", threadId);
 			return;
 		}
 		else if (getMark(node) == 0) {
+			printf("threadId = %d freeing nodeptr = %u\n", threadId, node);
 			free(node);
 			return;
 		}
 		else {
 			setMark(node, 0);
-			circularQueueEnq(getFreeQueue(hpStructure->freeQueues, threadId), node);
+			circularQueueEnq(getFreeQueue(hpStructure->freeQueues, threadId)->queue, node);
 		}
 	}
+}
+
+void setHazardPointer(HPStructure *hpStructure, int threadId, void *element) {
+	hpStructure->hazardPointers[threadId * hpStructure->numberOfHP + hpStructure->topPointers[threadId]] = element;
+	hpStructure->topPointers[threadId]++;
+}
+
+void clearHazardPointer(HPStructure *hpStructure, int threadId) {
+	hpStructure->topPointers[threadId]--;
+	hpStructure->hazardPointers[threadId * hpStructure->numberOfHP + hpStructure->topPointers[threadId]] = NULL;
 }

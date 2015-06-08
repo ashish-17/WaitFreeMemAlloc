@@ -307,7 +307,7 @@ void testChunk() {
 		printf("Block value %d\n", getFromChunk(chunk)->memBlock);
 	}
 }
- */
+
 
 void testCircularQueue() {
 	int numOfElements = 5;
@@ -357,8 +357,8 @@ void testCircularQueue() {
 			printf("queueIsEmpty\n");
 	}
 }
-
-int main() {
+*/
+int stmain() {
 
 	printf("hello world\n");
 	//testStack();
@@ -369,7 +369,7 @@ int main() {
 	//testPoolsTogether(); // have to update as chunk definition has been changed
 
 	//testChunk();
-	testCircularQueue();
+	//testCircularQueue();
 
 	printf("Test client");
 	return 0;

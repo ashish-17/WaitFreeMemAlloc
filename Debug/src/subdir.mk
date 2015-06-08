@@ -9,6 +9,7 @@ C_SRCS += \
 ../src/Chunk.c \
 ../src/CircularQueue.c \
 ../src/Client.c \
+../src/ClientHP.c \
 ../src/ClientPC.c \
 ../src/FreePool.c \
 ../src/FullPool.c \
@@ -31,6 +32,7 @@ OBJS += \
 ./src/Chunk.o \
 ./src/CircularQueue.o \
 ./src/Client.o \
+./src/ClientHP.o \
 ./src/ClientPC.o \
 ./src/FreePool.o \
 ./src/FullPool.o \
@@ -53,6 +55,7 @@ C_DEPS += \
 ./src/Chunk.d \
 ./src/CircularQueue.d \
 ./src/Client.d \
+./src/ClientHP.d \
 ./src/ClientPC.d \
 ./src/FreePool.d \
 ./src/FullPool.d \

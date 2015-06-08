@@ -18,11 +18,12 @@ void circularQueueCreate(CircularQueue *queue, int elementSize, int noOfElements
 
 bool circularQueueEnq(CircularQueue *queue, const void* element) {
 	if ((queue->tail + 1) % queue->maxNumberOfElements == queue->head) {
-		//printf("circularQueue full \n");
+		printf("circularQueue full \n");
 		return false;
 	}
 	else {
 		queue->tail = (queue->tail + 1) % queue->maxNumberOfElements;
+		//printf("maxnoOfElements = %d\n", queue->maxNumberOfElements);
 		//printf("tailValue = %d\n", queue->tail);
 		//printf("address of QueueElement %d is %u", queue->tail, getCircularQueueElement(queue, queue->tail));
 		getCircularQueueElement(queue, queue->tail)->value = element;
