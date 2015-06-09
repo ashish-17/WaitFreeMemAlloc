@@ -3,6 +3,7 @@
 
 #include <stdatomic.h>
 #include "commons.h"
+#include "HazardPointer.h"
 
 typedef struct _QueueElement {
 	void* value;
@@ -24,9 +25,9 @@ void queueCreate(Queue *queue, int elementSize);
 
 bool isQueueEmpty(Queue *queue);
 
-bool queueEnq(Queue *queue, const void* element);
+bool queueEnq(Queue *queue, const void* element, int threadId);
 
-void* queueDeq(Queue *queue, QueueElement *oldQueueHead);
+void* queueDeq(Queue *queue, QueueElement *oldQueueHead, int threadId);
 
 void queueFree(Queue *queue);
 

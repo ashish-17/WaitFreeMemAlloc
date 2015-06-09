@@ -2,6 +2,7 @@
 #define WAITFREEMEMALLOC_SRC_STACK_H_
 
 #include "AtomicStampedReference.h"
+#include "HazardPointer.h"
 
 typedef struct _StackElement {
 	void* value;
@@ -26,12 +27,12 @@ bool stackPush(Stack *stack, const void* element);
 
 void* stackPop(Stack *stack);
 
-bool stackPushOwner(Stack *stack, const void* element);
+bool stackPushOwner(Stack *stack, const void* element, int threadId);
 
-bool stackPushOther(Stack *stack, const void* element, AtomicStampedReference* oldTop);
+bool stackPushOther(Stack *stack, const void* element, AtomicStampedReference* oldTop, int threadId);
 
-void* stackPopOwner(Stack *stack);
+void* stackPopOwner(Stack *stack, int threadId);
 
-void* stackPopOther(Stack *stack);
+void* stackPopOther(Stack *stack, int threadId);
 
 #endif /* WAITFREEMEMALLOC_SRC_STACK_H_ */

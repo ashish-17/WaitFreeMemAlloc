@@ -166,14 +166,14 @@ void testQueue1(void *threadId) {
 		for (int i = 0; i < numOfBlocks; i++) {
 			int temp = (int)threadId * numOfBlocks + i;
 			Block *block = createBlock(temp, (int)threadId);
-			printf("thread = %d pushing the block = %d was successful = %d\n", (int)threadId, temp, queueEnq(queue,block));
+			printf("thread = %d pushing the block = %d was successful = %d\n", (int)threadId, temp, queueEnq(queue,block, (int)threadId));
 		}
 		//printf("tail ptr = %u, block ptr = %u\n", queue->tail, queue->tail->value);
 		//printf("block = %d\n", ((Block*)queue->tail->value)->memBlock);
 	}
 	else {
 		for (int i = 0; i < numOfBlocks; i++) {
-			Block *block = queueDeq(queue, queue->head);
+			Block *block = queueDeq(queue, queue->head, (int*)threadId);
 			if (block == NULL) {
 				printf("Thread = %d, didn't get the block\n",(int)threadId);
 			}

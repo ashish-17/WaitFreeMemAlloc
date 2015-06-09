@@ -40,7 +40,7 @@ bool queueEnq1(Queue *queue, const void* element) {
 	return false;
 }*/
 
-bool queueEnq(Queue *queue, const void* element) {
+bool queueEnq(Queue *queue, const void* element, int threadId) {
 	QueueElement *queueElement = createNode(element);
 	//printf("queueEnq: value = %u, blkPtr = %u, next ptr = %u\n", queueElement->value, element, queueElement->next);
 	QueueElement *last = queue->tail;
@@ -65,7 +65,7 @@ bool isQueueEmpty(Queue *queue) {
 	return (queue->head == queue->tail);
 }
 
-void* queueDeq(Queue *queue, QueueElement *oldQueueHead) {
+void* queueDeq(Queue *queue, QueueElement *oldQueueHead, int threadId) {
 	//printf("queueDeq: queuePtr: %u, q->head: %u, q->tail: %u, q->head->next: %u \n",queue, queue->head, queue->tail, queue->head->next);
 	QueueElement *first = oldQueueHead;
 	QueueElement *last = queue->tail;
@@ -92,11 +92,13 @@ void* queueDeq(Queue *queue, QueueElement *oldQueueHead) {
 			 * and if atomic_*** success to free copy pointer
 			 */
 			if (atomic_compare_exchange_strong(&queue->head, &first, next)) {
-
 				//printf("dequeuing successful\n");
+				clearHazardPointer(globalHPStructure, threadId);
+				freeMemHP(globalHPStructure, threadId, first);
 				return element;
 			}
 			else {
+				clearHazardPointer(globalHPStructure, threadId);
 				return NULL;
 			}
 		}

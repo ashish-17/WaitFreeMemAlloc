@@ -57,7 +57,7 @@ void* stackPop(Stack *stack) {
 
 	void* nodeValue = oldTop->value;
 
-	free(oldTop);
+	free(oldTop); // OK
 	oldTop = NULL;
 
 	stack->numberOfElements--;
@@ -65,7 +65,7 @@ void* stackPop(Stack *stack) {
 	return nodeValue;
 }
 
-bool stackPushOwner(Stack *stack, const void* element)
+bool stackPushOwner(Stack *stack, const void* element, int threadId)
 {
 	StackElement *node = (StackElement*)malloc(sizeof(StackElement));
 	node->value = element;
@@ -73,41 +73,47 @@ bool stackPushOwner(Stack *stack, const void* element)
 
 	AtomicStampedReference* oldTop = stack->top;
 
-	return compareAndSet(stack->top, oldTop->atomicRef->reference, node, oldTop->atomicRef->integer, (oldTop->atomicRef->integer + 1));
+	return compareAndSet(stack->top, oldTop->atomicRef->reference, node, oldTop->atomicRef->integer, (oldTop->atomicRef->integer + 1), threadId);
 }
 
-bool stackPushOther(Stack *stack, const void* element, AtomicStampedReference* oldTop)
+bool stackPushOther(Stack *stack, const void* element, AtomicStampedReference* oldTop, int threadId)
 {
 	StackElement *node = (StackElement*)malloc(sizeof(StackElement));
 	node->value = element;
 	node->next = (StackElement*)stack->top->atomicRef->reference;
 
-	return compareAndSet(stack->top, NULL, node, oldTop->atomicRef->integer, (oldTop->atomicRef->integer + 1));
+	return compareAndSet(stack->top, NULL, node, oldTop->atomicRef->integer, (oldTop->atomicRef->integer + 1), threadId);
 }
 
-void* stackPopOwner(Stack* stack)
+void* stackPopOwner(Stack* stack, int threadId)
 {
-	AtomicStampedReference *oldTop = stack->top;
+	setHazardPointer(globalHPStructure, threadId, stack->top->atomicRef);
+	ReferenceIntegerPair *oldTop = (ReferenceIntegerPair*)getHazardPointer(globalHPStructure, threadId);
+	//AtomicStampedReference *oldTop = stack->top; //initially it was this .. then accordingly add atomicRef everywhere
+
 	if(stack->top->atomicRef->reference == NULL){
 		printf("stackPopOwner: stack was empty\n");
 		return NULL;
 	}
-	void *oldValue = ((StackElement*)oldTop->atomicRef->reference)->value;
-	StackElement *nextTopReference = ((StackElement*)(oldTop->atomicRef->reference))->next;
-	if (compareAndSet(stack->top, oldTop->atomicRef->reference, nextTopReference, oldTop->atomicRef->integer, (oldTop->atomicRef->integer+1))) {
-		free(oldTop);
+	void *oldValue = ((StackElement*)oldTop->reference)->value;
+	StackElement *copy = (StackElement*)(oldTop->reference);
+	StackElement *nextTopReference = ((StackElement*)(oldTop->reference))->next;
+	if (compareAndSet(stack->top, oldTop->reference, nextTopReference, oldTop->integer, (oldTop->integer+1), threadId)) {
+		free(copy);
 		return oldValue;
 	}
 	else {
+		//clearHazardPointer(globalHPStructure, threadId);
 		printf("stackPopOwner: CAS failed\n");
 		return NULL;
 	}
 }
 
-void* stackPopOther(Stack* stack)
+void* stackPopOther(Stack* stack, int threadId)
 {
 	//printf("stackPopOther:\n");
-	ReferenceIntegerPair *oldTop = (ReferenceIntegerPair*)stack->top->atomicRef;
+	setHazardPointer(globalHPStructure, threadId, stack->top->atomicRef);
+	ReferenceIntegerPair *oldTop = (ReferenceIntegerPair*)getHazardPointer(globalHPStructure, threadId);
 	//printf("stackPopOther: oldTop = %u\n",oldTop);
 	//printf("stackPopOther: currentTop = %u, expected top = %u\n", stack->top->atomicRef->reference, (oldTop->reference));
 	if (stack->top->atomicRef->reference == NULL) {
@@ -115,15 +121,16 @@ void* stackPopOther(Stack* stack)
 		return NULL;
 	}
 	//printf("stackPopOther: victim's stack value")
+	StackElement *copy = (StackElement*)(oldTop->reference);
 	StackElement *nextTopReference = ((StackElement*)(oldTop->reference))->next;
 	if (nextTopReference == NULL) {
 		//printf("stackPopOther: stack had only one chunk \n");
 		return NULL;
 	}
-	if (compareAndSet(stack->top, oldTop->reference, ((StackElement*)oldTop->reference)->next, oldTop->integer, (oldTop->integer + 1))) {
+	if (compareAndSet(stack->top, oldTop->reference, ((StackElement*)oldTop->reference)->next, oldTop->integer, (oldTop->integer + 1), threadId)) {
 		void* poppedItem = ((StackElement*)oldTop->reference)->value;
 		//printf("stackPopOther: inside CAS \n");
-		free(((StackElement*)oldTop->reference));
+		free(copy);
 		return poppedItem;
 	}
 	else
@@ -131,13 +138,4 @@ void* stackPopOther(Stack* stack)
 		printf("stackPopOther: CAS failed\n");
 		return NULL;
 	}
-	/*void *oldValue = ((StackElement*)oldTop->atomicRef->reference)->value;
-	StackElement *nextTopReference = ((StackElement*)(oldTop->atomicRef->reference))->next;
-	if (nextTopReference == NULL)
-		return NULL;
-	printf("stackPopOther: before CAS \n");
-	if (compareAndSet(stack->top, oldTop->atomicRef->reference, nextTopReference, oldTop->atomicRef->integer, (oldTop->atomicRef->integer+1)))
-			return oldValue;
-	else
-		return NULL;*/
 }

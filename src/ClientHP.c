@@ -6,10 +6,12 @@
 #include "Stack.h"
 #include "HazardPointer.h"
 
-HPStructure *globalHPStructure = NULL;
+
 
 #define NUM_THREADS 2
 #define ARRAY_LOOP_CTR 10
+
+HPStructure *globalHPStructure = NULL;
 
 void* tester1(void *threadId) {
 	printf("In thread %d\n", (int)threadId);
@@ -19,8 +21,6 @@ void* tester1(void *threadId) {
 		freeMemHP(globalHPStructure,(int*)threadId,element);
 	}
 }
-
-
 
 int main() {
 

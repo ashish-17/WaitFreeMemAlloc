@@ -103,6 +103,10 @@ void setHazardPointer(HPStructure *hpStructure, int threadId, void *element) {
 	hpStructure->topPointers[threadId]++;
 }
 
+void* getHazardPointer(HPStructure *hpStructure, int threadId) {
+	hpStructure->hazardPointers[threadId * hpStructure->numberOfHP + hpStructure->topPointers[threadId]];
+}
+
 void clearHazardPointer(HPStructure *hpStructure, int threadId) {
 	hpStructure->topPointers[threadId]--;
 	hpStructure->hazardPointers[threadId * hpStructure->numberOfHP + hpStructure->topPointers[threadId]] = NULL;

@@ -39,13 +39,13 @@ QueuePool* createFreePoolC(int numThreads) {
 
 Chunk* getFromFreePoolC(QueuePool* pool, int threadIndex, QueueElement *oldQueueHead) {
 	QueueThread* thread = getQueueThread(pool, threadIndex);
-	return queueDeq(thread->queue, oldQueueHead);
+	return queueDeq(thread->queue, oldQueueHead, threadIndex);
 }
 
 bool putInFreePoolC(QueuePool* pool, int threadIndex, Chunk* chunk) {
 	printf("putInFreePoolC: threadId : %d\n", threadIndex);
 	QueueThread* thread = getQueueThread(pool, threadIndex);
-	return queueEnq(thread->queue, chunk);
+	return queueEnq(thread->queue, chunk, threadIndex);
 }
 
 

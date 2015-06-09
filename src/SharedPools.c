@@ -1,5 +1,5 @@
 #include "SharedPools.h"
-
+#include "HazardPointer.h"
 #include "Queue.h"
 #include "Block.h"
 
@@ -28,13 +28,14 @@ void* getFromSharedQueuePools(SharedQueuePools* pool, int threadIndex, int secTh
 	SharedQueuePool* queuePool = getSharedQueuePool(pool, threadIndex);
 	Queue *queue = getQueueThread(queuePool->sharedQueuePool, secThreadIndex)->queue;
 	//printf("getFromSQP: threadId = %d, queuePtr = %u\n", threadIndex, queue);
-	return queueDeq(queue, queue->head);
+	setHazardPointer(globalHPStructure, secThreadIndex, queue->head);
+	return queueDeq(queue, getHazardPointer(globalHPStructure, secThreadIndex), threadIndex);
 }
 
 bool putInSharedQueuePools(SharedQueuePools* pool, int threadIndex, int secThreadIndex, Block* block) {
 	SharedQueuePool* queuePool = getSharedQueuePool(pool, threadIndex);
 	Queue *queue = getQueueThread(queuePool->sharedQueuePool, secThreadIndex)->queue;
-	return queueEnq(queue, block);
+	return queueEnq(queue, block, secThreadIndex);
 }
 
 SharedQueuePool* getSharedQueuePool(SharedQueuePools* pool, int index)

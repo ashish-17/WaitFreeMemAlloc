@@ -295,13 +295,13 @@ Chunk* doHelp(int threadId, int threadToBeHelped, Chunk *stolenChunk, AtomicStam
 		if (putInOtherFullPool(memory->fullPool, threadToBeHelped, stolenChunk, oldTop)) {
 			tempBoolObj = (bool*)malloc(sizeof(bool));
 			*tempBoolObj = false;
-			compareAndSet(getHelperEntry(threadToBeHelped),announceOfThreadToBeHelped->atomicRef->reference, tempBoolObj, announceOfThreadToBeHelped->atomicRef->integer, (announceOfThreadToBeHelped->atomicRef->integer + 1));
+			compareAndSet(getHelperEntry(threadToBeHelped),announceOfThreadToBeHelped->atomicRef->reference, tempBoolObj, announceOfThreadToBeHelped->atomicRef->integer, (announceOfThreadToBeHelped->atomicRef->integer + 1), threadId);
 			return NULL;
 		}
 	}
 	tempBoolObj = (bool*)malloc(sizeof(bool));
 	*tempBoolObj = false;
-	compareAndSet(getHelperEntry(threadToBeHelped),announceOfThreadToBeHelped->atomicRef->reference, tempBoolObj, announceOfThreadToBeHelped->atomicRef->integer, (announceOfThreadToBeHelped->atomicRef->integer + 1));
+	compareAndSet(getHelperEntry(threadToBeHelped),announceOfThreadToBeHelped->atomicRef->reference, tempBoolObj, announceOfThreadToBeHelped->atomicRef->integer, (announceOfThreadToBeHelped->atomicRef->integer + 1), threadId);
 	return stolenChunk;
 }
 
@@ -392,7 +392,7 @@ bool donate(int threadId, Chunk *chunk) {
 				printf("donate: threadID %d, successfully donated to %d\n", threadId, i);
 				tempBoolObj = (bool*)malloc(sizeof(bool));
 				*tempBoolObj = false;
-				compareAndSet(getHelperEntry(i),announceOfThreadToBeHelped->atomicRef->reference, tempBoolObj, announceOfThreadToBeHelped->atomicRef->integer, (announceOfThreadToBeHelped->atomicRef->integer + 1));
+				compareAndSet(getHelperEntry(i),announceOfThreadToBeHelped->atomicRef->reference, tempBoolObj, announceOfThreadToBeHelped->atomicRef->integer, (announceOfThreadToBeHelped->atomicRef->integer + 1), threadId);
 				getDonorEntry(threadId)->lastDonated = i;
 				return true;
 			}
@@ -400,7 +400,7 @@ bool donate(int threadId, Chunk *chunk) {
 			//getHelperEntry(i)->compareAndSet(...);
 			tempBoolObj = (bool*)malloc(sizeof(bool));
 			*tempBoolObj = false;
-			compareAndSet(getHelperEntry(i),announceOfThreadToBeHelped->atomicRef->reference, tempBoolObj, announceOfThreadToBeHelped->atomicRef->integer, (announceOfThreadToBeHelped->atomicRef->integer + 1));
+			compareAndSet(getHelperEntry(i),announceOfThreadToBeHelped->atomicRef->reference, tempBoolObj, announceOfThreadToBeHelped->atomicRef->integer, (announceOfThreadToBeHelped->atomicRef->integer + 1), threadId);
 		}
 		i = (i + 1) % (memory->n);
 	} while(i != (getDonorEntry(threadId)->lastDonated + 1) % (memory->n));
@@ -424,7 +424,8 @@ Chunk* moveFromSharedQueuePools(int threadId) {
 				//printf("moveFromSQP: HeadPtr = %u\n", getQueueThread(memory->freePoolC, primThread)->queue->head);
 				//printf("moveFromSQP: nextPtr = %u\n", getQueueThread(memory->freePoolC, primThread)->queue->head->next);
 				//printf("moveFromSQP: chunkPtr = %u\n", getQueueThread(memory->freePoolC, primThread)->queue->head->next->value);
-				oldQueueHead = getQueueThread(memory->freePoolC, primThread)->queue->head;
+				setHazardPointer(globalHPStructure, threadId, getQueueThread(memory->freePoolC, primThread)->queue->head);
+				oldQueueHead = getHazardPointer(globalHPStructure, threadId);
 				if (!isQueueEmpty(getQueueThread(memory->freePoolC, primThread)->queue)) {
 					if (chunkHasSpace(oldQueueHead->next->value)) {
 						if (putInChunkContended(getQueueThread(memory->freePoolC, primThread)->queue->head->next->value, block)) {
@@ -458,7 +459,8 @@ Chunk* moveFromSharedQueuePools(int threadId) {
 				//printf("moveFromSQP: HeadPtr = %u\n", getQueueThread(memory->freePoolC, primThread)->queue->head);
 				//printf("moveFromSQP: nextPtr = %u\n", getQueueThread(memory->freePoolC, primThread)->queue->head->next);
 				//printf("moveFromSQP: chunkPtr = %u\n", getQueueThread(memory->freePoolC, primThread)->queue->head->next->value);
-				oldQueueHead = getQueueThread(memory->freePoolC, primThread)->queue->head;
+				setHazardPointer(globalHPStructure, threadId, getQueueThread(memory->freePoolC, primThread)->queue->head);
+				oldQueueHead = getHazardPointer(globalHPStructure, threadId);
 				if (!isQueueEmpty(getQueueThread(memory->freePoolC, primThread)->queue)) {
 					if (!chunkHasSpace(oldQueueHead->next->value)) {
 						//printf("moveFromSMP: threadId = %d block was null but chunk was full\n", threadId);
