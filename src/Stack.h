@@ -29,7 +29,7 @@ void* stackPop(Stack *stack);
 
 bool stackPushOwner(Stack *stack, const void* element, int threadId);
 
-bool stackPushOther(Stack *stack, const void* element, AtomicStampedReference* oldTop, int threadId);
+bool stackPushOther(Stack *stack, const void* element, ReferenceIntegerPair* oldTop, int threadId);
 
 void* stackPopOwner(Stack *stack, int threadId);
 

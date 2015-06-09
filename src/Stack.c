@@ -70,25 +70,29 @@ bool stackPushOwner(Stack *stack, const void* element, int threadId)
 	StackElement *node = (StackElement*)malloc(sizeof(StackElement));
 	node->value = element;
 	node->next = (StackElement*)stack->top->atomicRef->reference;
-
-	AtomicStampedReference* oldTop = stack->top;
-
-	return compareAndSet(stack->top, oldTop->atomicRef->reference, node, oldTop->atomicRef->integer, (oldTop->atomicRef->integer + 1), threadId);
+	//printf("stackPushOwner before setting HP\n");
+	ReferenceIntegerPair *oldTop = setHazardPointer(globalHPStructure, threadId, stack->top->atomicRef);
+	//printf("stack->top->atomicRef = %u\n", stack->top->atomicRef);
+	//ReferenceIntegerPair *oldTop = (ReferenceIntegerPair*)getHazardPointer(globalHPStructure, threadId);
+	//printf("oldTop = %u\n", oldTop);
+	//AtomicStampedReference* oldTop = stack->top;
+	//printf("stackPushOwner after setting HP\n");
+	return compareAndSet(stack->top, oldTop->reference, node, oldTop->integer, (oldTop->integer + 1), threadId);
 }
 
-bool stackPushOther(Stack *stack, const void* element, AtomicStampedReference* oldTop, int threadId)
+bool stackPushOther(Stack *stack, const void* element, ReferenceIntegerPair* oldTop, int threadId)
 {
 	StackElement *node = (StackElement*)malloc(sizeof(StackElement));
 	node->value = element;
 	node->next = (StackElement*)stack->top->atomicRef->reference;
 
-	return compareAndSet(stack->top, NULL, node, oldTop->atomicRef->integer, (oldTop->atomicRef->integer + 1), threadId);
+	return compareAndSet(stack->top, NULL, node, oldTop->integer, (oldTop->integer + 1), threadId);
 }
 
 void* stackPopOwner(Stack* stack, int threadId)
 {
-	setHazardPointer(globalHPStructure, threadId, stack->top->atomicRef);
-	ReferenceIntegerPair *oldTop = (ReferenceIntegerPair*)getHazardPointer(globalHPStructure, threadId);
+	ReferenceIntegerPair *oldTop = setHazardPointer(globalHPStructure, threadId, stack->top->atomicRef);
+	//ReferenceIntegerPair *oldTop = (ReferenceIntegerPair*)getHazardPointer(globalHPStructure, threadId);
 	//AtomicStampedReference *oldTop = stack->top; //initially it was this .. then accordingly add atomicRef everywhere
 
 	if(stack->top->atomicRef->reference == NULL){
@@ -112,8 +116,8 @@ void* stackPopOwner(Stack* stack, int threadId)
 void* stackPopOther(Stack* stack, int threadId)
 {
 	//printf("stackPopOther:\n");
-	setHazardPointer(globalHPStructure, threadId, stack->top->atomicRef);
-	ReferenceIntegerPair *oldTop = (ReferenceIntegerPair*)getHazardPointer(globalHPStructure, threadId);
+	ReferenceIntegerPair *oldTop = setHazardPointer(globalHPStructure, threadId, stack->top->atomicRef);
+	//ReferenceIntegerPair *oldTop = (ReferenceIntegerPair*)getHazardPointer(globalHPStructure, threadId);
 	//printf("stackPopOther: oldTop = %u\n",oldTop);
 	//printf("stackPopOther: currentTop = %u, expected top = %u\n", stack->top->atomicRef->reference, (oldTop->reference));
 	if (stack->top->atomicRef->reference == NULL) {

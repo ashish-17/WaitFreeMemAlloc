@@ -23,7 +23,7 @@ void hpStructureCreate(HPStructure *hpStructure, int noOfThreads, int noOfHP);
 
 void freeMemHP(HPStructure *hpStructure, int threadId, void *ptr);
 
-void setHazardPointer(HPStructure *hpStructure, int threadId, void *element);
+void* setHazardPointer(HPStructure *hpStructure, int threadId, void *element);
 
 void* getHazardPointer(HPStructure *hpStructure, int threadId);
 

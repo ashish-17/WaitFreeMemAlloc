@@ -4,6 +4,7 @@
 #include <pthread.h>
 # include "Block.h"
 #include "Stack.h"
+#include "HazardPointer.h"
 
 
 #define NUM_THREADS 2   // 3
@@ -11,6 +12,7 @@
 #define CHUNK_SIZE 2
 #define NUM_DONATION_STEPS 2
 
+HPStructure *globalHPStructure = NULL;
 
 // The actual tester
 void* tester(void *threadId) {
@@ -55,10 +57,13 @@ void* tester(void *threadId) {
 	pthread_exit(NULL);
 }
 
-int symain() {
+int main() {
 
 	//Wrapper wrapper = (Wrapper*) malloc(sizeof(Wrapper));
+	globalHPStructure = (HPStructure*)malloc(sizeof(HPStructure));
+	hpStructureCreate(globalHPStructure, NUM_THREADS, 3);
 	createWaitFreePool(NUM_BLOCKS, NUM_THREADS, CHUNK_SIZE, NUM_DONATION_STEPS);
+
 
 	int rc;
 	pthread_t threads[NUM_THREADS];

@@ -20,7 +20,7 @@ Chunk* getFromOtherFullPool(StackPool* pool, int threadIndex);
 
 Chunk* getFromOwnFullPool(StackPool* pool, int threadIndex);
 
-bool putInOtherFullPool(StackPool* pool, int threadIndex, Chunk* chunk, AtomicStampedReference* oldTop);
+bool putInOtherFullPool(StackPool* pool, int threadIndex, Chunk* chunk, ReferenceIntegerPair* oldTop);
 
 bool putInOwnFullPool(StackPool* pool, int threadIndex, Chunk* chunk);
 

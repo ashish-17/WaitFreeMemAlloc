@@ -28,8 +28,8 @@ void* getFromSharedQueuePools(SharedQueuePools* pool, int threadIndex, int secTh
 	SharedQueuePool* queuePool = getSharedQueuePool(pool, threadIndex);
 	Queue *queue = getQueueThread(queuePool->sharedQueuePool, secThreadIndex)->queue;
 	//printf("getFromSQP: threadId = %d, queuePtr = %u\n", threadIndex, queue);
-	setHazardPointer(globalHPStructure, secThreadIndex, queue->head);
-	return queueDeq(queue, getHazardPointer(globalHPStructure, secThreadIndex), threadIndex);
+	QueueElement *oldHead = setHazardPointer(globalHPStructure, secThreadIndex, queue->head);
+	return queueDeq(queue, oldHead, threadIndex);
 }
 
 bool putInSharedQueuePools(SharedQueuePools* pool, int threadIndex, int secThreadIndex, Block* block) {

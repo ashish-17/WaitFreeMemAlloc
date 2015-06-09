@@ -36,7 +36,7 @@ Chunk* getFromOwnFullPool(StackPool* pool, int threadIndex) {
 	return (Chunk*)stackPopOwner(thread->stack, threadIndex);
 }
 
-bool putInOtherFullPool(StackPool* pool, int threadIndex, Chunk* chunk, AtomicStampedReference* oldTop) {
+bool putInOtherFullPool(StackPool* pool, int threadIndex, Chunk* chunk, ReferenceIntegerPair* oldTop) {
 	StackThread* thread = getStackThread(pool, threadIndex);
 	return stackPushOther(thread->stack, chunk, oldTop, threadIndex);
 }

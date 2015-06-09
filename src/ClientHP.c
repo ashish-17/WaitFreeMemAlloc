@@ -6,12 +6,10 @@
 #include "Stack.h"
 #include "HazardPointer.h"
 
-
-
 #define NUM_THREADS 2
 #define ARRAY_LOOP_CTR 10
 
-HPStructure *globalHPStructure = NULL;
+//HPStructure *globalHPStructure = NULL;
 
 void* tester1(void *threadId) {
 	printf("In thread %d\n", (int)threadId);
@@ -22,7 +20,7 @@ void* tester1(void *threadId) {
 	}
 }
 
-int main() {
+int sdmain() {
 
 	globalHPStructure = (HPStructure*)malloc(sizeof(HPStructure));
 	hpStructureCreate(globalHPStructure, NUM_THREADS, 1);
