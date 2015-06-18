@@ -29,10 +29,10 @@ void* stackPop(Stack *stack);
 
 bool stackPushOwner(Stack *stack, const void* element, int threadId);
 
-bool stackPushOther(Stack *stack, const void* element, ReferenceIntegerPair* oldTop, int threadId);
+bool stackPushOther(Stack *stack, const void* element, ReferenceIntegerPair* oldTop, int otherThreadID, int threadId);
 
 void* stackPopOwner(Stack *stack, int threadId);
 
-void* stackPopOther(Stack *stack, int threadId);
+void* stackPopOther(Stack *stack, int otherThreadId, int threadId);
 
 #endif /* WAITFREEMEMALLOC_SRC_STACK_H_ */

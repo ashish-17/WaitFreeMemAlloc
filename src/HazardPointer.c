@@ -1,4 +1,5 @@
 #include "HazardPointer.h"
+#include <assert.h>
 
 FreeQueue* getFreeQueue(FreeQueue *queue, int index) {
 	return (queue + index);
@@ -103,7 +104,7 @@ void freeMemHP(HPStructure *hpStructure, int threadId, void *ptr) {
 void* setHazardPointer(HPStructure *hpStructure, int threadId, void *element) {
 	//printf("in setHP\n");
 	//printf("hpStructure = %u\n", hpStructure);
-	//printf("thread = %d, topPointer = %d\n", threadId, hpStructure->topPointers[threadId]);
+	printf("setHP: thread = %d, topPointer = %d\n", threadId, hpStructure->topPointers[threadId]);
 	hpStructure->hazardPointers[threadId * hpStructure->numberOfHP + hpStructure->topPointers[threadId]] = element;
 	//printf("setHP\n");
 	hpStructure->topPointers[threadId]++;
@@ -115,6 +116,8 @@ void* getHazardPointer(HPStructure *hpStructure, int threadId) {
 }
 
 void clearHazardPointer(HPStructure *hpStructure, int threadId) {
+	printf("clearHP: thread = %d, topPointer = %d\n", threadId, hpStructure->topPointers[threadId]);
+	assert(hpStructure->topPointers[threadId] > 0);
 	hpStructure->topPointers[threadId]--;
 	hpStructure->hazardPointers[threadId * hpStructure->numberOfHP + hpStructure->topPointers[threadId]] = NULL;
 }

@@ -16,11 +16,11 @@ StackPool* createFullPool(int numThreads);
 
 bool isFullPoolEmpty(StackPool* pool, int threadIndex);
 
-Chunk* getFromOtherFullPool(StackPool* pool, int threadIndex);
+Chunk* getFromOtherFullPool(StackPool* pool, int otherThreadId, int threadIndex);
 
 Chunk* getFromOwnFullPool(StackPool* pool, int threadIndex);
 
-bool putInOtherFullPool(StackPool* pool, int threadIndex, Chunk* chunk, ReferenceIntegerPair* oldTop);
+bool putInOtherFullPool(StackPool* pool, int otherThreadId, Chunk* chunk, ReferenceIntegerPair* oldTop, int threadIndex);
 
 bool putInOwnFullPool(StackPool* pool, int threadIndex, Chunk* chunk);
 

@@ -7,8 +7,8 @@
 #include "HazardPointer.h"
 
 
-#define NUM_THREADS 2   // 3
-#define NUM_BLOCKS  16    // 24
+#define NUM_THREADS 3   // 3
+#define NUM_BLOCKS  24    // 24
 #define CHUNK_SIZE 2
 #define NUM_DONATION_STEPS 2
 
@@ -16,6 +16,10 @@ HPStructure *globalHPStructure = NULL;
 
 // The actual tester
 void* tester(void *threadId) {
+	/*if ((int)threadId == 1) {
+		printf("thread %d is FINSISHED\n",(int)threadId);
+		pthread_exit(NULL);
+	}*/
 	printf("In thread %d\n", (int)threadId);
 	int numOfAllocBlocks = 0;
 	int flag = 0; // 0 -> allocate 1 -> free
@@ -61,7 +65,7 @@ int main() {
 
 	//Wrapper wrapper = (Wrapper*) malloc(sizeof(Wrapper));
 	globalHPStructure = (HPStructure*)malloc(sizeof(HPStructure));
-	hpStructureCreate(globalHPStructure, NUM_THREADS, 3);
+	hpStructureCreate(globalHPStructure, NUM_THREADS, 10);
 	createWaitFreePool(NUM_BLOCKS, NUM_THREADS, CHUNK_SIZE, NUM_DONATION_STEPS);
 
 

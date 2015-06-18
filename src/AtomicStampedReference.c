@@ -36,7 +36,7 @@ bool compareAndSet(AtomicStampedReference* current,
 	if (result) {
 		//printf("CAS: trying to clearHP\n");
 		clearHazardPointer(globalHPStructure, threadId);
-		//printf("cleared\n");
+		printf("CAS: clearing HP of thread %d on CAS successful\n", threadId);
 		//free(copy->reference);
 		freeMemHP(globalHPStructure, threadId, copy);
 		printf("---- thread = %d trying to free = %u\n", threadId, copy);
@@ -44,6 +44,7 @@ bool compareAndSet(AtomicStampedReference* current,
 	}
 	else {
 		clearHazardPointer(globalHPStructure, threadId);
+		printf("CAS: clearing HP of thread %d on CAS failure\n", threadId);
 		return result;
 	}
 }

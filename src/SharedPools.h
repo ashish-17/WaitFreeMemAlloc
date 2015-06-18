@@ -20,7 +20,7 @@ void deleteSharedQueuePools(SharedQueuePools* pool);
 
 SharedQueuePool* getSharedQueuePool(SharedQueuePools* pool, int index);
 
-void* getFromSharedQueuePools(SharedQueuePools* pool, int threadIndex, int secThreadIndex);
+void* getFromSharedQueuePools(SharedQueuePools* pool, int threadId, int primThreadIndex, int secThreadIndex);
 
 bool putInSharedQueuePools(SharedQueuePools* pool, int threadIndex, int secThreadIndex, Block *block);
 

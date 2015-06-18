@@ -75,6 +75,7 @@ void* queueDeq(Queue *queue, QueueElement *oldQueueHead, int threadId) {
 	if (first == queue->head) { // someone else dequeued
 		//printf("first == queue->head\n");
 		if (first == last) {    // queue is empty
+			clearHazardPointer(globalHPStructure, threadId);
 			//printf("first == last\n");
 			if (next == NULL) {
 				return NULL;
@@ -94,12 +95,14 @@ void* queueDeq(Queue *queue, QueueElement *oldQueueHead, int threadId) {
 			if (atomic_compare_exchange_strong(&queue->head, &first, next)) {
 				//printf("dequeuing successful\n");
 				clearHazardPointer(globalHPStructure, threadId);
+				printf("queueDeq: clearing HP of thread %d on successful dequeu\n", threadId);
 				freeMemHP(globalHPStructure, threadId, first);
 				printf("---- thread = %d trying to free = %u\n", threadId, first);
 				return element;
 			}
 			else {
 				clearHazardPointer(globalHPStructure, threadId);
+				printf("queueDeq: clearing HP of thread %d on failed dequeu\n", threadId);
 				return NULL;
 			}
 		}

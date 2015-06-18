@@ -24,12 +24,13 @@ void deleteSharedQueuePools(SharedQueuePools* pool)
 	pool->numberOfThreads = 0;*/
 }
 
-void* getFromSharedQueuePools(SharedQueuePools* pool, int threadIndex, int secThreadIndex) {
-	SharedQueuePool* queuePool = getSharedQueuePool(pool, threadIndex);
+void* getFromSharedQueuePools(SharedQueuePools* pool, int threadId, int primThreadIndex, int secThreadIndex) {
+	SharedQueuePool* queuePool = getSharedQueuePool(pool, primThreadIndex);
 	Queue *queue = getQueueThread(queuePool->sharedQueuePool, secThreadIndex)->queue;
 	//printf("getFromSQP: threadId = %d, queuePtr = %u\n", threadIndex, queue);
-	QueueElement *oldHead = setHazardPointer(globalHPStructure, secThreadIndex, queue->head);
-	return queueDeq(queue, oldHead, threadIndex);
+	printf("getFRomSQP: setting HP of thread %d for secondary queue head %u\n", threadId, queue->head);
+	QueueElement *oldHead = setHazardPointer(globalHPStructure, threadId, queue->head);
+	return queueDeq(queue, oldHead, threadId);
 }
 
 bool putInSharedQueuePools(SharedQueuePools* pool, int threadIndex, int secThreadIndex, Block* block) {
