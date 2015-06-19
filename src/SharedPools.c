@@ -1,12 +1,12 @@
 #include "SharedPools.h"
-#include "HazardPointer.h"
 #include "Queue.h"
 #include "Block.h"
+#include "HazardPointer.h"
 
 SharedQueuePools* createSharedQueuePools(int threads)
 {
-	SharedQueuePools* pool = (SharedQueuePools*)malloc(sizeof(SharedQueuePools));
-	pool->sharedQueuePools = (SharedQueuePool*)malloc(sizeof(SharedQueuePool) * threads);
+	SharedQueuePools* pool = (SharedQueuePools*)my_malloc(sizeof(SharedQueuePools));
+	pool->sharedQueuePools = (SharedQueuePool*)my_malloc(sizeof(SharedQueuePool) * threads);
 	pool->numberOfThreads = threads;
 
 	for (int i = 0; i < threads; i++) {
@@ -20,7 +20,7 @@ SharedQueuePools* createSharedQueuePools(int threads)
 void deleteSharedQueuePools(SharedQueuePools* pool)
 {
 	/*	stackFree(pool->threads->stack);
-	free(pool->threads);
+	my_free(pool->threads);
 	pool->numberOfThreads = 0;*/
 }
 

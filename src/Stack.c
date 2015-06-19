@@ -1,10 +1,11 @@
 #include "commons.h"
 #include "Stack.h"
+#include "HazardPointer.h"
 
 void stackCreate(Stack *stack, int elementSize)
 {
 	//printf("In stackCreate\n");
-	stack->top = (AtomicStampedReference*) malloc(sizeof(AtomicStampedReference));
+	stack->top = (AtomicStampedReference*) my_malloc(sizeof(AtomicStampedReference));
 	createAtomicStampedReference(stack->top, NULL, 0);
 	stack->elementSize = elementSize;
 	//printf("Inside create stack and size of chunk is %d\n", stack->elementSize);
@@ -27,7 +28,7 @@ bool stackIsEmpty(const Stack *stack)
 
 bool stackPush(Stack *stack, const void* element) {
 	//printf("inside stackPush\n");
-	StackElement *node = (StackElement*)malloc(sizeof(StackElement));
+	StackElement *node = (StackElement*)my_malloc(sizeof(StackElement));
 	//printf("allocated a node\n");
 	node->value = element;
 	//printf("the elementSize in stackPush is %u\n",stack->elementSize);
@@ -57,7 +58,7 @@ void* stackPop(Stack *stack) {
 
 	void* nodeValue = oldTop->value;
 
-	free(oldTop); // OK
+	my_free(oldTop); // OK
 	oldTop = NULL;
 
 	stack->numberOfElements--;
@@ -67,7 +68,7 @@ void* stackPop(Stack *stack) {
 
 bool stackPushOwner(Stack *stack, const void* element, int threadId)
 {
-	StackElement *node = (StackElement*)malloc(sizeof(StackElement));
+	StackElement *node = (StackElement*)my_malloc(sizeof(StackElement));
 	node->value = element;
 	node->next = (StackElement*)stack->top->atomicRef->reference;
 	//printf("stackPushOwner before setting HP\n");
@@ -84,7 +85,7 @@ bool stackPushOwner(Stack *stack, const void* element, int threadId)
 bool stackPushOther(Stack *stack, const void* element, ReferenceIntegerPair* oldTop, int otherThreadId, int threadId)
 {
 
-	StackElement *node = (StackElement*)malloc(sizeof(StackElement));
+	StackElement *node = (StackElement*)my_malloc(sizeof(StackElement));
 	node->value = element;
 	node->next = (StackElement*)stack->top->atomicRef->reference;
 	printf("stackPushOther: threadId:%d going to call CAS\n", threadId);
@@ -106,7 +107,7 @@ void* stackPopOwner(Stack* stack, int threadId)
 	StackElement *copy = (StackElement*)(oldTop->reference);
 	StackElement *nextTopReference = ((StackElement*)(oldTop->reference))->next;
 	if (compareAndSet(stack->top, oldTop->reference, nextTopReference, oldTop->integer, (oldTop->integer+1), threadId)) {
-		free(copy);
+		my_free(copy);
 		return oldValue;
 	}
 	else {
@@ -140,7 +141,7 @@ void* stackPopOther(Stack* stack, int otherThreadId, int threadIndex)
 	if (compareAndSet(stack->top, oldTop->reference, ((StackElement*)oldTop->reference)->next, oldTop->integer, (oldTop->integer + 1), threadIndex)) {
 		void* poppedItem = ((StackElement*)oldTop->reference)->value;
 		printf("stackPopOther: inside CAS \n");
-		free(copy);
+		my_free(copy);
 		return poppedItem;
 	}
 	else

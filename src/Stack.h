@@ -2,7 +2,6 @@
 #define WAITFREEMEMALLOC_SRC_STACK_H_
 
 #include "AtomicStampedReference.h"
-#include "HazardPointer.h"
 
 typedef struct _StackElement {
 	void* value;

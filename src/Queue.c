@@ -1,9 +1,10 @@
 #include "Queue.h"
 #include "Block.h"
+#include "HazardPointer.h"
 
 QueueElement* createNode(void *value) {
 	//printf("createNode blk ptr = %u\n", value);
-	QueueElement *element = (QueueElement*) malloc(sizeof(QueueElement));
+	QueueElement *element = (QueueElement*) my_malloc(sizeof(QueueElement));
 	element->value = value;
 	element->next = NULL;
 	return element;

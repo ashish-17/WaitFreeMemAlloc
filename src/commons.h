@@ -12,6 +12,7 @@
 #include <stdlib.h>
 #include <stdatomic.h>
 #include <string.h>
+#include "utils.h"
 
 
 #endif /* WAITFREEMEMALLOC_SRC_COMMONS_H_ */

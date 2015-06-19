@@ -11,14 +11,14 @@
 
 QueuePool* createQueuePool(int threads, int elementSize)
 {
-	QueuePool* pool = (QueuePool*)malloc(sizeof(QueuePool));
-	pool->threads = (QueueThread*)malloc(sizeof(QueueThread) * threads);
+	QueuePool* pool = (QueuePool*)my_malloc(sizeof(QueuePool));
+	pool->threads = (QueueThread*)my_malloc(sizeof(QueueThread) * threads);
 	pool->numberOfThreads = threads;
 
 	for (int i = 0; i < threads; i++) {
 		//printf("Thread ptr = %u \n", getThread(pool, i));
 		QueueThread* ptr = getQueueThread(pool, i);
-		ptr->queue = (Queue*)malloc(sizeof(Queue));
+		ptr->queue = (Queue*)my_malloc(sizeof(Queue));
 		//printf("Stack ptr = %u\n", ptr->stack);
 		//printf("Inside create pool and size of chunk is %u\n", sizeof(Chunk));
 		queueCreate(ptr->queue, elementSize);
@@ -31,7 +31,7 @@ QueuePool* createQueuePool(int threads, int elementSize)
 void deleteQueuePool(QueuePool* pool)
 {
 	queueFree(pool->threads->queue);
-	free(pool->threads);
+	my_free(pool->threads);
 	pool->numberOfThreads = 0;
 }
 

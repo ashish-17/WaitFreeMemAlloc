@@ -1,4 +1,5 @@
 #include "StackArray.h"
+#include "commons.h"
 
 StackArrayElement* getStackArrayElement(StackArray* stack, int index)
 {
@@ -7,7 +8,7 @@ StackArrayElement* getStackArrayElement(StackArray* stack, int index)
 
 void stackArrayCreate(StackArray *stack, int elementSize, int maxElements) {
 	//printf("In stackCreate\n");
-	stack->elements = (StackArrayElement*) malloc(sizeof(StackArrayElement) * (maxElements + 1));
+	stack->elements = (StackArrayElement*) my_malloc(sizeof(StackArrayElement) * (maxElements + 1));
 	for (int i = 0; i < maxElements + 1; i++) {
 		getStackArrayElement(stack,i)->value = NULL;
 	}
@@ -22,12 +23,12 @@ void stackArrayFree(StackArray *stack) {
 	for (int i = 0; i < stack->maxElements + 1; i++) {
 		StackArrayElement* element = getStackArrayElement(stack, i);
 		if (element != NULL && element->value != NULL) {
-			free(element->value);
+			my_free(element->value);
 			element->value = NULL;
 		}
 	}
 
-	free(stack->elements);
+	my_free(stack->elements);
 	stack->elements = NULL;
 	stack->top = NULL;
 	stack->elementSize = 0;

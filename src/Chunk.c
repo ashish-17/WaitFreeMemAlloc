@@ -1,10 +1,10 @@
 #include "Chunk.h"
 
 Chunk* createChunk(Chunk *chunk, int number) {
-	chunk = (Chunk*) malloc(sizeof(Chunk));
+	chunk = (Chunk*) my_malloc(sizeof(Chunk));
 	//printf("chunk ptr in createChunk= %u\n", chunk);
 	//printf("chunk ptr= %u\n", chunk->stack);
-	chunk->stack = (StackArray*) malloc(sizeof(StackArray));
+	chunk->stack = (StackArray*) my_malloc(sizeof(StackArray));
 	stackArrayCreate(chunk->stack, sizeof(Block), number);
 	//printf("stack ptr= %u\n", chunk->stack);
 	//chunk->numOfBlocks = number;
@@ -29,8 +29,9 @@ Block* getFromChunkUncontended(Chunk *chunk) {
 }
 
 bool putInChunkUncontended(Chunk *chunk, Block *block) {
+	printf("PutInChunkUC\n");
 	bool res = stackArrayPushUncontended(chunk->stack, block);
-	//printf("chunksize %d\n", chunk->stack->numberOfElements);
+	printf("chunksize %d\n", chunk->stack->maxElements);
 	return res;
 }
 

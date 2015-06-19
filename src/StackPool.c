@@ -11,14 +11,14 @@
 
 StackPool* createStackPool(int threads)
 {
-	StackPool* pool = (StackPool*)malloc(sizeof(StackPool));
-	pool->threads = (StackThread*)malloc(sizeof(StackThread) * threads);
+	StackPool* pool = (StackPool*)my_malloc(sizeof(StackPool));
+	pool->threads = (StackThread*)my_malloc(sizeof(StackThread) * threads);
 	pool->numberOfThreads = threads;
 
 	for (int i = 0; i < threads; i++) {
 		//printf("Thread ptr = %u \n", getThread(pool, i));
 		StackThread* ptr = getStackThread(pool, i);
-		ptr->stack = (Stack*)malloc(sizeof(Stack));
+		ptr->stack = (Stack*)my_malloc(sizeof(Stack));
 		//printf("Stack ptr = %u\n", ptr->stack);
 		//printf("Inside create pool and size of chunk is %u\n", sizeof(Chunk));
 		stackCreate(ptr->stack, sizeof(Chunk));
@@ -30,7 +30,7 @@ StackPool* createStackPool(int threads)
 void deleteStackPool(StackPool* pool)
 {
 	stackFree(pool->threads->stack);
-	free(pool->threads);
+	my_free(pool->threads);
 	pool->numberOfThreads = 0;
 }
 

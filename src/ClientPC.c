@@ -4,6 +4,7 @@
 #include <pthread.h>
 # include "Block.h"
 #include "Stack.h"
+#include "HazardPointer.h"
 
 
 #define NUM_THREADS 3   //3   // 3    //6
@@ -83,7 +84,7 @@ void* normalExec(void *threadID) {
 	srand(time(NULL));
 	int totalNumOfOps = randint(50);
 	printf("In thread %d, the totalNumOfOps %d\n", (int)threadId, totalNumOfOps);
-	Stack* stack = (Stack*) malloc(sizeof(Stack));
+	Stack* stack = (Stack*) my_malloc(sizeof(Stack));
 	stackCreate(stack, sizeof(Block));
 
 	while(totalNumOfOps > 0) {
@@ -118,7 +119,7 @@ void* normalExec(void *threadID) {
 }
 
 int main() {
-
+	printf("startung\n");
 	pthread_mutex_init(&the_mutex, NULL);
 	pthread_cond_init(&condc, NULL);		/* Initialize consumer condition variable */
 	pthread_cond_init(&condp, NULL);		/* Initialize producer condition variable */
@@ -128,10 +129,13 @@ int main() {
 
 	//Wrapper wrapper = (Wrapper*) malloc(sizeof(Wrapper));
 	//createWaitFreePool(NUM_BLOCKS, NUM_THREADS, CHUNK_SIZE, NUM_DONATION_STEPS);
-
-	globalHPStructure = (HPStructure*)malloc(sizeof(HPStructure));
+	printf("here...\n");
+	globalHPStructure = (HPStructure*)my_malloc(sizeof(HPStructure));
+	printf("initialised globalSruct\n");
 	hpStructureCreate(globalHPStructure, NUM_THREADS, 10);
+	printf("created globalSruct\n");
 	createWaitFreePool(NUM_BLOCKS, NUM_THREADS, CHUNK_SIZE, NUM_DONATION_STEPS);
+	printf("created wait free pools\n");
 
 	int rc;
 	pthread_t threads[NUM_THREADS];

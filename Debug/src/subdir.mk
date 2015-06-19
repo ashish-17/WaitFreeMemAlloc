@@ -24,7 +24,8 @@ C_SRCS += \
 ../src/StackPool.c \
 ../src/WaitFreePool.c \
 ../src/test.c \
-../src/testMulti.c 
+../src/testMulti.c \
+../src/utils.c 
 
 OBJS += \
 ./src/AtomicStampedReference.o \
@@ -47,7 +48,8 @@ OBJS += \
 ./src/StackPool.o \
 ./src/WaitFreePool.o \
 ./src/test.o \
-./src/testMulti.o 
+./src/testMulti.o \
+./src/utils.o 
 
 C_DEPS += \
 ./src/AtomicStampedReference.d \
@@ -70,7 +72,8 @@ C_DEPS += \
 ./src/StackPool.d \
 ./src/WaitFreePool.d \
 ./src/test.d \
-./src/testMulti.d 
+./src/testMulti.d \
+./src/utils.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes

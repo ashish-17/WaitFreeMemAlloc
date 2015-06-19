@@ -9,6 +9,7 @@
 #include "FullPool.h"
 #include "SharedPools.h"
 #include <assert.h>
+#include "HazardPointer.h"
 
 typedef struct {
 	AtomicStampedReference *helpers;
@@ -63,7 +64,7 @@ Donor* getDonorEntry(int index) {
 
 void createWaitFreePool(int m, int n, int c, int C) {
 
-	memory = (Memory*)malloc(sizeof(Memory));
+	memory = (Memory*)my_malloc(sizeof(Memory));
 
 	int numOfThreads = n;
 	int totalBlocks = m;
@@ -76,9 +77,9 @@ void createWaitFreePool(int m, int n, int c, int C) {
 	memory->localPool = createLocalPool(numOfThreads);
 	memory->freePoolUC = createFreePoolUC(numOfThreads);
 	memory->freePoolC = createFreePoolC(numOfThreads);
-	//printf("created freePoolC\n");
+	printf("created freePoolC\n");
 	memory->sharedQueuePools = createSharedQueuePools(numOfThreads);
-	//printf("created SQP\n");
+	printf("created SQP\n");
 	numOfThreads = n;
 	memory->m = m; memory->n = n; memory->c = c; memory->C = C;
 
@@ -98,7 +99,7 @@ void createWaitFreePool(int m, int n, int c, int C) {
 			putInLocalPool(memory->localPool,j,chunk);
 		}
 	}
-	//printf("set up localPool with chunk\n");
+	printf("set up localPool with chunk\n");
 
 	// Set-up of initial full pools
 	for(int j = 0; j < numOfThreads ; j++) {
@@ -109,26 +110,26 @@ void createWaitFreePool(int m, int n, int c, int C) {
 				blockNumber++;
 				putInChunkUncontended(chunk, block);
 			}
-			//printf("created the chunk for FP\n");
+			printf("created the chunk for FP\n");
 			putInOwnFullPool(memory->fullPool,j,chunk);
 			//printf("fullPoolEmpty[%d] %u %u\n",j, isFullPoolEmpty(memory->fullPool,j), flag);
 		}
 	}
-	//printf("set up FullPools with chunks\n");
+	printf("set up FullPools with chunks\n");
 
 	//numOfThreads = n + 1;
-	memory->announce = (Announce*)malloc(sizeof(Announce));
-	memory->announce->helpers = (AtomicStampedReference*) malloc(sizeof(AtomicStampedReference)*numOfThreads);
+	memory->announce = (Announce*)my_malloc(sizeof(Announce));
+	memory->announce->helpers = (AtomicStampedReference*) my_malloc(sizeof(AtomicStampedReference)*numOfThreads);
 	for(int i = 0; i < numOfThreads; i++) {
 		AtomicStampedReference* helperEntry = getHelperEntry(i);
-		bool* tempBoolObj = (bool*)malloc(sizeof(bool));
+		bool* tempBoolObj = (bool*)my_malloc(sizeof(bool));
 		*tempBoolObj = false;
 		createAtomicStampedReference(helperEntry,tempBoolObj,0);
 	}
 
 	// Set up initial info array
-	memory->info = (Info*)malloc(sizeof(Info));
-	memory->info->donors = (Donor*) malloc(sizeof(Donor)*numOfThreads);
+	memory->info = (Info*)my_malloc(sizeof(Info));
+	memory->info->donors = (Donor*) my_malloc(sizeof(Donor)*numOfThreads);
 	memory->info->numOfDonors = numOfThreads;
 	//memory->info->numOfPassed = 0;
 	for(int i = 0; i < numOfThreads; i++) {
@@ -300,11 +301,11 @@ Chunk* doHelp(int threadId, int threadToBeHelped, Chunk *stolenChunk, ReferenceI
 		assert(globalHPStructure->topPointers[threadId] == 2);
 		if (putInOtherFullPool(memory->fullPool, threadToBeHelped, stolenChunk, oldTop, threadId)) {
 			assert(globalHPStructure->topPointers[threadId] == 1);
-			tempBoolObj = (bool*)malloc(sizeof(bool));
+			tempBoolObj = (bool*)my_malloc(sizeof(bool));
 			*tempBoolObj = false;
 			if (!compareAndSet(getHelperEntry(threadToBeHelped),announceOfThreadToBeHelped->reference, tempBoolObj, announceOfThreadToBeHelped->integer, (announceOfThreadToBeHelped->integer + 1), threadId)) {
 				printf("doHelp: thread = %d, removing HP from annouce\n", threadId);
-				free(tempBoolObj);
+				my_free(tempBoolObj);
 			}
 			return NULL;
 		}
@@ -315,10 +316,10 @@ Chunk* doHelp(int threadId, int threadToBeHelped, Chunk *stolenChunk, ReferenceI
 		assert(globalHPStructure->topPointers[threadId] == 1);
 		printf("doHelp: clearing HP of top thread %d when someone else helped\n", threadId);
 	}
-	tempBoolObj = (bool*)malloc(sizeof(bool));
+	tempBoolObj = (bool*)my_malloc(sizeof(bool));
 	*tempBoolObj = false;
 	if (!compareAndSet(getHelperEntry(threadToBeHelped),announceOfThreadToBeHelped->reference, tempBoolObj, announceOfThreadToBeHelped->integer, (announceOfThreadToBeHelped->integer + 1), threadId)) {
-		free(tempBoolObj);
+		my_free(tempBoolObj);
 	}
 	assert(globalHPStructure->topPointers[threadId] == 0);
 	return stolenChunk;
@@ -414,11 +415,11 @@ bool donate(int threadId, Chunk *chunk) {
 				//getHelperEntry(i)->compareAndSet(...);
 				assert(globalHPStructure->topPointers[threadId] == 1);
 				printf("donate: threadID %d, successfully donated to %d\n", threadId, i);
-				tempBoolObj = (bool*)malloc(sizeof(bool));
+				tempBoolObj = (bool*)my_malloc(sizeof(bool));
 				*tempBoolObj = false;
 				if(!compareAndSet(getHelperEntry(i),announceOfThreadToBeHelped->reference, tempBoolObj, announceOfThreadToBeHelped->integer, (announceOfThreadToBeHelped->integer + 1), threadId)) {
 					//clearHazardPointer(globalHPStructure, threadId);
-					free(tempBoolObj);
+					my_free(tempBoolObj);
 				}
 				assert(globalHPStructure->topPointers[threadId] == 0);
 				getDonorEntry(threadId)->lastDonated = i;
@@ -426,11 +427,11 @@ bool donate(int threadId, Chunk *chunk) {
 			}
 			printf("donate: threadID %d, donation to %d failed: someone else helped\n", threadId, i);
 			//getHelperEntry(i)->compareAndSet(...);
-			tempBoolObj = (bool*)malloc(sizeof(bool));
+			tempBoolObj = (bool*)my_malloc(sizeof(bool));
 			*tempBoolObj = false;
 			if (!compareAndSet(getHelperEntry(i),announceOfThreadToBeHelped->reference, tempBoolObj, announceOfThreadToBeHelped->integer, (announceOfThreadToBeHelped->integer + 1), threadId)) {
 				//clearHazardPointer(globalHPStructure, threadId);
-				free(tempBoolObj);
+				my_free(tempBoolObj);
 			}
 			assert(globalHPStructure->topPointers[threadId] == 0);
 		}

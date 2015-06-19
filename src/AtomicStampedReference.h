@@ -1,7 +1,6 @@
 #include "stdbool.h"
 #include "commons.h"
 #include "stdlib.h"
-#include "HazardPointer.h"
 
 typedef struct {
 	void* reference;

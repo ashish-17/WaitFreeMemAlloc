@@ -14,6 +14,7 @@
 #include "Block.h"
 #include "StackPool.h"
 #include "CircularQueue.h"
+#include "commons.h"
 
 /*void testStack() {
 	Stack * stack = (Stack*)malloc(sizeof(Stack));
@@ -356,6 +357,23 @@ void testCircularQueue() {
 		else
 			printf("queueIsEmpty\n");
 	}
+}
+
+
+typedef struct
+{
+ int a;
+}abc;
+
+
+int main()
+{
+ abc * x = (abc*)my_malloc(sizeof(abc)*2);
+ x->a = 1;
+ (x+1)->a = 2;
+ printf("%d %d\n", x->a, (x+1)->a);
+ my_free(x);
+ return 0;
 }
 */
 int stmain() {

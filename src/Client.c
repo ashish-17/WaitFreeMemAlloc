@@ -27,7 +27,7 @@ void* tester(void *threadId) {
 	srand(time(NULL));
 	int totalNumOfOps = randint(50);
 	printf("In thread %d, the totalNumOfOps %d\n", (int)threadId, totalNumOfOps);
-	Stack* stack = (Stack*) malloc(sizeof(Stack));
+	Stack* stack = (Stack*) my_malloc(sizeof(Stack));
 	stackCreate(stack, sizeof(Block));
 
 	while(totalNumOfOps > 0) {
@@ -63,8 +63,8 @@ void* tester(void *threadId) {
 
 int tymain() {
 
-	//Wrapper wrapper = (Wrapper*) malloc(sizeof(Wrapper));
-	globalHPStructure = (HPStructure*)malloc(sizeof(HPStructure));
+	//Wrapper wrapper = (Wrapper*) my_malloc(sizeof(Wrapper));
+	globalHPStructure = (HPStructure*)my_malloc(sizeof(HPStructure));
 	hpStructureCreate(globalHPStructure, NUM_THREADS, 10);
 	createWaitFreePool(NUM_BLOCKS, NUM_THREADS, CHUNK_SIZE, NUM_DONATION_STEPS);
 

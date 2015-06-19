@@ -2,11 +2,16 @@
 
 
 CircularQueueElement * getCircularQueueElement(CircularQueue *queue, int index) {
-	return (queue->baseAddress + index);
+	printf("sizeof CircularQueueElemnt = %d\n", sizeof(CircularQueueElement));
+	printf("Trying to access %d th element of Circular Queue from address %u (%d)\n", index, queue->baseAddress, pthread_self());
+	CircularQueueElement *ptr = (queue->baseAddress + index);
+	printf("Success(%u) to access %d th element of Circular Queue from address %u (%d)\n", ptr, index, queue->baseAddress, pthread_self());
+	ptr->value = NULL;
+	return ptr;
 }
 
 void circularQueueCreate(CircularQueue *queue, int elementSize, int noOfElements) {
-	queue->baseAddress = (CircularQueueElement*) malloc(sizeof(CircularQueueElement) * noOfElements);
+	queue->baseAddress = (CircularQueueElement*) my_malloc(sizeof(CircularQueueElement) * noOfElements);
 	queue->head = queue->tail = -1;
 	queue->elementSize = elementSize;
 	queue->maxNumberOfElements = noOfElements;

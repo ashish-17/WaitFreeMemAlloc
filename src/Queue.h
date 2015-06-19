@@ -3,7 +3,6 @@
 
 #include <stdatomic.h>
 #include "commons.h"
-#include "HazardPointer.h"
 
 typedef struct _QueueElement {
 	void* value;

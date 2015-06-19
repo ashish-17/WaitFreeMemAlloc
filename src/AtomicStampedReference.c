@@ -1,16 +1,17 @@
 #include "AtomicStampedReference.h"
 #include "commons.h"
 #include <stdatomic.h>
+#include "HazardPointer.h"
 
 ReferenceIntegerPair* createReferenceIntegerPair(void* ref, int i) {
-	ReferenceIntegerPair* pair = (ReferenceIntegerPair*)malloc(sizeof(ReferenceIntegerPair)); //added.. shouldn't we first free memory pointed by pair
+	ReferenceIntegerPair* pair = (ReferenceIntegerPair*)my_malloc(sizeof(ReferenceIntegerPair)); //added.. shouldn't we first free memory pointed by pair
 	pair->reference = ref; pair->integer = i;
 	return pair;
 }
 
 void createAtomicStampedReference(AtomicStampedReference* current, void* initialRef, int initialStamp) {
 	//printf("In createAtomicStampedReference\n");
-	current->atomicRef = (ReferenceIntegerPair*)malloc(sizeof(ReferenceIntegerPair));
+	current->atomicRef = (ReferenceIntegerPair*)my_malloc(sizeof(ReferenceIntegerPair));
 	current->atomicRef->reference = initialRef;
 	current->atomicRef->integer = initialStamp;
 	//printf("leaving createAtomicStampedReference\n");
@@ -61,7 +62,7 @@ void set(AtomicStampedReference* current, void* newReference, int newStamp) {
 		/*if(current->atomicRef->reference != NULL) {
 			free(current->atomicRef->reference);
 		}*/
-		free(current->atomicRef);
+		my_free(current->atomicRef);
 		current->atomicRef = createReferenceIntegerPair(newReference, newStamp);
 		current->atomicRef->reference = newReference;
 		current->atomicRef->integer = newStamp;

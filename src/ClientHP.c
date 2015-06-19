@@ -14,7 +14,7 @@
 void* tester1(void *threadId) {
 	printf("In thread %d\n", (int)threadId);
 	for (int i = 1; i <= ARRAY_LOOP_CTR; i++) {
-		int *element = (int*)malloc(sizeof(int));
+		int *element = (int*)my_malloc(sizeof(int));
 		printf("thread %d allocated element ptr = %u\n", (int*)threadId, element);
 		freeMemHP(globalHPStructure,(int*)threadId,element);
 	}
@@ -22,7 +22,7 @@ void* tester1(void *threadId) {
 
 int sdmain() {
 
-	globalHPStructure = (HPStructure*)malloc(sizeof(HPStructure));
+	globalHPStructure = (HPStructure*)my_malloc(sizeof(HPStructure));
 	hpStructureCreate(globalHPStructure, NUM_THREADS, 1);
 	printf("successfully initialized\n");
 	int rc;
