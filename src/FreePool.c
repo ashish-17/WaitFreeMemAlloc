@@ -37,8 +37,8 @@ QueuePool* createFreePoolC(int numThreads) {
 	return freePool;
 }
 
-Chunk* getFromFreePoolC(QueuePool* pool, int threadIndex, QueueElement *oldQueueHead) {
-	QueueThread* thread = getQueueThread(pool, threadIndex);
+Chunk* getFromFreePoolC(QueuePool* pool, int threadIndex, int primThread, QueueElement *oldQueueHead) {
+	QueueThread* thread = getQueueThread(pool, primThread);
 	return queueDeq(thread->queue, oldQueueHead, threadIndex);
 }
 

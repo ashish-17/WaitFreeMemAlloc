@@ -8,6 +8,7 @@
 #include "FreePool.h"
 #include "FullPool.h"
 #include "SharedPools.h"
+#include <assert.h>
 
 typedef struct {
 	AtomicStampedReference *helpers;
@@ -194,10 +195,14 @@ Block* allocate(int threadId, bool toBePassed) {
 					//if(announceOfThreadToBeHelped->needHelp) {
 					if(*(bool*)announceOfThreadToBeHelped->reference) {
 						printf("allocate: threadId = %d: going to help thread %d\n", threadId, threadToBeHelped);
+						assert(globalHPStructure->topPointers[threadId] == 1);
 						stolenChunk = doHelp(threadId, threadToBeHelped, stolenChunk, announceOfThreadToBeHelped);
+						assert(globalHPStructure->topPointers[threadId] == 0);
 					}
 					else {
+						assert(globalHPStructure->topPointers[threadId] == 1);
 						clearHazardPointer(globalHPStructure, threadId);
+						assert(globalHPStructure->topPointers[threadId] == 0);
 					}
 				}
 				if (stolenChunk != NULL) {
@@ -211,7 +216,9 @@ Block* allocate(int threadId, bool toBePassed) {
 				//printf("allocate: threadId = %d, isFullPoolEmpty = %d\n", threadId, isFullPoolEmpty(memory->fullPool,threadId));
 				chunk = getFromOwnFullPool(memory->fullPool,threadId);
 				//printf("allocate: threadId = %d, after removing a chunk, isFullPoolEmpty = %d\n", threadId, isFullPoolEmpty(memory->fullPool,threadId));
+				assert(globalHPStructure->topPointers[threadId] == 0);
 				if (chunk != NULL) {
+					assert(globalHPStructure->topPointers[threadId] == 0);
 					if (getDonorEntry(threadId)->noOfOps != memory->C) {
 						//printf("allocate: threadId = %d: noOfOps = %d\n", threadId,getDonorEntry(threadId)->noOfOps);
 						getDonorEntry(threadId)->noOfOps++;
@@ -221,6 +228,7 @@ Block* allocate(int threadId, bool toBePassed) {
 						return block;
 					}
 					else {
+						assert(globalHPStructure->topPointers[threadId] == 0);
 						getDonorEntry(threadId)->noOfOps = 0;
 						if (!donate(threadId, chunk)) {
 							putInLocalPool(memory->localPool, threadId, chunk);
@@ -242,13 +250,14 @@ Block* allocate(int threadId, bool toBePassed) {
 
 //Chunk* doHelp(int threadToBeHelped, Chunk *stolenChunk, Helper *announceOfThreadToBeHelped) {
 Chunk* doHelp(int threadId, int threadToBeHelped, Chunk *stolenChunk, ReferenceIntegerPair *announceOfThreadToBeHelped) {
-
+	assert(globalHPStructure->topPointers[threadId] == 1);
 	int i = 0;
 	printf("doHelp: threadId: %d\n",threadId);
 	//printf("doHelp: threadId: %d, current annTS: %d, old annTS: %d\n",threadId,getHelperEntry(threadToBeHelped)->atomicRef->integer,announceOfThreadToBeHelped->atomicRef->integer);
 	//if (getHelperEntry(threadToBeHelped)->timestamp != announceOfThreadToBeHelped->timestamp)
 	if (getHelperEntry(threadToBeHelped)->atomicRef->integer != announceOfThreadToBeHelped->integer) {
 		printf("doHelp: threadId %d,somebody already helped threadToBeHelped = %d\n",threadId, threadToBeHelped);
+		clearHazardPointer(globalHPStructure, threadId);
 		return stolenChunk;
 	}
 
@@ -258,6 +267,7 @@ Chunk* doHelp(int threadId, int threadToBeHelped, Chunk *stolenChunk, ReferenceI
 		printf("doHelp: threadId %d, stolenChunk is null\n", threadId);
 		//printf("doHelp: threadId %d, top reference = %u\n", threadId, getStackThread(memory->fullPool, threadToBeHelped)->stack->top->atomicRef->reference);
 		//printf("doHelp: threadId %d, current annTS = %d, old annTS = %d\n",threadId, getHelperEntry(threadToBeHelped)->atomicRef->integer, announceOfThreadToBeHelped->atomicRef->integer);
+		assert(globalHPStructure->topPointers[threadId] == 1);
 		while ((getStackThread(memory->fullPool, threadToBeHelped)->stack->top->atomicRef->reference == NULL) && (getHelperEntry(threadToBeHelped)->atomicRef->integer == announceOfThreadToBeHelped->integer)) {
 			printf("doHelp: threadId %d, inside while\n",threadId);
 			stolenChunk = getFromOtherFullPool(memory->fullPool, i, threadId);
@@ -269,7 +279,10 @@ Chunk* doHelp(int threadId, int threadToBeHelped, Chunk *stolenChunk, ReferenceI
 			//printf("doHelp: dtealAttempt failed\n");
 			i = (i + 1) % memory->n;
 			if (i == 0) {
+				assert(globalHPStructure->topPointers[threadId] == 1);
 				stolenChunk = moveFromSharedQueuePools(threadId);
+				printf("doHelp: treadId = %d, topPtr value = %d\n", threadId, globalHPStructure->topPointers[threadId]);
+				assert(globalHPStructure->topPointers[threadId] == 1);
 				//printf("allocate: threadID : %d, returned from moveFreomSQP with stolenChunk %u\n", threadId, stolenChunk);
 				if (stolenChunk != NULL) {
 					break;
@@ -278,33 +291,41 @@ Chunk* doHelp(int threadId, int threadToBeHelped, Chunk *stolenChunk, ReferenceI
 			}
 		}
 	}
+	assert(globalHPStructure->topPointers[threadId] == 1);
 	ReferenceIntegerPair *oldTop = setHazardPointer(globalHPStructure, threadId, getStackThread(memory->fullPool, threadToBeHelped)->stack->top->atomicRef);
 	printf("doHelp: setting HP of thread %d for oldTop %u\n", threadId, oldTop);
+	assert(globalHPStructure->topPointers[threadId] == 2);
 	bool *tempBoolObj;
 	if ((getStackThread(memory->fullPool, threadToBeHelped)->stack->top->atomicRef->reference == NULL) && (getHelperEntry(threadToBeHelped)->atomicRef->integer == announceOfThreadToBeHelped->integer)) {
+		assert(globalHPStructure->topPointers[threadId] == 2);
 		if (putInOtherFullPool(memory->fullPool, threadToBeHelped, stolenChunk, oldTop, threadId)) {
+			assert(globalHPStructure->topPointers[threadId] == 1);
 			tempBoolObj = (bool*)malloc(sizeof(bool));
 			*tempBoolObj = false;
 			if (!compareAndSet(getHelperEntry(threadToBeHelped),announceOfThreadToBeHelped->reference, tempBoolObj, announceOfThreadToBeHelped->integer, (announceOfThreadToBeHelped->integer + 1), threadId)) {
+				printf("doHelp: thread = %d, removing HP from annouce\n", threadId);
 				free(tempBoolObj);
 			}
 			return NULL;
 		}
 	}
 	else {
+		assert(globalHPStructure->topPointers[threadId] == 2);
 		clearHazardPointer(globalHPStructure, threadId);
-		printf("doHelp: clearing HP of thread %d when someone else helped\n", threadId);
+		assert(globalHPStructure->topPointers[threadId] == 1);
+		printf("doHelp: clearing HP of top thread %d when someone else helped\n", threadId);
 	}
 	tempBoolObj = (bool*)malloc(sizeof(bool));
 	*tempBoolObj = false;
 	if (!compareAndSet(getHelperEntry(threadToBeHelped),announceOfThreadToBeHelped->reference, tempBoolObj, announceOfThreadToBeHelped->integer, (announceOfThreadToBeHelped->integer + 1), threadId)) {
 		free(tempBoolObj);
 	}
+	assert(globalHPStructure->topPointers[threadId] == 0);
 	return stolenChunk;
 }
 
 void freeMem(int threadId, Block *block) {
-
+	assert(globalHPStructure->topPointers[threadId] == 0);
 	//printf("freeMem: threadID = %d, entered freeMem\n", threadId);
 	Chunk *chunk;
 	if (block->threadId != threadId) {
@@ -367,17 +388,19 @@ void freeMem(int threadId, Block *block) {
 			}
 		}
 	}
+	assert(globalHPStructure->topPointers[threadId] == 0);
 }
 
 bool donate(int threadId, Chunk *chunk) {
 	printf("donate: threadID %d\n", threadId);
 	int i = (getDonorEntry(threadId)->lastDonated + 1) % (memory->n);
 	bool *tempBoolObj;
-
+	assert(globalHPStructure->topPointers[threadId] == 0);
 	do {
 		printf("donate: threadID %d, trying to donate to %d\n", threadId, i);
 		ReferenceIntegerPair *announceOfThreadToBeHelped = setHazardPointer(globalHPStructure, threadId, getHelperEntry(i)->atomicRef);
 		ReferenceIntegerPair *oldTop = setHazardPointer(globalHPStructure, threadId, getStackThread(memory->fullPool, i)->stack->top->atomicRef);
+		assert(globalHPStructure->topPointers[threadId] == 2);
 		printf("donate: setting HP of thread %d for oldTop %u\n", threadId, oldTop);
 		//ReferenceIntegerPair *oldTop = (ReferenceIntegerPair*)getHazardPointer(globalHPStructure, threadId);
 		//AtomicStampedReference* oldTop = getStackThread(memory->fullPool, i)->stack->top;
@@ -389,6 +412,7 @@ bool donate(int threadId, Chunk *chunk) {
 			printf("donate: threadID %d, %d needed help\n", threadId, i);
 			if (putInOtherFullPool(memory->fullPool, i, chunk, oldTop, threadId)) {
 				//getHelperEntry(i)->compareAndSet(...);
+				assert(globalHPStructure->topPointers[threadId] == 1);
 				printf("donate: threadID %d, successfully donated to %d\n", threadId, i);
 				tempBoolObj = (bool*)malloc(sizeof(bool));
 				*tempBoolObj = false;
@@ -396,6 +420,7 @@ bool donate(int threadId, Chunk *chunk) {
 					//clearHazardPointer(globalHPStructure, threadId);
 					free(tempBoolObj);
 				}
+				assert(globalHPStructure->topPointers[threadId] == 0);
 				getDonorEntry(threadId)->lastDonated = i;
 				return true;
 			}
@@ -407,6 +432,7 @@ bool donate(int threadId, Chunk *chunk) {
 				//clearHazardPointer(globalHPStructure, threadId);
 				free(tempBoolObj);
 			}
+			assert(globalHPStructure->topPointers[threadId] == 0);
 		}
 		else {
 			clearHazardPointer(globalHPStructure, threadId);
@@ -414,12 +440,14 @@ bool donate(int threadId, Chunk *chunk) {
 			printf("donate: clearing HP of thread %d donation was not needed\n", threadId);
 		}
 		i = (i + 1) % (memory->n);
+		assert(globalHPStructure->topPointers[threadId] == 0);
 	} while(i != (getDonorEntry(threadId)->lastDonated + 1) % (memory->n));
 	printf("returning from donate\n");
 	return false;
 }
 
 Chunk* moveFromSharedQueuePools(int threadId) {
+	assert(globalHPStructure->topPointers[threadId] == 1);
 	printf("moveFromSQP: threadID: %d\n", threadId);
 	int primThread = 0, secThread = 0;
 	Block *block;
@@ -427,8 +455,10 @@ Chunk* moveFromSharedQueuePools(int threadId) {
 	QueueElement *oldQueueHead;
 	for (primThread = 0; primThread < memory->n; primThread++) {
 		for (secThread = 0; secThread < memory->n; secThread++) {
-			//printf("moveFromSQP: threadID: %d primThread: %d, secThread: %d\n", threadId, primThread, secThread);
+			assert(globalHPStructure->topPointers[threadId] == 1);
+			printf("moveFromSQP: threadID: %d primThread: %d, secThread: %d\n", threadId, primThread, secThread);
 			block = getFromSharedQueuePools(memory->sharedQueuePools, threadId, primThread, secThread);
+			assert(globalHPStructure->topPointers[threadId] == 1);
 			//printf("moveFromSQP: threadID: %d block ptr : %u\n", threadId, block);
 			if (block != NULL) {
 				printf("block was not null\n");
@@ -437,12 +467,14 @@ Chunk* moveFromSharedQueuePools(int threadId) {
 				//printf("moveFromSQP: nextPtr = %u\n", getQueueThread(memory->freePoolC, primThread)->queue->head->next);
 				//printf("moveFromSQP: chunkPtr = %u\n", getQueueThread(memory->freePoolC, primThread)->queue->head->next->value);
 				oldQueueHead = setHazardPointer(globalHPStructure, threadId, getQueueThread(memory->freePoolC, primThread)->queue->head);
+				assert(globalHPStructure->topPointers[threadId] == 2);
 				printf("moveFromSQP: setting HP of thread %d for oldQueueHEad %u\n", threadId, oldQueueHead);
 				//getHazardPointer(globalHPStructure, threadId);
 				if (!isQueueEmpty(getQueueThread(memory->freePoolC, primThread)->queue)) {
 					if (chunkHasSpace(oldQueueHead->next->value)) {
 						if (putInChunkContended(getQueueThread(memory->freePoolC, primThread)->queue->head->next->value, block)) {
 							clearHazardPointer(globalHPStructure, threadId);
+							assert(globalHPStructure->topPointers[threadId] == 1);
 							printf("moveFromSQP: clearing HP of thread %d block was inserted in chunk\n", threadId);
 							continue; // now go to next secThread
 						}
@@ -451,10 +483,13 @@ Chunk* moveFromSharedQueuePools(int threadId) {
 							clearHazardPointer(globalHPStructure, threadId);
 							printf("moveFromSQP: clearing HP of thread %d block was not inserted in chunk\n", threadId);
 							putInSharedQueuePools(memory->sharedQueuePools, primThread, threadId, block);
+							assert(globalHPStructure->topPointers[threadId] == 1);
 						}
 					}
 					else { //chunk doesn't have space.try moving the chunk to fullPool
-						chunk = getFromFreePoolC(memory->freePoolC, primThread, oldQueueHead);
+						assert(globalHPStructure->topPointers[threadId] == 2);
+						chunk = getFromFreePoolC(memory->freePoolC, threadId, primThread, oldQueueHead);
+						assert(globalHPStructure->topPointers[threadId] == 1);
 						if (chunk != NULL) {
 							printf("moveFromSQP: moving block %d to SQP %d\n",block->memBlock, threadId);
 							putInSharedQueuePools(memory->sharedQueuePools, primThread, threadId, block);
@@ -464,17 +499,20 @@ Chunk* moveFromSharedQueuePools(int threadId) {
 							putInSharedQueuePools(memory->sharedQueuePools, primThread, threadId, block);
 							// do sth with the removed block
 						}
+						assert(globalHPStructure->topPointers[threadId] == 1);
 					}
 				}
 				else {
 					clearHazardPointer(globalHPStructure, threadId);
 					printf("moveFromSQP: clearing HP of thread %d queue wasn't empty\n", threadId);
+					assert(globalHPStructure->topPointers[threadId] == 1);
 					putInSharedQueuePools(memory->sharedQueuePools, primThread, threadId, block);
 				}
 			}
 			else {
 				//clearHazardPointer(globalHPStructure, threadId);
-				printf("block was null\n");
+				printf("moveFromSQP: threadID = %d threadblock was null\n", threadId);
+				assert(globalHPStructure->topPointers[threadId] == 1);
 				//printf("moveFromSQP: queuePtr = %u\n", getQueueThread(memory->freePoolC, primThread)->queue);
 				//printf("moveFromSQP: HeadPtr = %u\n", getQueueThread(memory->freePoolC, primThread)->queue->head);
 				//printf("moveFromSQP: nextPtr = %u\n", getQueueThread(memory->freePoolC, primThread)->queue->head->next);
@@ -484,8 +522,9 @@ Chunk* moveFromSharedQueuePools(int threadId) {
 				//oldQueueHead = getHazardPointer(globalHPStructure, threadId);
 				if (!isQueueEmpty(getQueueThread(memory->freePoolC, primThread)->queue)) {
 					if (!chunkHasSpace(oldQueueHead->next->value)) {
-						//printf("moveFromSMP: threadId = %d block was null but chunk was full\n", threadId);
-						chunk = getFromFreePoolC(memory->freePoolC, primThread, oldQueueHead);
+						printf("moveFromSMP: threadId = %d block was null but chunk was full\n", threadId);
+						chunk = getFromFreePoolC(memory->freePoolC, threadId, primThread, oldQueueHead);
+						assert(globalHPStructure->topPointers[threadId] == 1);
 						if (chunk != NULL) {
 							return chunk;
 						}
@@ -499,9 +538,12 @@ Chunk* moveFromSharedQueuePools(int threadId) {
 					clearHazardPointer(globalHPStructure, threadId);
 					printf("moveFromSQP: clearing HP of thread %d block block was nnnnull\n", threadId);
 				}
+				assert(globalHPStructure->topPointers[threadId] == 1);
 			}
 			printf("moveFromSQP: threadID: %d came here\n", threadId);
+			assert(globalHPStructure->topPointers[threadId] == 1);
 		}
 	}
+	assert(globalHPStructure->topPointers[threadId] == 1);
 	return NULL;
 }

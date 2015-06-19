@@ -34,7 +34,7 @@ bool compareAndSet(AtomicStampedReference* current,
 					newStamp == current->atomicRef->integer)||
 					atomic_compare_exchange_strong(&current->atomicRef, &current->atomicRef, createReferenceIntegerPair(newReference, newStamp)))); //not sure what we want
 	if (result) {
-		//printf("CAS: trying to clearHP\n");
+		printf("CAS: trying to clearHP\n");
 		clearHazardPointer(globalHPStructure, threadId);
 		printf("CAS: clearing HP of thread %d on CAS successful\n", threadId);
 		//free(copy->reference);

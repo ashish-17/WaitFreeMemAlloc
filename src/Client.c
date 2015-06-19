@@ -12,7 +12,7 @@
 #define CHUNK_SIZE 2
 #define NUM_DONATION_STEPS 2
 
-HPStructure *globalHPStructure = NULL;
+//HPStructure *globalHPStructure = NULL;
 
 // The actual tester
 void* tester(void *threadId) {
@@ -61,7 +61,7 @@ void* tester(void *threadId) {
 	pthread_exit(NULL);
 }
 
-int main() {
+int tymain() {
 
 	//Wrapper wrapper = (Wrapper*) malloc(sizeof(Wrapper));
 	globalHPStructure = (HPStructure*)malloc(sizeof(HPStructure));

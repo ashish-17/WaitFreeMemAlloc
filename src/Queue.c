@@ -107,4 +107,7 @@ void* queueDeq(Queue *queue, QueueElement *oldQueueHead, int threadId) {
 			}
 		}
 	}
+	else {
+		clearHazardPointer(globalHPStructure, threadId);
+	}
 }

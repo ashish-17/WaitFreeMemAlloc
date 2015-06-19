@@ -69,7 +69,7 @@ void hpStructureCreate(HPStructure *hpStructure, int noOfThreads, int noOfHP) {
 
 void freeMemHP(HPStructure *hpStructure, int threadId, void *ptr) {
 	bool flag = circularQueueEnq(getFreeQueue(hpStructure->freeQueues, threadId)->queue, ptr);
-	//printf("threadId = %d enqueue was successful = %u \n", threadId, flag);
+	printf("freeMemHP: threadId = %d enqueue was successful = %u \n", threadId, flag);
 	void* node = NULL;
 	while (node == NULL) {
 		//printf("came here\n");
@@ -83,7 +83,7 @@ void freeMemHP(HPStructure *hpStructure, int threadId, void *ptr) {
 			inspect = setMark(inspect, 1);
 		}
 		node = circularQueueDeq(getFreeQueue(hpStructure->freeQueues, threadId)->queue);
-		printf("threadId = %d nodePtr = %u dequeued\n", threadId, node);
+		printf("freeMemHp: threadId = %d nodePtr = %u dequeued\n", threadId, node);
 		if (node == NULL) {
 			//printf("threadId = %d node dequeued was null\n", threadId);
 			return;
@@ -116,6 +116,7 @@ void* getHazardPointer(HPStructure *hpStructure, int threadId) {
 }
 
 void clearHazardPointer(HPStructure *hpStructure, int threadId) {
+	printf("clearHP\n");
 	printf("clearHP: thread = %d, topPointer = %d\n", threadId, hpStructure->topPointers[threadId]);
 	assert(hpStructure->topPointers[threadId] > 0);
 	hpStructure->topPointers[threadId]--;

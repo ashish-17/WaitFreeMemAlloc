@@ -6,12 +6,12 @@
 #include "Stack.h"
 
 
-#define NUM_THREADS 6   // 3
-#define NUM_BLOCKS 36   // 24
+#define NUM_THREADS 3   //3   // 3    //6
+#define NUM_BLOCKS  18    //18   // 24   //36
 #define CHUNK_SIZE 2
 #define NUM_DONATION_STEPS 2
 #define NUM_PRODUCERS 2
-#define NUM_NORMAL_THREADS 2
+#define NUM_NORMAL_THREADS 0
 
 
 #define MAX 10000000000			/* Numbers to produce */
@@ -19,12 +19,14 @@ pthread_mutex_t the_mutex[NUM_THREADS];
 pthread_cond_t condc[NUM_THREADS], condp[NUM_THREADS];
 Block* buffer[NUM_THREADS];
 
+HPStructure *globalHPStructure = NULL;
+
 void* producer(void *threadID) {
 	int threadId = (int*) threadID;
 
 	srand(time(NULL));
 
-	for (int i = 1; i <= NUM_BLOCKS + 2; i++) {
+	for (int i = 1; i <= NUM_BLOCKS + 50; i++) {
 		Block* block = allocate(threadID, 1);
 		int con;
 
@@ -115,7 +117,7 @@ void* normalExec(void *threadID) {
 	pthread_exit(NULL);
 }
 
-int sotmain() {
+int main() {
 
 	pthread_mutex_init(&the_mutex, NULL);
 	pthread_cond_init(&condc, NULL);		/* Initialize consumer condition variable */
@@ -125,6 +127,10 @@ int sotmain() {
 	}
 
 	//Wrapper wrapper = (Wrapper*) malloc(sizeof(Wrapper));
+	//createWaitFreePool(NUM_BLOCKS, NUM_THREADS, CHUNK_SIZE, NUM_DONATION_STEPS);
+
+	globalHPStructure = (HPStructure*)malloc(sizeof(HPStructure));
+	hpStructureCreate(globalHPStructure, NUM_THREADS, 10);
 	createWaitFreePool(NUM_BLOCKS, NUM_THREADS, CHUNK_SIZE, NUM_DONATION_STEPS);
 
 	int rc;
