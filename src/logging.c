@@ -31,7 +31,7 @@ void get_system_date(SystemDate *mdate)
 
 void log_msg(char* msg, ...)
 {
-	static char output[MAX_MSG_SIZE];
+	char output[MAX_MSG_SIZE];
 	char string[MAX_MSG_SIZE];
 	SystemDate mdate;
 

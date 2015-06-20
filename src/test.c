@@ -387,7 +387,7 @@ void testCircularQueue() {
 }
 
 
- */
+
 int main() {
 	log_msg("hello world");
 	log_msg("integer %d", 2);
@@ -403,7 +403,7 @@ int main() {
 	log_msg_epilog("integer %d", 2);
 	log_msg_epilog("int - %d, string %s", 1, "lol");
 }
-
+*/
 int stmain() {
 
 	printf("hello world\n");
