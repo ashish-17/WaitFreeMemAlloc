@@ -3,10 +3,14 @@
 
 StackArrayElement* getStackArrayElement(StackArray* stack, int index)
 {
-	return (stack->elements + index);
+	log_msg_prolog("getStackArrayElement");
+	StackArrayElement* ptr = (stack->elements + index);
+	log_msg_epilog("getStackArrayElement");
+	return ptr;
 }
 
 void stackArrayCreate(StackArray *stack, int elementSize, int maxElements) {
+	log_msg_prolog("stackArrayCreate");
 	//printf("In stackCreate\n");
 	stack->elements = (StackArrayElement*) my_malloc(sizeof(StackArrayElement) * (maxElements + 1));
 	for (int i = 0; i < maxElements + 1; i++) {
@@ -17,9 +21,11 @@ void stackArrayCreate(StackArray *stack, int elementSize, int maxElements) {
 	//printf("Inside create stack and size of chunk is %d\n", stack->elementSize);
 	stack->maxElements = maxElements;
 	//printf("leaving stackCreate\n");
+	log_msg_epilog("stackArrayCreate");
 }
 
 void stackArrayFree(StackArray *stack) {
+	log_msg_prolog("stackArrayFree");
 	for (int i = 0; i < stack->maxElements + 1; i++) {
 		StackArrayElement* element = getStackArrayElement(stack, i);
 		if (element != NULL && element->value != NULL) {
@@ -33,99 +39,106 @@ void stackArrayFree(StackArray *stack) {
 	stack->top = NULL;
 	stack->elementSize = 0;
 	stack->maxElements = 0;
+	log_msg_epilog("stackArrayFree");
 }
 
 bool stackArrayIsEmpty(const StackArray *stack) {
+	log_msg_prolog("stackArrayIsEmpty");
 	//return (stack->top == NULL);
-	return (stack->top == getStackArrayElement(stack, 0));
+	bool flag = (stack->top == getStackArrayElement(stack, 0));
+	log_msg_epilog("stackArrayIsEmpty");
+	return flag;
 }
 
 bool StackArrayIsFull(const StackArray *stack) {
-	return (stack->top == getStackArrayElement(stack, stack->maxElements));
+	log_msg_prolog("StackArrayIsFull");
+	bool flag = (stack->top == getStackArrayElement(stack, stack->maxElements));
 	//return (stack->numberOfElements == stack->maxElements);
+	log_msg_epilog("StackArrayIsFull");
+	return flag;
 }
 
 bool stackArrayPushUncontended(StackArray *stack, const void* element) {
-
+	log_msg_prolog("stackArrayPushUncontended");
+	bool flag;
 	if (StackArrayIsFull(stack)) {
-		return false;
+		flag = false;
 	}
-
-	stack->top->value = element;
-	stack->top++;
-	return true;
+	else {
+		stack->top->value = element;
+		stack->top++;
+		flag = true;
+	}
+	log_msg_epilog("stackArrayPushUncontended");
+	return flag;
 }
 
 void* stackArrayPopUncontended(StackArray *stack) {
+	log_msg_prolog("stackArrayPopUncontended");
+	void *ptr = NULL;
 	if (stackArrayIsEmpty(stack)) {
-		return NULL;
+		ptr = NULL;
 	}
-	stack->top--;
-	void *element = stack->top->value;
-	stack->top->value = NULL;
-
-	return element;
+	else {
+		stack->top--;
+		void *element = stack->top->value;
+		stack->top->value = NULL;
+		ptr = element;
+	}
+	log_msg_epilog("stackArrayPopUncontended");
+	return ptr;
 }
 
 bool stackArrayPushContended(StackArray *stack, const void* element) {
-
+	log_msg_prolog("stackArrayPushContended");
+	bool flag = false;
 	if (StackArrayIsFull(stack)) {
 		printf("stack array is full\n");
-		return false;
-	}
-	void *nullptr = NULL;
-	/*if (stack->top == NULL) { // * ABA problem * might have to change top into AtomicStampedReference
-		//printf("set top to stackArray the first time \n");
-		atomic_compare_exchange_strong(&stack->top, &nullptr, stack->elements);
-		//printf("stack->top = %u, stack->elements = %u \n", stack->top, stack->elements);
-	}
-	 */
-	StackArrayElement *oldTop = stack->top;
-	//StackArrayElement *newTop = NULL;
-	if (oldTop->value != NULL) {
-		//printf("oldTop->value was not null\n");
-		atomic_compare_exchange_strong(&stack->top, &oldTop, oldTop + 1); //finish the job of other and return
-		return false;
-	}
-	//printf("stack->top->value = %u, stack->top = %u\n", stack->top->value, stack->top);
-	if (atomic_compare_exchange_strong(&stack->top->value, &nullptr, element)) {
-		atomic_compare_exchange_strong(&stack->top, &oldTop, oldTop + 1);
-		//printf("CAS successful = %d\n", status);
-		//printf("after changing the top pointer\n");
-		//printf("stack->top->value = %u, stack->top = %u\n", stack->top->value, stack->top);
-		return true;
+		flag = false;
 	}
 	else {
-		//printf("CAS failed while updating top->value\n");
-		return false;
+		void *nullptr = NULL;
+		StackArrayElement *oldTop = stack->top;
+		if (oldTop->value != NULL) {
+			//printf("oldTop->value was not null\n");
+			atomic_compare_exchange_strong(&stack->top, &oldTop, oldTop + 1); //finish the job of other and return
+			flag = false;
+		}
+		//printf("stack->top->value = %u, stack->top = %u\n", stack->top->value, stack->top);
+		else if (atomic_compare_exchange_strong(&stack->top->value, &nullptr, element)) {
+			atomic_compare_exchange_strong(&stack->top, &oldTop, oldTop + 1);
+			//printf("CAS successful = %d\n", status);
+			//printf("after changing the top pointer\n");
+			//printf("stack->top->value = %u, stack->top = %u\n", stack->top->value, stack->top);
+			flag = true;
+		}
+		else {
+			//printf("CAS failed while updating top->value\n");
+			flag = false;
+		}
 	}
+	log_msg_epilog("stackArrayPushContended");
+	return flag;
 }
 
 void* stackArrayPopContended(StackArray *stack) {
-
+	log_msg_prolog("stackArrayPopContended");
+	void *ptr = NULL;
 	StackArrayElement *oldTop = stack->top;
 	if (stackArrayIsEmpty(stack)) {
-		return NULL;
-	}
-
-	void *element = (oldTop - 1)->value;
-
-	if (atomic_compare_exchange_strong(&(stack->top - 1)->value, &element, NULL)) {
-		//if (stack->top == getStackArrayElement(stack, 0)) {
-		//atomic_compare_exchange_strong(&stack->top, &oldTop, NULL);
-		//}
-		//else {
-		atomic_compare_exchange_strong(&stack->top, &oldTop, oldTop - 1);
-		//}
-		return element;
+		ptr = NULL;
 	}
 	else {
-		//if (stack->top == getStackArrayElement(stack, 0)) {
-		//atomic_compare_exchange_strong(&stack->top, &oldTop, NULL);
-		//}
-		//else {
-		atomic_compare_exchange_strong(&stack->top, &oldTop, oldTop - 1);
-		//}
-		return NULL;
+		void *element = (oldTop - 1)->value;
+		if (atomic_compare_exchange_strong(&(stack->top - 1)->value, &element, NULL)) {
+			atomic_compare_exchange_strong(&stack->top, &oldTop, oldTop - 1);
+			ptr = element;
+		}
+		else {
+			atomic_compare_exchange_strong(&stack->top, &oldTop, oldTop - 1);
+			ptr = NULL;
+		}
 	}
+	log_msg_epilog("stackArrayPopContended");
+	return ptr;
 }

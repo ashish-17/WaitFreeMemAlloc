@@ -25,8 +25,6 @@ void freeMemHP(HPStructure *hpStructure, int threadId, void *ptr);
 
 void* setHazardPointer(HPStructure *hpStructure, int threadId, void *element);
 
-void* getHazardPointer(HPStructure *hpStructure, int threadId);
-
 void clearHazardPointer(HPStructure *hpStructure, int threadId);
 
 #endif /* WAITFREEMEMALLOC_SRC_HAZARDPOINTER_H_ */

@@ -15,8 +15,35 @@
 #include "StackPool.h"
 #include "CircularQueue.h"
 #include "commons.h"
+#include <time.h>
+#include "logging.h"
 
-/*void testStack() {
+/*
+typedef struct {
+    int year;
+    int mon;
+    int day;
+    int hour;
+    int min;
+    int sec;
+} SystemDate;
+
+void get_system_date(SystemDate *mdate)
+{
+    time_t rawtime;
+    struct tm *timeinfo;
+    rawtime = time(NULL);
+    timeinfo = localtime(&rawtime);
+
+    mdate->year = timeinfo->tm_year+1900;
+    mdate->mon = timeinfo->tm_mon+1;
+    mdate->day = timeinfo->tm_mday;
+    mdate->hour = timeinfo->tm_hour;
+    mdate->min = timeinfo->tm_min;
+    mdate->sec = timeinfo->tm_sec;
+}
+
+void testStack() {
 	Stack * stack = (Stack*)malloc(sizeof(Stack));
 	int noOfOps = 0;
 
@@ -319,7 +346,7 @@ void testCircularQueue() {
 
 	for(int i = 0; i < numOfElements + 1; i++) {
 		int* element = (int*) malloc(sizeof(int));
-		*element = i;
+ *element = i;
 		//printf("elementPtr = %u\n", element);
 		printf("element %d successfully enqueued %u \n", i, circularQueueEnq(queue, element));
 	}
@@ -333,7 +360,7 @@ void testCircularQueue() {
 	}
 	for(int i = 0; i < numOfElements - 1; i++) {
 		int* element = (int*) malloc(sizeof(int));
-		*element = i;
+ *element = i;
 		//printf("elementPtr = %u\n", element);
 		printf("element %d successfully enqueued %u \n", i, circularQueueEnq(queue, element));
 	}
@@ -346,7 +373,7 @@ void testCircularQueue() {
 	}
 	for(int i = 0; i < numOfElements - 1; i++) {
 		int* element = (int*) malloc(sizeof(int));
-		*element = i;
+ *element = i;
 		//printf("elementPtr = %u\n", element);
 		printf("element %d successfully enqueued %u \n", i, circularQueueEnq(queue, element));
 	}
@@ -360,22 +387,23 @@ void testCircularQueue() {
 }
 
 
-typedef struct
-{
- int a;
-}abc;
+ */
+int main() {
+	log_msg("hello world");
+	log_msg("integer %d", 2);
+	log_msg("int - %d, string %s", 1, "lol");
 
+	log_msg_prolog("");
+	log_msg_prolog("hello world");
+	log_msg_prolog("integer %d", 2);
+	log_msg_prolog("int - %d, string %s", 1, "lol");
 
-int main()
-{
- abc * x = (abc*)my_malloc(sizeof(abc)*2);
- x->a = 1;
- (x+1)->a = 2;
- printf("%d %d\n", x->a, (x+1)->a);
- my_free(x);
- return 0;
+	log_msg_epilog("");
+	log_msg_epilog("hello world");
+	log_msg_epilog("integer %d", 2);
+	log_msg_epilog("int - %d, string %s", 1, "lol");
 }
-*/
+
 int stmain() {
 
 	printf("hello world\n");

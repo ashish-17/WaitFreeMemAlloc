@@ -23,6 +23,7 @@ bool compareAndSet(AtomicStampedReference* current,
 		int expectedStamp,
 		int newStamp,
 		int threadId) {
+	log_msg_prolog("compareAndSet");
 	/*
 	 * Make a copy of current->atomicRef
 	 * AtomicStampedReference* copy = current->atomicRef;
@@ -34,38 +35,41 @@ bool compareAndSet(AtomicStampedReference* current,
 			((newReference == current->atomicRef->reference &&
 					newStamp == current->atomicRef->integer)||
 					atomic_compare_exchange_strong(&current->atomicRef, &current->atomicRef, createReferenceIntegerPair(newReference, newStamp)))); //not sure what we want
-	*/
+	 */
 	bool result =   (expectedReference == current->atomicRef->reference &&
-				expectedStamp == current->atomicRef->integer &&
-				((newReference == current->atomicRef->reference &&
-						newStamp == current->atomicRef->integer)||
-						atomic_compare_exchange_strong(&current->atomicRef, &copy, createReferenceIntegerPair(newReference, newStamp)))); //not sure what we want
+			expectedStamp == current->atomicRef->integer &&
+			((newReference == current->atomicRef->reference &&
+					newStamp == current->atomicRef->integer)||
+					atomic_compare_exchange_strong(&current->atomicRef, &copy, createReferenceIntegerPair(newReference, newStamp)))); //not sure what we want
 
 
 	if (result) {
-		printf("CAS: trying to clearHP\n");
+		log_msg("compareAndSet: trying to clearHP");
 		clearHazardPointer(globalHPStructure, threadId);
-		printf("CAS: clearing HP of thread %d on CAS successful\n", threadId);
+		log_msg("compareAndSet: clearing HP on CAS successful");
 		//free(copy->reference);
 		freeMemHP(globalHPStructure, threadId, copy);
-		printf("CAS: thread = %d trying to free = %u\n", threadId, copy);
-		return result;
+		//log_msg("compareAndSet: trying to free = %u\n", threadId, copy);
+		//return result;
 	}
 	else {
 		clearHazardPointer(globalHPStructure, threadId);
-		printf("CAS: clearing HP of thread %d on CAS failure\n", threadId);
-		return result;
+		log_msg("compareAndSet: clearing HP on CAS failure");
+		//return result;
 	}
+	log_msg_epilog("compareAndSet");
+	return result;
 }
 
 void set(AtomicStampedReference* current, void* newReference, int newStamp) {
+	log_msg_prolog("set");
 	if (newReference != current->atomicRef->reference || newStamp != current->atomicRef->integer)
 	{
 		/*
-			 * Make a copy of current->atomicRef
-			 * AtomicStampedReference* copy = current->atomicRef;
-			 * free if atomic_*** sucesss
-			 */
+		 * Make a copy of current->atomicRef
+		 * AtomicStampedReference* copy = current->atomicRef;
+		 * free if atomic_*** sucesss
+		 */
 		//ReferenceIntegerPair *copy = current->atomicRef;
 		/*if(current->atomicRef->reference != NULL) {
 			free(current->atomicRef->reference);
@@ -79,4 +83,5 @@ void set(AtomicStampedReference* current, void* newReference, int newStamp) {
 		 * free copy
 		 */
 	}
+	log_msg_epilog("set");
 }

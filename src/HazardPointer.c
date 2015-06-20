@@ -6,12 +6,15 @@
 
 
 FreeQueue* getFreeQueue(FreeQueue *queue, int index) {
-	return (queue + index);
+	log_msg_prolog("getFreeQueue");
+	FreeQueue* ptr = (queue + index);
+	log_msg_epilog("getFreeQueue");
+	return ptr;
 }
 
 /*int* getHP(int *hazardPointers, int numberOfHP, int priIndex, int secIndex) {
 	return (hazardPointers + (priIndex*numberOfHP) + secIndex);
-}*/
+}
 
 uintptr_t combine(void *ptr, bool mark) {
 	if (mark) {
@@ -20,10 +23,11 @@ uintptr_t combine(void *ptr, bool mark) {
 	else {
 		return (uintptr_t) ptr;
 	}
-}
+}*/
 
 
 void hpStructureCreate(HPStructure *hpStructure, int noOfThreads, int noOfHP) {
+	log_msg_prolog("hpStructureCreate");
 	hpStructure->freeQueues = (FreeQueue*) my_malloc(sizeof(FreeQueue) * noOfThreads);
 	for (int i = 0; i < noOfThreads; i++) {
 		getFreeQueue(hpStructure->freeQueues, i)->queue = (CircularQueue*) my_malloc(sizeof(CircularQueue));
@@ -57,11 +61,13 @@ void hpStructureCreate(HPStructure *hpStructure, int noOfThreads, int noOfHP) {
 	hpStructure->numberOfHP = noOfHP;
 	hpStructure->numberOfThreads = noOfThreads;
 	//printf("hpCreate: hpStructure = %u\n", hpStructure);
+	log_msg_epilog("hpStructureCreate");
 }
 
 void freeMemHP(HPStructure *hpStructure, int threadId, void *ptr) {
+	log_msg_prolog("freeMemHP");
 	bool flag = circularQueueEnq(getFreeQueue(hpStructure->freeQueues, threadId)->queue, ptr);
-	printf("freeMemHP: threadId = %d enqueue of %u was successful = %u \n", threadId, ptr, flag);
+	//log_msg("freeMemHP:  enqueue of %u was successful = %u", ptr, flag);
 	void* node = NULL;
 	while (node == NULL) {
 		//printf("came here\n");
@@ -69,48 +75,50 @@ void freeMemHP(HPStructure *hpStructure, int threadId, void *ptr) {
 		//printf("threadId = %d, size of queue = %d\n", threadId,hpStructure->numberOfHP * hpStructure->numberOfThreads);
 		void *inspect = hpStructure->hazardPointers[hpStructure->roundCounters[threadId]];
 		hpStructure->roundCounters[threadId] = (hpStructure->roundCounters[threadId] + 1) % (hpStructure->numberOfHP * hpStructure->numberOfThreads);
-		printf("freeMemHP: threadId = %d roundCounter = %u\n", threadId, hpStructure->roundCounters[threadId]);
+		//printf("freeMemHP: threadId = %d roundCounter = %u\n", threadId, hpStructure->roundCounters[threadId]);
 		//printf("threadId = %d inspectPtr = %u\n", threadId, inspect);
 		if (inspect != NULL) {
 			setDirty(inspect, 1);
 		}
 		node = circularQueueDeq(getFreeQueue(hpStructure->freeQueues, threadId)->queue);
-		printf("freeMemHp: threadId = %d nodePtr = %u dequeued\n", threadId, node);
+		//printf("freeMemHp: threadId = %d nodePtr = %u dequeued\n", threadId, node);
 		if (node == NULL) {
 			//printf("threadId = %d node dequeued was null\n", threadId);
-			return;
+			break;
 		}
 		else if (isDirty(node) == 0) {
-			printf("&&&&&&&threadId = %d freeing nodeptr = %u\n", threadId, node);
+			log_msg("freeing nodeptr = %u", node);
 			my_free(node);
-			return;
+			break;
 		}
 		else {
-			printf("***** threadID = %d marking the non null node\n", threadId);
+			//log_msg("***** threadID = %d marking the non null node\n", threadId);
 			setDirty(node, 0);
 			circularQueueEnq(getFreeQueue(hpStructure->freeQueues, threadId)->queue, node);
 		}
 	}
+	log_msg_epilog("freeMemHP");
+	return;
 }
 
 void* setHazardPointer(HPStructure *hpStructure, int threadId, void *element) {
+	log_msg_prolog("setHazardPointer");
 	//printf("in setHP\n");
 	//printf("hpStructure = %u\n", hpStructure);
-	printf("setHP: thread = %d, topPointer = %d\n", threadId, hpStructure->topPointers[threadId]);
+	//printf("setHP: thread = %d, topPointer = %d\n", threadId, hpStructure->topPointers[threadId]);
 	hpStructure->hazardPointers[threadId * hpStructure->numberOfHP + hpStructure->topPointers[threadId]] = element;
 	//printf("setHP\n");
 	hpStructure->topPointers[threadId]++;
+	log_msg_epilog("setHazardPointer");
 	return element;
 }
 
-void* getHazardPointer(HPStructure *hpStructure, int threadId) {
-	hpStructure->hazardPointers[threadId * hpStructure->numberOfHP + hpStructure->topPointers[threadId]];
-}
-
 void clearHazardPointer(HPStructure *hpStructure, int threadId) {
-	printf("clearHP\n");
-	printf("clearHP: thread = %d, topPointer = %d\n", threadId, hpStructure->topPointers[threadId]);
+	log_msg_prolog("clearHazardPointer");
+	//printf("clearHP\n");
+	//printf("clearHP: thread = %d, topPointer = %d\n", threadId, hpStructure->topPointers[threadId]);
 	assert(hpStructure->topPointers[threadId] > 0);
 	hpStructure->topPointers[threadId]--;
 	hpStructure->hazardPointers[threadId * hpStructure->numberOfHP + hpStructure->topPointers[threadId]] = NULL;
+	log_msg_epilog("clearHazardPointer");
 }

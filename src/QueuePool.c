@@ -12,6 +12,7 @@
 
 QueuePool* createQueuePool(int threads, int elementSize)
 {
+	log_msg_prolog("createQueuePool");
 	QueuePool* pool = (QueuePool*)my_malloc(sizeof(QueuePool));
 	pool->threads = (QueueThread*)my_malloc(sizeof(QueueThread) * threads);
 	pool->numberOfThreads = threads;
@@ -23,25 +24,31 @@ QueuePool* createQueuePool(int threads, int elementSize)
 		//printf("Stack ptr = %u\n", ptr->stack);
 		//printf("Inside create pool and size of chunk is %u\n", sizeof(Chunk));
 		queueCreate(ptr->queue, elementSize);
-		printf("createQueuePool: queuePtr: %u, headPtr = %u, TailPtr = %u\n", ptr->queue, ptr->queue->head, ptr->queue->tail);
+		//printf("createQueuePool: queuePtr: %u, headPtr = %u, TailPtr = %u\n", ptr->queue, ptr->queue->head, ptr->queue->tail);
 	}
 	//printf("after pool create the address of thread ptr is %u\n", pool->threads);
+	log_msg_epilog("createQueuePool");
 	return pool;
 }
 
 void deleteQueuePool(QueuePool* pool)
 {
+	log_msg_prolog("deleteQueuePool");
 	queueFree(pool->threads->queue);
 	my_free(pool->threads);
 	pool->numberOfThreads = 0;
+	log_msg_epilog("deleteQueuePool");
 }
 
 QueueThread* getQueueThread(QueuePool* pool, int index)
 {
-	printf("getQueueThread: thread = %d\n", pthread_self());
+	log_msg_prolog("getQueueThread");
+	//printf("getQueueThread: thread = %d\n", pthread_self());
 	//printf("address of stacks %u\n", pool->threads);
 	//printf("size of thread*index %u\n", sizeof(Thread)*index);
 	//printf("address of index stack %u\n", pool->threads + sizeof(Thread)*index);
 	//printf("**************\n");
-	return (pool->threads + index);
+	QueueThread* ptr = (pool->threads + index);
+	log_msg_epilog("getQueueThread");
+	return ptr;
 }

@@ -118,7 +118,7 @@ void* normalExec(void *threadID) {
 	pthread_exit(NULL);
 }
 
-int main() {
+int dsmain() {
 	printf("startung\n");
 	pthread_mutex_init(&the_mutex, NULL);
 	pthread_cond_init(&condc, NULL);		/* Initialize consumer condition variable */
