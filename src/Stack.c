@@ -140,7 +140,7 @@ void* stackPopOther(Stack* stack, int otherThreadId, int threadIndex)
 	}
 	if (compareAndSet(stack->top, oldTop->reference, ((StackElement*)oldTop->reference)->next, oldTop->integer, (oldTop->integer + 1), threadIndex)) {
 		void* poppedItem = ((StackElement*)oldTop->reference)->value;
-		printf("stackPopOther: inside CAS \n");
+		printf("stackPopOther: threadid = %d inside CAS \n", threadIndex);
 		my_free(copy);
 		return poppedItem;
 	}

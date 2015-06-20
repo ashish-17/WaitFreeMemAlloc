@@ -36,6 +36,7 @@ void deleteStackPool(StackPool* pool)
 
 StackThread* getStackThread(StackPool* pool, int index)
 {
+	printf("getStackThread: threadId = %d\n");
 	/*printf("Pool address %u\n", pool);
 	printf("address of stacks %u\n", pool->threads);*/
 	//printf("size of thread*index %u\n", sizeof(Thread)*index);

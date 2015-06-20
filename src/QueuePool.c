@@ -8,6 +8,7 @@
 
 #include "commons.h"
 #include "Chunk.h"
+#include <pthread.h>
 
 QueuePool* createQueuePool(int threads, int elementSize)
 {
@@ -37,8 +38,8 @@ void deleteQueuePool(QueuePool* pool)
 
 QueueThread* getQueueThread(QueuePool* pool, int index)
 {
-	/*printf("Pool address %u\n", pool);
-	printf("address of stacks %u\n", pool->threads);*/
+	printf("getQueueThread: thread = %d\n", pthread_self());
+	//printf("address of stacks %u\n", pool->threads);
 	//printf("size of thread*index %u\n", sizeof(Thread)*index);
 	//printf("address of index stack %u\n", pool->threads + sizeof(Thread)*index);
 	//printf("**************\n");

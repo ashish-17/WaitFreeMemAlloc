@@ -98,7 +98,7 @@ void* queueDeq(Queue *queue, QueueElement *oldQueueHead, int threadId) {
 				clearHazardPointer(globalHPStructure, threadId);
 				printf("queueDeq: clearing HP of thread %d on successful dequeu\n", threadId);
 				freeMemHP(globalHPStructure, threadId, first);
-				printf("---- thread = %d trying to free = %u\n", threadId, first);
+				printf("queueDeq: thread = %d trying to free = %u\n", threadId, first);
 				return element;
 			}
 			else {

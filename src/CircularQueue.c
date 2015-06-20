@@ -1,12 +1,12 @@
 #include "CircularQueue.h"
+#include <pthread.h>
 
 
 CircularQueueElement * getCircularQueueElement(CircularQueue *queue, int index) {
-	printf("sizeof CircularQueueElemnt = %d\n", sizeof(CircularQueueElement));
-	printf("Trying to access %d th element of Circular Queue from address %u (%d)\n", index, queue->baseAddress, pthread_self());
+	printf("getCircularQueueElement: Trying to access %d th element of Circular Queue from address %u (%d)\n", index, queue->baseAddress, pthread_self());
 	CircularQueueElement *ptr = (queue->baseAddress + index);
-	printf("Success(%u) to access %d th element of Circular Queue from address %u (%d)\n", ptr, index, queue->baseAddress, pthread_self());
-	ptr->value = NULL;
+	printf("getCircularQueueElement: Success(%u) to access %d th element of Circular Queue from address %u (%d)\n", ptr, index, queue->baseAddress, pthread_self());
+	//ptr->value = NULL;
 	return ptr;
 }
 
@@ -40,18 +40,22 @@ bool circularQueueEnq(CircularQueue *queue, const void* element) {
 }
 
 void* circularQueueDeq(CircularQueue *queue) {
+	printf("CircularQueueDEque: thread (%d)\n", pthread_self());
 	if (queue->head == -1) {
 		return NULL;
 	}
 	else {
 		void *element = getCircularQueueElement(queue, queue->head)->value;
+		printf("CircularQueueDEque: returned the element thread (%d)\n", pthread_self());
 		getCircularQueueElement(queue, queue->head)->value = NULL;
+		printf("CircularQueueDEque: settinf the value to null thread (%d)\n", pthread_self());
 		if (queue->head == queue->tail) {
 			queue->head = queue->tail = -1;
 		}
 		else {
 			queue->head = (queue->head + 1) % queue->maxNumberOfElements;
 		}
+		printf("CircularQueueDEque: successfully returning the element (%d)\n", pthread_self());
 		return element;
 	}
 }

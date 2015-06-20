@@ -132,7 +132,7 @@ int main() {
 	printf("here...\n");
 	globalHPStructure = (HPStructure*)my_malloc(sizeof(HPStructure));
 	printf("initialised globalSruct\n");
-	hpStructureCreate(globalHPStructure, NUM_THREADS, 10);
+	hpStructureCreate(globalHPStructure, NUM_THREADS, 5);
 	printf("created globalSruct\n");
 	createWaitFreePool(NUM_BLOCKS, NUM_THREADS, CHUNK_SIZE, NUM_DONATION_STEPS);
 	printf("created wait free pools\n");

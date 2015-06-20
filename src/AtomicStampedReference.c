@@ -29,18 +29,26 @@ bool compareAndSet(AtomicStampedReference* current,
 	 * free if atomic_*** sucesss
 	 */
 	ReferenceIntegerPair *copy = current->atomicRef;
-	bool result =   (expectedReference == current->atomicRef->reference &&
+	/*bool result =   (expectedReference == current->atomicRef->reference &&
 			expectedStamp == current->atomicRef->integer &&
 			((newReference == current->atomicRef->reference &&
 					newStamp == current->atomicRef->integer)||
 					atomic_compare_exchange_strong(&current->atomicRef, &current->atomicRef, createReferenceIntegerPair(newReference, newStamp)))); //not sure what we want
+	*/
+	bool result =   (expectedReference == current->atomicRef->reference &&
+				expectedStamp == current->atomicRef->integer &&
+				((newReference == current->atomicRef->reference &&
+						newStamp == current->atomicRef->integer)||
+						atomic_compare_exchange_strong(&current->atomicRef, &copy, createReferenceIntegerPair(newReference, newStamp)))); //not sure what we want
+
+
 	if (result) {
 		printf("CAS: trying to clearHP\n");
 		clearHazardPointer(globalHPStructure, threadId);
 		printf("CAS: clearing HP of thread %d on CAS successful\n", threadId);
 		//free(copy->reference);
 		freeMemHP(globalHPStructure, threadId, copy);
-		printf("---- thread = %d trying to free = %u\n", threadId, copy);
+		printf("CAS: thread = %d trying to free = %u\n", threadId, copy);
 		return result;
 	}
 	else {

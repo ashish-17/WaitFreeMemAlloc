@@ -61,7 +61,7 @@ void hpStructureCreate(HPStructure *hpStructure, int noOfThreads, int noOfHP) {
 
 void freeMemHP(HPStructure *hpStructure, int threadId, void *ptr) {
 	bool flag = circularQueueEnq(getFreeQueue(hpStructure->freeQueues, threadId)->queue, ptr);
-	printf("freeMemHP: threadId = %d enqueue was successful = %u \n", threadId, flag);
+	printf("freeMemHP: threadId = %d enqueue of %u was successful = %u \n", threadId, ptr, flag);
 	void* node = NULL;
 	while (node == NULL) {
 		//printf("came here\n");
@@ -69,7 +69,7 @@ void freeMemHP(HPStructure *hpStructure, int threadId, void *ptr) {
 		//printf("threadId = %d, size of queue = %d\n", threadId,hpStructure->numberOfHP * hpStructure->numberOfThreads);
 		void *inspect = hpStructure->hazardPointers[hpStructure->roundCounters[threadId]];
 		hpStructure->roundCounters[threadId] = (hpStructure->roundCounters[threadId] + 1) % (hpStructure->numberOfHP * hpStructure->numberOfThreads);
-		//printf("threadId = %d roundCounter = %u\n", threadId, hpStructure->roundCounters[threadId]);
+		printf("freeMemHP: threadId = %d roundCounter = %u\n", threadId, hpStructure->roundCounters[threadId]);
 		//printf("threadId = %d inspectPtr = %u\n", threadId, inspect);
 		if (inspect != NULL) {
 			setDirty(inspect, 1);
