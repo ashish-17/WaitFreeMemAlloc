@@ -30,4 +30,7 @@
 
 # Debug files
 *.dSYM/
+
+# My log files (Archita)
+*.txt
 /Debug/
