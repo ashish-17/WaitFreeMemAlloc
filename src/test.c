@@ -16,7 +16,7 @@
 #include "CircularQueue.h"
 #include "commons.h"
 #include <time.h>
-#include "logging.h"
+//#include "logging.h"
 
 /*
 typedef struct {

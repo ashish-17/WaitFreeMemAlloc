@@ -10,24 +10,24 @@
 
 StackPool* createLocalPool(int numThreads)
 {
-	log_msg_prolog("createLocalPool");
+	LOG_PROLOG();
 	StackPool* localPool = createStackPool(numThreads);
-	log_msg_epilog("createLocalPool");
+	LOG_EPILOG();
 	return localPool;
 }
 
 Chunk* getFromLocalPool(StackPool* pool, int threadIndex) {
-	log_msg_prolog("getFromLocalPool");
+	LOG_PROLOG();
 	StackThread* thread = getStackThread(pool, threadIndex);
 	//printf("getFromLocalPool: threadId %d, stack ptr = %u\n",threadIndex, thread->stack);
 	Chunk* chunk =  stackPop(thread->stack);
 	//printf("getFromLocalPool: threadId %d, chunk ptr = %u\n", threadIndex, chunk);
-	log_msg_epilog("getFromLocalPool");
+	LOG_EPILOG();
 	return chunk;
 }
 
 bool putInLocalPool(StackPool* pool, int threadIndex, Chunk* chunk) {
-	log_msg_prolog("putInLocalPool");
+	LOG_PROLOG();
 	//printf("putInLocalPool: Chunk's stack ptr: %u\n", chunk->stack);
 	StackThread* thread = getStackThread(pool, threadIndex);
 	//printf("Stack ptr in putInLocakPool %u\n", thread->stack);
@@ -35,6 +35,6 @@ bool putInLocalPool(StackPool* pool, int threadIndex, Chunk* chunk) {
 	bool res = stackPush(thread->stack, chunk);
 	//printf("putInLocalPool: after pushing Chunk ptr: %u\n", thread->stack->top->atomicRef->reference);
 	//printf("putInLocalPool: threadId = %d, returned from stackPush\n", threadIndex);
-	log_msg_epilog("putInLocalPool");
+	LOG_EPILOG();
 	return res;
 }

@@ -3,16 +3,16 @@
 
 
 CircularQueueElement * getCircularQueueElement(CircularQueue *queue, int index) {
-	log_msg_prolog("getCircularQueueElement");
+	LOG_PROLOG();
 	//printf("getCircularQueueElement: Trying to access %d th element of Circular Queue from address %u (%d)\n", index, queue->baseAddress, pthread_self());
 	CircularQueueElement *ptr = (queue->baseAddress + index);
 	//printf("getCircularQueueElement: Success(%u) to access %d th element of Circular Queue from address %u (%d)\n", ptr, index, queue->baseAddress, pthread_self());
-	log_msg_epilog("getCircularQueueElement");
+	LOG_EPILOG();
 	return ptr;
 }
 
 void circularQueueCreate(CircularQueue *queue, int elementSize, int noOfElements) {
-	log_msg_prolog("circularQueueCreate");
+	LOG_PROLOG();
 	queue->baseAddress = (CircularQueueElement*) my_malloc(sizeof(CircularQueueElement) * noOfElements);
 	queue->head = queue->tail = -1;
 	queue->elementSize = elementSize;
@@ -21,11 +21,11 @@ void circularQueueCreate(CircularQueue *queue, int elementSize, int noOfElements
 	for (int i = 0; i < noOfElements; i++) {
 		getCircularQueueElement(queue, i)->value = NULL;
 	}
-	log_msg_epilog("circularQueueCreate");
+	LOG_EPILOG();
 }
 
 bool circularQueueEnq(CircularQueue *queue, const void* element) {
-	log_msg_prolog("circularQueueEnq");
+	LOG_PROLOG();
 	bool flag;
 	if ((queue->tail + 1) % queue->maxNumberOfElements == queue->head) {
 		printf("circularQueue full \n");
@@ -42,22 +42,22 @@ bool circularQueueEnq(CircularQueue *queue, const void* element) {
 		}
 		flag = true;
 	}
-	log_msg_epilog("circularQueueEnq");
+	LOG_EPILOG();
 	return flag;
 }
 
 void* circularQueueDeq(CircularQueue *queue) {
 	//printf("CircularQueueDEque: thread (%d)\n", pthread_self());
-	log_msg_prolog("circularQueueDeq");
+	LOG_PROLOG();
 	void *ptr;
 	if (queue->head == -1) {
 		ptr = NULL;
 	}
 	else {
 		void *element = getCircularQueueElement(queue, queue->head)->value;
-		log_msg("circularQueueDeq: returned the element");
+		LOG_INFO("circularQueueDeq: returned the element");
 		getCircularQueueElement(queue, queue->head)->value = NULL;
-		log_msg("circularQueueDeq: setting the value to null thread");
+		LOG_INFO("circularQueueDeq: setting the value to null thread");
 		if (queue->head == queue->tail) {
 			queue->head = queue->tail = -1;
 		}
@@ -66,6 +66,6 @@ void* circularQueueDeq(CircularQueue *queue) {
 		}
 		ptr = element;
 	}
-	log_msg_epilog("circularQueueDeq");
+	LOG_EPILOG();
 	return ptr;
 }

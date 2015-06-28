@@ -5,7 +5,7 @@
 
 SharedQueuePools* createSharedQueuePools(int threads)
 {
-	log_msg_prolog("createSharedQueuePools");
+	LOG_PROLOG();
 	SharedQueuePools* pool = (SharedQueuePools*)my_malloc(sizeof(SharedQueuePools));
 	pool->sharedQueuePools = (SharedQueuePool*)my_malloc(sizeof(SharedQueuePool) * threads);
 	pool->numberOfThreads = threads;
@@ -15,7 +15,7 @@ SharedQueuePools* createSharedQueuePools(int threads)
 		ptr->sharedQueuePool = createQueuePool(threads, sizeof(Block));
 		//printf("createSQP: SQPPtr = %u, queuePtr = %u, HeadPtr = %u, TailPtr = %u\n", ptr->sharedQueuePool, getQueueThread(ptr->sharedQueuePool,i)->queue, getQueueThread(ptr->sharedQueuePool,i)->queue->head, getQueueThread(ptr->sharedQueuePool,i)->queue->tail);
 	}
-	log_msg_epilog("createSharedQueuePools");
+	LOG_EPILOG();
 	return pool;
 }
 
@@ -27,31 +27,31 @@ void deleteSharedQueuePools(SharedQueuePools* pool)
 }
 
 void* getFromSharedQueuePools(SharedQueuePools* pool, int threadId, int primThreadIndex, int secThreadIndex) {
-	log_msg_prolog("getFromSharedQueuePools");
+	LOG_PROLOG();
 	SharedQueuePool* queuePool = getSharedQueuePool(pool, primThreadIndex);
 	Queue *queue = getQueueThread(queuePool->sharedQueuePool, secThreadIndex)->queue;
 	//printf("getFromSQP: threadId = %d, queuePtr = %u\n", threadIndex, queue);
 	//printf("getFRomSQP: setting HP of thread %d for secondary queue head %u\n", threadId, queue->head);
 	QueueElement *oldHead = setHazardPointer(globalHPStructure, threadId, queue->head);
 	void *ptr = queueDeq(queue, oldHead, threadId);
-	log_msg_epilog("getFromSharedQueuePools");
+	LOG_EPILOG();
 	return ptr;
 }
 
 bool putInSharedQueuePools(SharedQueuePools* pool, int threadIndex, int secThreadIndex, Block* block) {
-	log_msg_prolog("putInSharedQueuePools");
+	LOG_PROLOG();
 	SharedQueuePool* queuePool = getSharedQueuePool(pool, threadIndex);
 	Queue *queue = getQueueThread(queuePool->sharedQueuePool, secThreadIndex)->queue;
 	bool flag = queueEnq(queue, block, secThreadIndex);
-	log_msg_epilog("putInSharedQueuePools");
+	LOG_EPILOG();
 	return flag;
 }
 
 SharedQueuePool* getSharedQueuePool(SharedQueuePools* pool, int index)
 {
-	log_msg_prolog("getSharedQueuePool");
+	LOG_PROLOG();
 	SharedQueuePool *ptr = (pool->sharedQueuePools + index);
-	log_msg_epilog("getSharedQueuePool");
+	LOG_EPILOG();
 	return ptr;
 }
 

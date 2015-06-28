@@ -12,22 +12,22 @@
 
 
 StackPool* createFreePoolUC(int numThreads) {
-	log_msg_prolog("createFreePoolUC");
+	LOG_PROLOG();
 	StackPool* freePool = createStackPool(numThreads);
-	log_msg_epilog("createFreePoolUC");
+	LOG_EPILOG();
 	return freePool;
 }
 
 Chunk* getFromFreePoolUC(StackPool* pool, int threadIndex) {
-	log_msg_prolog("getFromFreePoolUC");
+	LOG_PROLOG();
 	StackThread* thread = getStackThread(pool, threadIndex);
 	Chunk* chunk = stackPop(thread->stack);
-	log_msg_epilog("getFromFreePoolUC");
+	LOG_EPILOG();
 	return chunk;
 }
 
 bool putInFreePoolUC(StackPool* pool, int threadIndex, Chunk* chunk) {
-	log_msg_prolog("putInFreePoolUC");
+	LOG_PROLOG();
 	/*printf("inside putInFreePool with threadIndex %d\n", threadIndex);
 	printf("Inside putInfreePool the valeue of pool ptr is %u\n", pool);
 	printf("Inside putInfreePool the valeue of StackThread ptr is %u\n", pool->threads);*/
@@ -36,31 +36,31 @@ bool putInFreePoolUC(StackPool* pool, int threadIndex, Chunk* chunk) {
 	printf("Stack ptr in putInFreePool %u\n", thread->stack);
 	printf("Stack element size = %d\n", thread->stack->elementSize);*/
 	bool flag = stackPush(thread->stack, chunk);
-	log_msg_epilog("putInFreePoolUC");
+	LOG_EPILOG();
 	return flag;
 }
 
 QueuePool* createFreePoolC(int numThreads) {
-	log_msg_prolog("createFreePoolC");
+	LOG_PROLOG();
 	QueuePool* freePool = createQueuePool(numThreads, sizeof(Chunk));
-	log_msg_epilog("createFreePoolC");
+	LOG_EPILOG();
 	return freePool;
 }
 
 Chunk* getFromFreePoolC(QueuePool* pool, int threadIndex, int primThread, QueueElement *oldQueueHead) {
-	log_msg_prolog("getFromFreePoolC");
+	LOG_PROLOG();
 	QueueThread* thread = getQueueThread(pool, primThread);
 	Chunk* chunk = queueDeq(thread->queue, oldQueueHead, threadIndex);
-	log_msg_epilog("getFromFreePoolC");
+	LOG_EPILOG();
 	return chunk;
 }
 
 bool putInFreePoolC(QueuePool* pool, int threadIndex, Chunk* chunk) {
-	log_msg_prolog("putInFreePoolC");
+	LOG_PROLOG();
 	//printf("putInFreePoolC: threadId : %d\n", threadIndex);
 	QueueThread* thread = getQueueThread(pool, threadIndex);
 	bool flag = queueEnq(thread->queue, chunk, threadIndex);
-	log_msg_epilog("putInFreePoolC");
+	LOG_EPILOG();
 	return flag;
 }
 

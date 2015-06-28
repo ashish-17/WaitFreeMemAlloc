@@ -3,14 +3,14 @@
 
 StackArrayElement* getStackArrayElement(StackArray* stack, int index)
 {
-	log_msg_prolog("getStackArrayElement");
+	LOG_PROLOG();
 	StackArrayElement* ptr = (stack->elements + index);
-	log_msg_epilog("getStackArrayElement");
+	LOG_EPILOG();
 	return ptr;
 }
 
 void stackArrayCreate(StackArray *stack, int elementSize, int maxElements) {
-	log_msg_prolog("stackArrayCreate");
+	LOG_PROLOG();
 	//printf("In stackCreate\n");
 	stack->elements = (StackArrayElement*) my_malloc(sizeof(StackArrayElement) * (maxElements + 1));
 	for (int i = 0; i < maxElements + 1; i++) {
@@ -21,11 +21,11 @@ void stackArrayCreate(StackArray *stack, int elementSize, int maxElements) {
 	//printf("Inside create stack and size of chunk is %d\n", stack->elementSize);
 	stack->maxElements = maxElements;
 	//printf("leaving stackCreate\n");
-	log_msg_epilog("stackArrayCreate");
+	LOG_EPILOG();
 }
 
 void stackArrayFree(StackArray *stack) {
-	log_msg_prolog("stackArrayFree");
+	LOG_PROLOG();
 	for (int i = 0; i < stack->maxElements + 1; i++) {
 		StackArrayElement* element = getStackArrayElement(stack, i);
 		if (element != NULL && element->value != NULL) {
@@ -39,27 +39,27 @@ void stackArrayFree(StackArray *stack) {
 	stack->top = NULL;
 	stack->elementSize = 0;
 	stack->maxElements = 0;
-	log_msg_epilog("stackArrayFree");
+	LOG_EPILOG();
 }
 
 bool stackArrayIsEmpty(const StackArray *stack) {
-	log_msg_prolog("stackArrayIsEmpty");
+	LOG_PROLOG();
 	//return (stack->top == NULL);
 	bool flag = (stack->top == getStackArrayElement(stack, 0));
-	log_msg_epilog("stackArrayIsEmpty");
+	LOG_EPILOG();
 	return flag;
 }
 
 bool StackArrayIsFull(const StackArray *stack) {
-	log_msg_prolog("StackArrayIsFull");
+	LOG_PROLOG();
 	bool flag = (stack->top == getStackArrayElement(stack, stack->maxElements));
 	//return (stack->numberOfElements == stack->maxElements);
-	log_msg_epilog("StackArrayIsFull");
+	LOG_EPILOG();
 	return flag;
 }
 
 bool stackArrayPushUncontended(StackArray *stack, const void* element) {
-	log_msg_prolog("stackArrayPushUncontended");
+	LOG_PROLOG();
 	bool flag;
 	if (StackArrayIsFull(stack)) {
 		flag = false;
@@ -69,12 +69,12 @@ bool stackArrayPushUncontended(StackArray *stack, const void* element) {
 		stack->top++;
 		flag = true;
 	}
-	log_msg_epilog("stackArrayPushUncontended");
+	LOG_EPILOG();
 	return flag;
 }
 
 void* stackArrayPopUncontended(StackArray *stack) {
-	log_msg_prolog("stackArrayPopUncontended");
+	LOG_PROLOG();
 	void *ptr = NULL;
 	if (stackArrayIsEmpty(stack)) {
 		ptr = NULL;
@@ -85,12 +85,12 @@ void* stackArrayPopUncontended(StackArray *stack) {
 		stack->top->value = NULL;
 		ptr = element;
 	}
-	log_msg_epilog("stackArrayPopUncontended");
+	LOG_EPILOG();
 	return ptr;
 }
 
 bool stackArrayPushContended(StackArray *stack, const void* element) {
-	log_msg_prolog("stackArrayPushContended");
+	LOG_PROLOG();
 	bool flag = false;
 	if (StackArrayIsFull(stack)) {
 		printf("stack array is full\n");
@@ -117,12 +117,12 @@ bool stackArrayPushContended(StackArray *stack, const void* element) {
 			flag = false;
 		}
 	}
-	log_msg_epilog("stackArrayPushContended");
+	LOG_EPILOG();
 	return flag;
 }
 
 void* stackArrayPopContended(StackArray *stack) {
-	log_msg_prolog("stackArrayPopContended");
+	LOG_PROLOG();
 	void *ptr = NULL;
 	StackArrayElement *oldTop = stack->top;
 	if (stackArrayIsEmpty(stack)) {
@@ -139,6 +139,6 @@ void* stackArrayPopContended(StackArray *stack) {
 			ptr = NULL;
 		}
 	}
-	log_msg_epilog("stackArrayPopContended");
+	LOG_EPILOG();
 	return ptr;
 }

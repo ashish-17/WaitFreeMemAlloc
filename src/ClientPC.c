@@ -23,9 +23,9 @@ Block* buffer[NUM_THREADS];
 HPStructure *globalHPStructure = NULL;
 
 void* producer(void *threadID) {
-	log_msg_prolog("producer");
+	LOG_PROLOG();
 	int threadId = (int*) threadID;
-	log_msg("producer: thread has id %d", threadId);
+	LOG_INFO("producer: thread has id %d", threadId);
 	srand(time(NULL));
 
 	for (int i = 1; i <= NUM_BLOCKS + 50; i++) {
@@ -51,15 +51,15 @@ void* producer(void *threadID) {
 		pthread_cond_signal(&condc[con]);	/* wake up consumer */
 		pthread_mutex_unlock(&the_mutex[con]);	/* release the buffer */
 	}
-	log_msg("FINISHED");
-	log_msg_epilog("producer");
+	LOG_INFO("FINISHED");
+	LOG_EPILOG();
 	pthread_exit(0);
 }
 
 void* consumer(void *threadID) {
-	log_msg_prolog("consumer");
+	LOG_PROLOG();
 	int threadId = (int*) threadID;
-	log_msg("consumer: thread has id %d", threadId);
+	LOG_INFO("consumer: thread has id %d", threadId);
 	Block *block;
 
 	while(true) {
@@ -78,13 +78,13 @@ void* consumer(void *threadID) {
 		freeMem(threadId, block);
 	}
 	pthread_exit(0);
-	log_msg_epilog("consumer");
+	LOG_EPILOG();
 }
 
 void* normalExec(void *threadID) {
-	log_msg_prolog("normalExec");
+	LOG_PROLOG();
 	int threadId = (int*) threadID;
-	log_msg("normalExec: thread has id %d", threadId);
+	LOG_INFO("normalExec: thread has id %d", threadId);
 	int numOfAllocBlocks = 0;
 	int flag = 0; // 0 -> allocate 1 -> free
 
@@ -121,14 +121,15 @@ void* normalExec(void *threadID) {
 		totalNumOfOps--;
 		//printf("thread %d totalNumOfOps remaining %d\n",(int)threadId, totalNumOfOps);
 	}
-	log_msg("FINISHED");
-	log_msg_epilog("normalExec");
+	LOG_INFO("FINISHED");
+	LOG_EPILOG();
 	pthread_exit(NULL);
 }
 
 int main() {
-	log_msg_prolog("main");
-	//printf("startung\n");
+	LOG_INIT_CONSOLE();
+	LOG_INIT_FILE();
+
 	pthread_mutex_init(&the_mutex, NULL);
 	pthread_cond_init(&condc, NULL);		/* Initialize consumer condition variable */
 	pthread_cond_init(&condp, NULL);		/* Initialize producer condition variable */
@@ -168,6 +169,7 @@ int main() {
 		rc = pthread_join(threads[t], &status);
 	}
 	printf("Test Client\n");
-	log_msg_epilog("main");
+
 	pthread_exit(NULL);
+	LOG_CLOSE();
 }

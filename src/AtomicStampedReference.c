@@ -4,16 +4,19 @@
 #include "HazardPointer.h"
 
 ReferenceIntegerPair* createReferenceIntegerPair(void* ref, int i) {
+	LOG_PROLOG();
 	ReferenceIntegerPair* pair = (ReferenceIntegerPair*)my_malloc(sizeof(ReferenceIntegerPair)); //added.. shouldn't we first free memory pointed by pair
 	pair->reference = ref; pair->integer = i;
+	LOG_EPILOG();
 	return pair;
 }
 
 void createAtomicStampedReference(AtomicStampedReference* current, void* initialRef, int initialStamp) {
-	//printf("In createAtomicStampedReference\n");
+	LOG_PROLOG();
 	current->atomicRef = (ReferenceIntegerPair*)my_malloc(sizeof(ReferenceIntegerPair));
 	current->atomicRef->reference = initialRef;
 	current->atomicRef->integer = initialStamp;
+	LOG_EPILOG();
 	//printf("leaving createAtomicStampedReference\n");
 }
 
@@ -23,7 +26,7 @@ bool compareAndSet(AtomicStampedReference* current,
 		int expectedStamp,
 		int newStamp,
 		int threadId) {
-	log_msg_prolog("compareAndSet");
+	LOG_PROLOG();
 	/*
 	 * Make a copy of current->atomicRef
 	 * AtomicStampedReference* copy = current->atomicRef;
@@ -44,25 +47,25 @@ bool compareAndSet(AtomicStampedReference* current,
 
 
 	if (result) {
-		log_msg("compareAndSet: trying to clearHP");
+		LOG_INFO("compareAndSet: trying to clearHP");
 		clearHazardPointer(globalHPStructure, threadId);
-		log_msg("compareAndSet: clearing HP on CAS successful");
+		LOG_INFO("compareAndSet: clearing HP on CAS successful");
 		//free(copy->reference);
 		freeMemHP(globalHPStructure, threadId, copy);
-		//log_msg("compareAndSet: trying to free = %u\n", threadId, copy);
+		//LOG_INFO("compareAndSet: trying to free = %u\n", threadId, copy);
 		//return result;
 	}
 	else {
 		clearHazardPointer(globalHPStructure, threadId);
-		log_msg("compareAndSet: clearing HP on CAS failure");
+		LOG_INFO("compareAndSet: clearing HP on CAS failure");
 		//return result;
 	}
-	log_msg_epilog("compareAndSet");
+	LOG_EPILOG();
 	return result;
 }
 
 void set(AtomicStampedReference* current, void* newReference, int newStamp) {
-	log_msg_prolog("set");
+	LOG_PROLOG();
 	if (newReference != current->atomicRef->reference || newStamp != current->atomicRef->integer)
 	{
 		/*
@@ -83,5 +86,5 @@ void set(AtomicStampedReference* current, void* newReference, int newStamp) {
 		 * free copy
 		 */
 	}
-	log_msg_epilog("set");
+	LOG_EPILOG();
 }

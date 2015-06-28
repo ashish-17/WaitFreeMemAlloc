@@ -3,22 +3,22 @@
 #include "HazardPointer.h"
 
 QueueElement* createNode(void *value) {
-	log_msg_prolog("createNode");
+	LOG_PROLOG();
 	//printf("createNode blk ptr = %u\n", value);
 	QueueElement *element = (QueueElement*) my_malloc(sizeof(QueueElement));
 	element->value = value;
 	element->next = NULL;
-	log_msg_epilog("createNode");
+	LOG_EPILOG();
 	return element;
 }
 
 void queueCreate(Queue *queue, int elementSize) {
-	log_msg_prolog("queueCreate");
+	LOG_PROLOG();
 	queue->head = createNode(NULL);
 	queue->tail = queue->head;
 	//printf("queueCreate: queuePtr = %u, headPtr = %u, TailPtr = %u \n", queue, queue->head, queue->tail);
 	queue->elementSize  = elementSize;
-	log_msg_epilog("queueCreate");
+	LOG_EPILOG();
 }
 
 void queueFree(Queue *queue) {
@@ -46,7 +46,7 @@ bool queueEnq1(Queue *queue, const void* element) {
 }*/
 
 bool queueEnq(Queue *queue, const void* element, int threadId) {
-	log_msg_prolog("queueEnq");
+	LOG_PROLOG();
 	QueueElement *queueElement = createNode(element);
 	//printf("queueEnq: value = %u, blkPtr = %u, next ptr = %u\n", queueElement->value, element, queueElement->next);
 	QueueElement *last = queue->tail;
@@ -65,19 +65,19 @@ bool queueEnq(Queue *queue, const void* element, int threadId) {
 			atomic_compare_exchange_strong(&queue->tail, &last, next);
 		}
 	}
-	log_msg_epilog("queueEnq");
+	LOG_EPILOG();
 	return flag;
 }
 
 bool isQueueEmpty(Queue *queue) {
-	log_msg_prolog("isQueueEmpty");
+	LOG_PROLOG();
 	bool flag = (queue->head == queue->tail);
-	log_msg_epilog("isQueueEmpty");
+	LOG_EPILOG();
 	return flag;
 }
 
 void* queueDeq(Queue *queue, QueueElement *oldQueueHead, int threadId) {
-	log_msg_prolog("queueDeq");
+	LOG_PROLOG();
 	void *ptr = NULL;
 	//printf("queueDeq: queuePtr: %u, q->head: %u, q->tail: %u, q->head->next: %u \n",queue, queue->head, queue->tail, queue->head->next);
 	QueueElement *first = oldQueueHead;
@@ -123,6 +123,6 @@ void* queueDeq(Queue *queue, QueueElement *oldQueueHead, int threadId) {
 	else {
 		clearHazardPointer(globalHPStructure, threadId);
 	}
-	log_msg_epilog("queueDeq");
+	LOG_EPILOG();
 	return ptr;
 }

@@ -4,7 +4,7 @@
 
 void stackCreate(Stack *stack, int elementSize)
 {
-	log_msg_prolog("stackCreate");
+	LOG_PROLOG();
 	//printf("In stackCreate\n");
 	stack->top = (AtomicStampedReference*) my_malloc(sizeof(AtomicStampedReference));
 	createAtomicStampedReference(stack->top, NULL, 0);
@@ -12,7 +12,7 @@ void stackCreate(Stack *stack, int elementSize)
 	//printf("Inside create stack and size of chunk is %d\n", stack->elementSize);
 	stack->numberOfElements = 0;
 	//printf("leaving stackCreate\n");
-	log_msg_epilog("stackCreate");
+	LOG_EPILOG();
 }
 
 void stackFree(Stack *stack)
@@ -22,18 +22,18 @@ void stackFree(Stack *stack)
 
 bool stackIsEmpty(const Stack *stack)
 {
-	log_msg_prolog("stackIsEmpty");
+	LOG_PROLOG();
 	bool flag;
 	if (stack->top->atomicRef->reference == NULL)
 		flag = true;
 	else
 		flag = false;
-	log_msg_epilog("stackIsEmpty");
+	LOG_EPILOG();
 	return flag;
 }
 
 bool stackPush(Stack *stack, const void* element) {
-	log_msg_prolog("stackPush");
+	LOG_PROLOG();
 	//printf("inside stackPush\n");
 	StackElement *node = (StackElement*)my_malloc(sizeof(StackElement));
 	//printf("allocated a node\n");
@@ -52,12 +52,12 @@ bool stackPush(Stack *stack, const void* element) {
 	stack->top->atomicRef->reference = node;
 	stack->numberOfElements++;
 	//printf("reached here\n");
-	log_msg_epilog("stackPush");
+	LOG_EPILOG();
 	return true;
 }
 
 void* stackPop(Stack *stack) {
-	log_msg_prolog("stackPop");
+	LOG_PROLOG();
 	void *ptr;
 	StackElement* oldTop = (StackElement*) stack->top->atomicRef->reference;
 	if (oldTop == NULL) {
@@ -71,13 +71,13 @@ void* stackPop(Stack *stack) {
 		stack->numberOfElements--;
 		ptr = nodeValue;
 	}
-	log_msg_epilog("stackPop");
+	LOG_EPILOG();
 	return ptr;
 }
 
 bool stackPushOwner(Stack *stack, const void* element, int threadId)
 {
-	log_msg_prolog("stackPushOwner");
+	LOG_PROLOG();
 	StackElement *node = (StackElement*)my_malloc(sizeof(StackElement));
 	node->value = element;
 	node->next = (StackElement*)stack->top->atomicRef->reference;
@@ -90,25 +90,25 @@ bool stackPushOwner(Stack *stack, const void* element, int threadId)
 	//AtomicStampedReference* oldTop = stack->top;
 	//printf("stackPushOwner after setting HP\n");
 	bool flag = compareAndSet(stack->top, oldTop->reference, node, oldTop->integer, (oldTop->integer + 1), threadId);
-	log_msg_epilog("stackPushOwner");
+	LOG_EPILOG();
 	return flag;
 }
 
 bool stackPushOther(Stack *stack, const void* element, ReferenceIntegerPair* oldTop, int otherThreadId, int threadId)
 {
-	log_msg_prolog("stackPushOther");
+	LOG_PROLOG();
 	StackElement *node = (StackElement*)my_malloc(sizeof(StackElement));
 	node->value = element;
 	node->next = (StackElement*)stack->top->atomicRef->reference;
 	//printf("stackPushOther: threadId:%d going to call CAS\n", threadId);
 	bool flag = compareAndSet(stack->top, NULL, node, oldTop->integer, (oldTop->integer + 1), threadId);
-	log_msg_epilog("stackPushOther");
+	LOG_EPILOG();
 	return flag;
 }
 
 void* stackPopOwner(Stack* stack, int threadId)
 {
-	log_msg_prolog("stackPopOwner");
+	LOG_PROLOG();
 	void *ptr = NULL;
 	ReferenceIntegerPair *oldTop = setHazardPointer(globalHPStructure, threadId, stack->top->atomicRef);
 	//printf("stackPopOwner: setting HP of thread %d for oldTop %u\n", threadId, oldTop);
@@ -129,17 +129,17 @@ void* stackPopOwner(Stack* stack, int threadId)
 		}
 		else {
 			//clearHazardPointer(globalHPStructure, threadId);
-			log_msg("stackPopOwner: CAS failed");
+			LOG_INFO("stackPopOwner: CAS failed");
 			ptr = NULL;
 		}
 	}
-	log_msg_epilog("stackPopOwner");
+	LOG_EPILOG();
 	return ptr;
 }
 
 void* stackPopOther(Stack* stack, int otherThreadId, int threadIndex)
 {
-	log_msg_prolog("stackPopOther");
+	LOG_PROLOG();
 	void *ptr = NULL;
 	//printf("stackPopOther:\n");
 	//printf("stackPopOther: currentTop = %u, expected top = %u\n", stack->top->atomicRef->reference, (oldTop->reference));
@@ -173,6 +173,6 @@ void* stackPopOther(Stack* stack, int otherThreadId, int threadIndex)
 			ptr = NULL;
 		}
 	}
-	log_msg_epilog("stackPopOther");
+	LOG_EPILOG();
 	return ptr;
 }

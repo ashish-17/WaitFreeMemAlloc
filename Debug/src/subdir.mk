@@ -23,7 +23,7 @@ C_SRCS += \
 ../src/StackArray.c \
 ../src/StackPool.c \
 ../src/WaitFreePool.c \
-../src/logging.c \
+../src/logger.c \
 ../src/test.c \
 ../src/testMulti.c \
 ../src/utils.c 
@@ -48,7 +48,7 @@ OBJS += \
 ./src/StackArray.o \
 ./src/StackPool.o \
 ./src/WaitFreePool.o \
-./src/logging.o \
+./src/logger.o \
 ./src/test.o \
 ./src/testMulti.o \
 ./src/utils.o 
@@ -73,7 +73,7 @@ C_DEPS += \
 ./src/StackArray.d \
 ./src/StackPool.d \
 ./src/WaitFreePool.d \
-./src/logging.d \
+./src/logger.d \
 ./src/test.d \
 ./src/testMulti.d \
 ./src/utils.d 

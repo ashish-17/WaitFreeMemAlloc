@@ -1,7 +1,7 @@
 #include "Chunk.h"
 
 Chunk* createChunk(Chunk *chunk, int number) {
-	log_msg_prolog("createChunk");
+	LOG_PROLOG();
 	chunk = (Chunk*) my_malloc(sizeof(Chunk));
 	//printf("chunk ptr in createChunk= %u\n", chunk);
 	//printf("chunk ptr= %u\n", chunk->stack);
@@ -9,21 +9,21 @@ Chunk* createChunk(Chunk *chunk, int number) {
 	stackArrayCreate(chunk->stack, sizeof(Block), number);
 	//printf("stack ptr= %u\n", chunk->stack);
 	//chunk->numOfBlocks = number;
-	log_msg_epilog("createChunk");
+	LOG_EPILOG();
 	return chunk;
 }
 
 bool isChunkEmpty(Chunk *chunk) {
-	log_msg_prolog("isChunkEmpty");
+	LOG_PROLOG();
 	bool flag = stackArrayIsEmpty(chunk->stack);
-	log_msg_epilog("isChunkEmpty");
+	LOG_EPILOG();
 	return flag;
 }
 
 bool chunkHasSpace(Chunk *chunk) {
-	log_msg_prolog("chunkHasSpace");
+	LOG_PROLOG();
 	bool flag = (!StackArrayIsFull(chunk->stack));
-	log_msg_epilog("chunkHasSpace");
+	LOG_EPILOG();
 	return flag;
 	/*if (chunk->numOfBlocks != chunk->stack->numberOfElements)
 		return true;
@@ -32,30 +32,30 @@ bool chunkHasSpace(Chunk *chunk) {
 }
 
 Block* getFromChunkUncontended(Chunk *chunk) {
-	log_msg_prolog("getFromChunkUncontended");
+	LOG_PROLOG();
 	void *ptr =  stackArrayPopUncontended(chunk->stack);
-	log_msg_epilog("getFromChunkUncontended");
+	LOG_EPILOG();
 	return ptr;
 }
 
 bool putInChunkUncontended(Chunk *chunk, Block *block) {
-	log_msg_prolog("putInChunkUC");
+	LOG_PROLOG();
 	bool res = stackArrayPushUncontended(chunk->stack, block);
 	//printf("chunksize %d\n", chunk->stack->maxElements);
-	log_msg_epilog("putInChunkUC");
+	LOG_EPILOG();
 	return res;
 }
 
 Block* getFromChunkContended(Chunk *chunk) {
-	log_msg_prolog("getFromChunkContended");
+	LOG_PROLOG();
 	return stackArrayPopContended(chunk->stack);
-	log_msg_epilog("getFromChunkContended");
+	LOG_EPILOG();
 }
 
 bool putInChunkContended(Chunk *chunk, Block *block) {
-	log_msg_prolog("putInChunkContended");
+	LOG_PROLOG();
 	bool res = stackArrayPushContended(chunk->stack, block);
 	//printf("chunksize %d\n", chunk->stack->numberOfElements);
-	log_msg_epilog("putInChunkContended");
+	LOG_EPILOG();
 	return res;
 }
