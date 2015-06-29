@@ -14,13 +14,11 @@ typedef struct {
 	StackArrayElement* elements;
 
 	int elementSize;
-	//	int numberOfElements; // number of elements currently in the stack
 	int maxElements;
 } StackArray;
 
-StackArrayElement* getStackArrayElement(StackArray* stack, int index);
 
-void stackArrayCreate(StackArray *stack, int elementSize, int maxElements);
+StackArray* stackArrayCreate(int elementSize, int maxElements);
 
 void stackArrayFree(StackArray *stack);
 

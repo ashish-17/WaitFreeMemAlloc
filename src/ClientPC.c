@@ -191,7 +191,7 @@ void* normalExec(void *threadID) {
 	pthread_exit(NULL);
 }
 
-int main() {
+int smain() {
 	LOG_INIT_CONSOLE();
 	LOG_INIT_FILE();
 

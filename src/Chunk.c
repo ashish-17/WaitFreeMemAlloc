@@ -5,8 +5,7 @@ Chunk* createChunk(Chunk *chunk, int number) {
 	chunk = (Chunk*) my_malloc(sizeof(Chunk));
 	//printf("chunk ptr in createChunk= %u\n", chunk);
 	//printf("chunk ptr= %u\n", chunk->stack);
-	chunk->stack = (StackArray*) my_malloc(sizeof(StackArray));
-	stackArrayCreate(chunk->stack, sizeof(Block), number);
+	chunk->stack = stackArrayCreate(sizeof(Block), number);
 	//printf("stack ptr= %u\n", chunk->stack);
 	//chunk->numOfBlocks = number;
 	LOG_EPILOG();

@@ -113,52 +113,6 @@ void testMultiFullPool() {
 	pthread_exit(NULL);
 }
 
-void testStackArray1(void *threadId) {
-	int numOfBlocks = NUM_BLKS_IN_STACK;
-	LOG_INFO("Here... in thread %d\n", (int)threadId);
-
-	for (int i = 0; i < numOfBlocks; i++) {
-		int temp = (int)threadId * numOfBlocks + i;
-		Block *block = createBlock(temp, (int)threadId);
-		LOG_INFO("thread = %d pushing the block = %d was successful = %d\n", (int)threadId, temp, stackArrayPushContended(stack,block));
-	}
-
-	for (int i = 0; i < numOfBlocks; i++) {
-		Block *block = stackArrayPopContended(stack);
-		if (block == NULL) {
-			LOG_INFO("Thread = %d, didn't get the block\n",(int)threadId);
-		}
-		else {
-			LOG_INFO("Thread = %d, block just popped = %d\n", (int)threadId, block->memBlock);
-		}
-	}
-}
-
-void testStackArray() {
-	int numOfElements = NUM_THREADS * NUM_BLKS_IN_STACK;
-	LOG_INFO("herre");
-	stack = (StackArray*)malloc(sizeof(StackArray));
-	stackArrayCreate(stack, sizeof(Block), numOfElements);
-
-	int rc;
-	pthread_t threads[NUM_THREADS];
-	for (int t = 0; t < NUM_THREADS; t++) {
-		LOG_INFO("In main: creating thread %d\n", t);
-		rc = pthread_create(&threads[t], NULL, testStackArray1, (void *)t);
-		if (rc){
-			LOG_INFO("ERROR; return code from pthread_create() is %d\n", rc);
-			exit(-1);
-		}
-	}
-
-	void *status;
-	for (int t = 0; t < NUM_THREADS; t++) {
-		rc = pthread_join(threads[t], &status);
-	}
-	LOG_INFO("Test Client\n");
-	pthread_exit(NULL);
-}
-
 void testQueue1(void *threadId) {
 	int numOfBlocks = NUM_BLKS_IN_STACK;
 	LOG_INFO("Here... in thread %d\n", (int)threadId);
@@ -210,13 +164,13 @@ void testQueue() {
 	pthread_exit(NULL);
 }
 
-
-int smain() {
+int dmain() {
 	LOG_INIT_CONSOLE();
 	LOG_INIT_FILE();
 	//testMultiFullPool();
 
-	testStackArray();
+	//testStackArray();
+
 	LOG_CLOSE();
 	//testQueue();
 }
