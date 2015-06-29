@@ -22,12 +22,12 @@ void * my_malloc(size_t nBytes) {
 
 void my_free(void *ptr) {
 	LOG_PROLOG();
-	LOG_INFO("my_free: Trying to free memory %u", ptr);
+	//LOG_INFO("my_free: Trying to free memory %u", ptr);
 	char* tmp = ptr;
 	tmp -= sizeof(hp_malloc_header);
 	LOG_INFO("my_free: Original memory to free %u", tmp);
 	free(tmp);
-	LOG_INFO("my_free: Memory successfully freed %u", tmp);
+	//LOG_INFO("my_free: Memory successfully freed %u", tmp);
 	LOG_EPILOG();
 }
 

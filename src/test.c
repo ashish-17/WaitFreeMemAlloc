@@ -48,60 +48,60 @@ void testStack() {
 	int noOfOps = 0;
 
 	// Testing stackCreate()
-	printf("Before stackCreate\n");
+	LOG_INFO("Before stackCreate\n");
 	stackCreate(stack, sizeof(int*));
-	printf("After stackCreate\n");
+	LOG_INFO("After stackCreate\n");
 
 	// Testing stackPush()
 	for(int i = 1; i <= 10; i++) {
 		int *ptr = (int*) malloc(sizeof(int));
  *ptr = i;
-		printf("Pushing the value using stackPush i=%d\n",i);
+		LOG_INFO("Pushing the value using stackPush i=%d\n",i);
 		stackPush(stack, ptr);
 	}
 
 	// Testing stackPop()
 	for (int i = 1; i <= 9; i++) {
 		int* ptr = (int*)stackPop(stack);
-		printf("value popped using stackPop is %d\n", *ptr);
+		LOG_INFO("value popped using stackPop is %d\n", *ptr);
 	}
 
 	// Testing stackIsEmpty()
-	printf("is stack empty %d\n", stackIsEmpty(stack));
+	LOG_INFO("is stack empty %d\n", stackIsEmpty(stack));
 
 	// Checking the value of stamp
-	printf("Current stamp value of the top pointer is %d\n", stack->top->atomicRef->integer);
+	LOG_INFO("Current stamp value of the top pointer is %d\n", stack->top->atomicRef->integer);
 
 	// Testing stackPushOwner()
 	for(int i = 1; i <= 10; i++) {
 		int *ptr = (int*) malloc(sizeof(int));
  *ptr = i;
-		printf("Pushing the value using pushOwner i=%d\n",i);
+		LOG_INFO("Pushing the value using pushOwner i=%d\n",i);
 		stackPushOwner(stack, ptr);
 		noOfOps++;
 	}
 
 	// Checking the value of stamp
-	printf("Current stamp value of the top pointer is %d\n", stack->top->atomicRef->integer);
-	printf("Current value of the noOfOps is %d\n", noOfOps);
+	LOG_INFO("Current stamp value of the top pointer is %d\n", stack->top->atomicRef->integer);
+	LOG_INFO("Current value of the noOfOps is %d\n", noOfOps);
 
 	// Testing stackPopOwner()
 	while(!stackIsEmpty(stack)) {
 		int* ptr = (int*)stackPopOwner(stack);
 		noOfOps++;
-		printf("value popped using popOwner is %d\n", *ptr);
+		LOG_INFO("value popped using popOwner is %d\n", *ptr);
 	}
 
 	// Checking the value of stamp
-	printf("Current stamp value of the top pointer is %d\n", stack->top->atomicRef->integer);
-	printf("Current value of the noOfOps is %d\n", noOfOps);
+	LOG_INFO("Current stamp value of the top pointer is %d\n", stack->top->atomicRef->integer);
+	LOG_INFO("Current value of the noOfOps is %d\n", noOfOps);
 
 	// Testing stackPushOther()
 	for(int i = 1; i <= 10; i++) {
 		int *ptr = (int*) malloc(sizeof(int));
  *ptr = i;
 		bool out = stackPushOther(stack, ptr,stack->top);
-		printf("Pushing the value using pushOther i=%d succeeded with %d\n", i, out);
+		LOG_INFO("Pushing the value using pushOther i=%d succeeded with %d\n", i, out);
 		if (out)
 			noOfOps++;
 	}
@@ -115,17 +115,17 @@ void testStack() {
 		int* ptr = (int*)stackPopOther(stack);
 		if	(ptr != NULL){
 			noOfOps++;
-			printf("value popped using popOwner is %d\n", *ptr);
+			LOG_INFO("value popped using popOwner is %d\n", *ptr);
 		}
 		else {
-			printf("Can't pop more from other's stack but is stack empty %d\n",stackIsEmpty(stack));
+			LOG_INFO("Can't pop more from other's stack but is stack empty %d\n",stackIsEmpty(stack));
 			break;
 		}
 	}
 
 	// Checking the value of stamp
-	printf("Current stamp value of the top pointer is %d\n", stack->top->atomicRef->integer);
-	printf("Current value of the noOfOps is %d\n", noOfOps);
+	LOG_INFO("Current stamp value of the top pointer is %d\n", stack->top->atomicRef->integer);
+	LOG_INFO("Current value of the noOfOps is %d\n", noOfOps);
 }
 
 void testLocalPool() {
@@ -140,8 +140,8 @@ void testLocalPool() {
 		for (int i = 0; i < numOfChunks; i++) {
 			Chunk *chunk;
 			chunk = createChunk(chunk,(j * (numOfThreads-1) + i));
-			printf("the value of chunk ptr is%u\n",chunk);
-			//	printf("in test the chunk value is %d\n", chunk->value);
+			LOG_INFO("the value of chunk ptr is%u\n",chunk);
+			//	LOG_INFO("in test the chunk value is %d\n", chunk->value);
 			putInLocalPool(localPool, j, chunk);
 		}
 	}
@@ -150,7 +150,7 @@ void testLocalPool() {
 	for(int j = 0; j < numOfThreads; j++) {
 		for (int i = 1; i <= numOfChunks; i++) {
 			Chunk *chunk = getFromLocalPool(localPool, j);
-			//		printf("Chunk popped from localPool of thread %d is %d\n", j, chunk->value);
+			//		LOG_INFO("Chunk popped from localPool of thread %d is %d\n", j, chunk->value);
 		}
 	}
 }
@@ -162,8 +162,8 @@ void testFreePool() {
 
 	// Testing createFreePool()
 	Pool *freePool = createFreePool(numOfThreads);
-	//printf("Inside test pool ptr is %u\n", freePool);
-	//printf("Inside test Thread ptr is %u\n", freePool->threads);
+	//LOG_INFO("Inside test pool ptr is %u\n", freePool);
+	//LOG_INFO("Inside test Thread ptr is %u\n", freePool->threads);
 
 	// Testing putInFreePool
 	for(int j = 0; j < numOfThreads ; j++) {
@@ -172,11 +172,11 @@ void testFreePool() {
 			chunk = createChunk(chunk, numOfBlocks);
 			for (int i = 0; i < numOfBlocks; i++) {
 				Block *block = createBlock(i);
-				//printf("block ptr= %u\n", block);
+				//LOG_INFO("block ptr= %u\n", block);
 				putInChunk(chunk, block);
 			}
-			//printf("the value of chunk ptr is%u\n",chunk);
-			//printf("in test the chunk value is %d\n", chunk->value);
+			//LOG_INFO("the value of chunk ptr is%u\n",chunk);
+			//LOG_INFO("in test the chunk value is %d\n", chunk->value);
 			putInFreePool(freePool, j, chunk);
 
 		}
@@ -187,15 +187,15 @@ void testFreePool() {
 		for (int i = 1; i <= numOfChunks; i++) {
 			Chunk *chunk = getFromFreePool(freePool, j);
 			while(!isChunkEmpty(chunk)) {
-				printf("thread id %d, chunk id %d, Block value %d\n", j, i, getFromChunk(chunk)->memBlock);
+				LOG_INFO("thread id %d, chunk id %d, Block value %d\n", j, i, getFromChunk(chunk)->memBlock);
 			}
-			//			printf("Chunk popped from freePool of thread %d is %d\n", j, chunk->value);
+			//			LOG_INFO("Chunk popped from freePool of thread %d is %d\n", j, chunk->value);
 		}
 	}
 }
 
 void testFullPool() {
-	printf("************Testing Full Pool\n");
+	LOG_INFO("************Testing Full Pool\n");
 	int numOfThreads = 3;
 	int numOfChunks = 2;
 	int numOfBlocks = 3;
@@ -209,11 +209,11 @@ void testFullPool() {
 			chunk = createChunk(chunk, numOfBlocks);
 			for (int i = 0; i < numOfBlocks; i++) {
 				Block *block = createBlock(i);
-				//printf("block ptr= %u\n", block);
+				//LOG_INFO("block ptr= %u\n", block);
 				putInChunk(chunk, block);
 			}
-			//printf("the value of chunk ptr is%u\n",chunk);
-			//printf("in test the chunk value is %d\n", chunk->value);
+			//LOG_INFO("the value of chunk ptr is%u\n",chunk);
+			//LOG_INFO("in test the chunk value is %d\n", chunk->value);
 			putInOwnFullPool(fullPool, j, chunk);
 		}
 	}
@@ -223,9 +223,9 @@ void testFullPool() {
 		while(!isFullPoolEmpty(fullPool, j)) {
 			Chunk *chunk = getFromOwnFullPool(fullPool, j);
 			while(!isChunkEmpty(chunk)) {
-				printf("thread id %d, Block value %d\n", j, getFromChunk(chunk)->memBlock);
+				LOG_INFO("thread id %d, Block value %d\n", j, getFromChunk(chunk)->memBlock);
 			}
-			//	printf("Chunk popped from fullPool of thread %d is %d\n", j, chunk->value);
+			//	LOG_INFO("Chunk popped from fullPool of thread %d is %d\n", j, chunk->value);
 		}
 	}
 
@@ -234,11 +234,11 @@ void testFullPool() {
 		for (int i = 0; i < numOfChunks; i++) {
 			Chunk *chunk;
 			chunk = createChunk(chunk,numOfBlocks);
-			//printf("the value of chunk ptr is%u\n",chunk);
-			//printf("in test the chunk value is %d\n", chunk->value);
+			//LOG_INFO("the value of chunk ptr is%u\n",chunk);
+			//LOG_INFO("in test the chunk value is %d\n", chunk->value);
 			for (int i = 0; i < numOfBlocks; i++) {
 				Block *block = createBlock(i);
-				//printf("block ptr= %u\n", block);
+				//LOG_INFO("block ptr= %u\n", block);
 				putInChunk(chunk, block);
 			}
 			putInOwnFullPool(fullPool, j, chunk);
@@ -246,50 +246,50 @@ void testFullPool() {
 	}
 
 	// Testing getFromOtherFullPool- making thread 0 pop from stack 1. Should be able to pop only 3 chunks
-	printf("testing getFromOtherFullPool\n");
+	LOG_INFO("testing getFromOtherFullPool\n");
 	while(!isFullPoolEmpty(fullPool, 1)) {
 		Chunk *chunk = getFromOtherFullPool(fullPool, 1);
 		if (chunk != NULL) {
 			while(!isChunkEmpty(chunk)) {
-				printf("thread id %d, Block value %d\n", 1, getFromChunk(chunk)->memBlock);
+				LOG_INFO("thread id %d, Block value %d\n", 1, getFromChunk(chunk)->memBlock);
 			}
-			//	printf("Chunk popped from otherfullPool of thread %d is %d\n", 1, chunk->value);
+			//	LOG_INFO("Chunk popped from otherfullPool of thread %d is %d\n", 1, chunk->value);
 		}
 		else {
-			printf("Can't pop more from other's stack 1 but is stack 1 empty %d\n",isFullPoolEmpty(fullPool,1));
+			LOG_INFO("Can't pop more from other's stack 1 but is stack 1 empty %d\n",isFullPoolEmpty(fullPool,1));
 			break;
 		}
 	}
-	printf("popping the last chunk from stack 1 using popOwner\n");
+	LOG_INFO("popping the last chunk from stack 1 using popOwner\n");
 	Chunk *chunk = getFromOwnFullPool(fullPool, 1);
 	while(!isChunkEmpty(chunk)) {
-		printf("thread id %d, Block value %d\n", 1, getFromChunk(chunk)->memBlock);
+		LOG_INFO("thread id %d, Block value %d\n", 1, getFromChunk(chunk)->memBlock);
 	}
-	//printf("Chunk popped from fullPool of thread 1 is %d\n", chunk->value);
-	printf("Now is the stack 1 empty %d\n",isFullPoolEmpty(fullPool,1));
+	//LOG_INFO("Chunk popped from fullPool of thread 1 is %d\n", chunk->value);
+	LOG_INFO("Now is the stack 1 empty %d\n",isFullPoolEmpty(fullPool,1));
 
 	// Testing pushOther
-	printf("Testing pushOther\n");
+	LOG_INFO("Testing pushOther\n");
 	chunk = createChunk(chunk, numOfBlocks);
 	for (int i = 0; i < numOfBlocks; i++) {
 		Block *block = createBlock(i);
-		//printf("block ptr= %u\n", block);
+		//LOG_INFO("block ptr= %u\n", block);
 		putInChunk(chunk, block);
 	}
-	printf("was Chunk push successful %d \n", putInOtherFullPool(fullPool, 1, chunk, getThread(fullPool,1)->stack->top));
-	printf("Now is the stack 1 empty %d\n",isFullPoolEmpty(fullPool,1));
-	printf("trying to push again using pushOther\n");
+	LOG_INFO("was Chunk push successful %d \n", putInOtherFullPool(fullPool, 1, chunk, getThread(fullPool,1)->stack->top));
+	LOG_INFO("Now is the stack 1 empty %d\n",isFullPoolEmpty(fullPool,1));
+	LOG_INFO("trying to push again using pushOther\n");
 	chunk = createChunk(chunk, numOfBlocks);
 	for (int i = 0; i < numOfBlocks; i++) {
 		Block *block = createBlock(i);
-		//printf("block ptr= %u\n", block);
+		//LOG_INFO("block ptr= %u\n", block);
 		putInChunk(chunk, block);
 	}
-	printf("was Chunk push successful %d \n", putInOtherFullPool(fullPool, 1, chunk, getThread(fullPool,1)->stack->top));
-	printf("Now is the stack 1 empty %d\n",isFullPoolEmpty(fullPool,1));
-	printf("now trying to push using pushOwner\n");
-	printf("was Chunk push successful %d \n", putInOwnFullPool(fullPool, 1, chunk));
-	printf("Now is the stack 1 empty %d\n",isFullPoolEmpty(fullPool,1));
+	LOG_INFO("was Chunk push successful %d \n", putInOtherFullPool(fullPool, 1, chunk, getThread(fullPool,1)->stack->top));
+	LOG_INFO("Now is the stack 1 empty %d\n",isFullPoolEmpty(fullPool,1));
+	LOG_INFO("now trying to push using pushOwner\n");
+	LOG_INFO("was Chunk push successful %d \n", putInOwnFullPool(fullPool, 1, chunk));
+	LOG_INFO("Now is the stack 1 empty %d\n",isFullPoolEmpty(fullPool,1));
 
 }
 
@@ -303,7 +303,7 @@ void testPoolsTogether() {
 	Pool *localPool = createLocalPool(numOfThreads);
 	Pool *freePool = createFreePool(numOfThreads);
 
-	printf("Populating fullPool\n");
+	LOG_INFO("Populating fullPool\n");
 	for(int j = 0; j < numOfThreads ; j++) {
 		for (int i = 0; i < numOfChunks; i++) {
 			chunk = createChunk(chunk,(j * (numOfThreads-1) + i));
@@ -311,28 +311,28 @@ void testPoolsTogether() {
 		}
 	}
 
-	printf("Thread 1 moves all the chunks from stack 1 to local pool\n");
+	LOG_INFO("Thread 1 moves all the chunks from stack 1 to local pool\n");
 	while(!isFullPoolEmpty(fullPool, 1)) {
 		chunk = getFromOwnFullPool(fullPool, 1);
-		//	printf("removed chunk with value %d from stack 1\n", chunk->value);
+		//	LOG_INFO("removed chunk with value %d from stack 1\n", chunk->value);
 		putInLocalPool(localPool, 1, chunk);
 	}
-	printf("popping the last chunk from local pool of stack 1\n");
-	//printf("Chunk popped from local pool of stack 1 is %d\n", getFromLocalPool(localPool,1)->value);
+	LOG_INFO("popping the last chunk from local pool of stack 1\n");
+	//LOG_INFO("Chunk popped from local pool of stack 1 is %d\n", getFromLocalPool(localPool,1)->value);
 }
 
 void testChunk() {
 	int numOfBlocks = 5;
 	Chunk *chunk = createChunk(chunk, numOfBlocks);
-	printf("chunk ptr= %u\n", chunk);
+	LOG_INFO("chunk ptr= %u\n", chunk);
 	for (int i = 0; i < numOfBlocks; i++) {
 		Block *block = createBlock(i);
-		//printf("block ptr= %u\n", block);
+		//LOG_INFO("block ptr= %u\n", block);
 		putInChunk(chunk, block);
 	}
 
 	while(!isChunkEmpty(chunk)) {
-		printf("Block value %d\n", getFromChunk(chunk)->memBlock);
+		LOG_INFO("Block value %d\n", getFromChunk(chunk)->memBlock);
 	}
 }
 
@@ -340,49 +340,49 @@ void testChunk() {
 void testCircularQueue() {
 	int numOfElements = 5;
 	CircularQueue *queue = (CircularQueue*) malloc(sizeof(CircularQueue));
-	//printf("queuePtr = %u\n", queue);
+	//LOG_INFO("queuePtr = %u\n", queue);
 	circularQueueCreate(queue, sizeof(int*), numOfElements);
-	//printf("baseAddressPtr = %u\n", queue->baseAddress);
+	//LOG_INFO("baseAddressPtr = %u\n", queue->baseAddress);
 
 	for(int i = 0; i < numOfElements + 1; i++) {
 		int* element = (int*) malloc(sizeof(int));
  *element = i;
-		//printf("elementPtr = %u\n", element);
-		printf("element %d successfully enqueued %u \n", i, circularQueueEnq(queue, element));
+		//LOG_INFO("elementPtr = %u\n", element);
+		LOG_INFO("element %d successfully enqueued %u \n", i, circularQueueEnq(queue, element));
 	}
 
 	for (int i = 0; i < numOfElements + 1; i++) {
 		int *element = circularQueueDeq(queue);
 		if (element)
-			printf("element %d dequeued \n", *element);
+			LOG_INFO("element %d dequeued \n", *element);
 		else
-			printf("queueIsEmpty\n");
+			LOG_INFO("queueIsEmpty\n");
 	}
 	for(int i = 0; i < numOfElements - 1; i++) {
 		int* element = (int*) malloc(sizeof(int));
  *element = i;
-		//printf("elementPtr = %u\n", element);
-		printf("element %d successfully enqueued %u \n", i, circularQueueEnq(queue, element));
+		//LOG_INFO("elementPtr = %u\n", element);
+		LOG_INFO("element %d successfully enqueued %u \n", i, circularQueueEnq(queue, element));
 	}
 	for (int i = 0; i < 1; i++) {
 		int *element = circularQueueDeq(queue);
 		if (element)
-			printf("element %d dequeued \n", *element);
+			LOG_INFO("element %d dequeued \n", *element);
 		else
-			printf("queueIsEmpty\n");
+			LOG_INFO("queueIsEmpty\n");
 	}
 	for(int i = 0; i < numOfElements - 1; i++) {
 		int* element = (int*) malloc(sizeof(int));
  *element = i;
-		//printf("elementPtr = %u\n", element);
-		printf("element %d successfully enqueued %u \n", i, circularQueueEnq(queue, element));
+		//LOG_INFO("elementPtr = %u\n", element);
+		LOG_INFO("element %d successfully enqueued %u \n", i, circularQueueEnq(queue, element));
 	}
 	for (int i = 0; i < numOfElements ; i++) {
 		int *element = circularQueueDeq(queue);
 		if (element)
-			printf("element %d dequeued \n", *element);
+			LOG_INFO("element %d dequeued \n", *element);
 		else
-			printf("queueIsEmpty\n");
+			LOG_INFO("queueIsEmpty\n");
 	}
 }
 
@@ -406,7 +406,7 @@ int main() {
 */
 int stmain() {
 
-	printf("hello world\n");
+	LOG_INFO("hello world\n");
 	//testStack();
 	//testLocalPool(); // have to update as chunk definition has been changed
 	//testFreePool();
@@ -417,7 +417,7 @@ int stmain() {
 	//testChunk();
 	//testCircularQueue();
 
-	printf("Test client");
+	LOG_INFO("Test client");
 	return 0;
 }
 

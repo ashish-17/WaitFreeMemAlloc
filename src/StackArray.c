@@ -11,16 +11,16 @@ StackArrayElement* getStackArrayElement(StackArray* stack, int index)
 
 void stackArrayCreate(StackArray *stack, int elementSize, int maxElements) {
 	LOG_PROLOG();
-	//printf("In stackCreate\n");
+	//LOG_INFO("In stackCreate\n");
 	stack->elements = (StackArrayElement*) my_malloc(sizeof(StackArrayElement) * (maxElements + 1));
 	for (int i = 0; i < maxElements + 1; i++) {
 		getStackArrayElement(stack,i)->value = NULL;
 	}
 	stack->top = stack->elements;
 	stack->elementSize = elementSize;
-	//printf("Inside create stack and size of chunk is %d\n", stack->elementSize);
+	//LOG_INFO("Inside create stack and size of chunk is %d\n", stack->elementSize);
 	stack->maxElements = maxElements;
-	//printf("leaving stackCreate\n");
+	//LOG_INFO("leaving stackCreate\n");
 	LOG_EPILOG();
 }
 
@@ -93,28 +93,24 @@ bool stackArrayPushContended(StackArray *stack, const void* element) {
 	LOG_PROLOG();
 	bool flag = false;
 	if (StackArrayIsFull(stack)) {
-		printf("stack array is full\n");
+		LOG_INFO("stack array is full\n");
 		flag = false;
 	}
 	else {
 		void *nullptr = NULL;
 		StackArrayElement *oldTop = stack->top;
 		if (oldTop->value != NULL) {
-			//printf("oldTop->value was not null\n");
+			LOG_INFO("stackArrayPushContended: oldTop->value was not null");
 			atomic_compare_exchange_strong(&stack->top, &oldTop, oldTop + 1); //finish the job of other and return
 			flag = false;
 		}
-		//printf("stack->top->value = %u, stack->top = %u\n", stack->top->value, stack->top);
+		//LOG_INFO("stack->top->value = %u, stack->top = %u\n", stack->top->value, stack->top);
 		else if (atomic_compare_exchange_strong(&stack->top->value, &nullptr, element)) {
 			atomic_compare_exchange_strong(&stack->top, &oldTop, oldTop + 1);
-			//printf("CAS successful = %d\n", status);
-			//printf("after changing the top pointer\n");
-			//printf("stack->top->value = %u, stack->top = %u\n", stack->top->value, stack->top);
+			//LOG_INFO("CAS successful = %d\n", status);
+			//LOG_INFO("after changing the top pointer\n");
+			//LOG_INFO("stack->top->value = %u, stack->top = %u\n", stack->top->value, stack->top);
 			flag = true;
-		}
-		else {
-			//printf("CAS failed while updating top->value\n");
-			flag = false;
 		}
 	}
 	LOG_EPILOG();
