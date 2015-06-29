@@ -226,10 +226,8 @@ typedef struct _StackArrayTestThreadData {
 /*
     Test code for stack array.
 */
-#define NUM_THREADS 30
-#define NUM_CHUNKS_PER_THREAD 15
-#define NUM_BLOCKS_PER_CHUNK 3
-#define NUM_BLKS_IN_STACK 13
+#define NUM_THREADS 20
+#define NUM_BLKS_IN_STACK 10
 void testStackArrayPushAndPop(void *data) {
     LOG_PROLOG();
     StackArrayTestThreadData *threadData = (StackArrayTestThreadData*)data;
@@ -299,6 +297,45 @@ void testStackArrayOnlyPush(void *data) {
 	LOG_EPILOG();
 }
 
+bool verifyDataOnStack(StackArray *stack) {
+    bool success = false;
+
+    bool blockVals[NUM_THREADS * NUM_BLKS_IN_STACK] = {0};
+    Block *block = NULL;
+    StackArrayElement *element = NULL;
+    for (int i = 0; i< stack->maxElements; ++i) {
+        element = getStackArrayElement(stack, i);
+        if (element != NULL) {
+            block = (Block*)element->value;
+            if (block != NULL) {
+                if (blockVals[block->memBlock] == true) {
+                    LOG_WARN("Block added twice into stack - %d", block->memBlock);
+                    break;
+                }
+
+                blockVals[block->memBlock] = true;
+            } else {
+                LOG_WARN("Invalid block found on stack");
+                break;
+            }
+        } else {
+            LOG_WARN("Invalid element found on stack");
+            break;
+        }
+    }
+
+    for (int j = 0; j < stack->maxElements; ++j) {
+        if (!blockVals[block->memBlock]) {
+            success = false;
+            break;
+        } else if (!success) {
+            success = true;
+        }
+    }
+
+    return success;
+}
+
 int main() {
     LOG_INIT_CONSOLE();
 	LOG_INIT_FILE();
@@ -330,7 +367,13 @@ int main() {
 
         bool test1Success = StackArrayIsFull(stack);
         if (test1Success) {
-            LOG_INFO("Test 1 Successful");
+            LOG_INFO("Test 1 part 1 Successful");
+            test1Success = verifyDataOnStack(stack);
+            if (test1Success) {
+                LOG_INFO("Test 1 part 2 Successful");
+            } else {
+                LOG_WARN("Test 1 Part 2 failed");
+            }
 
             pthread_t threads[NUM_THREADS];
             for (int t = 0; t < NUM_THREADS; t++) {
