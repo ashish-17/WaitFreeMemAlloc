@@ -92,13 +92,13 @@ void* stackArrayPopUncontended(StackArray *stack) {
 bool stackArrayPushContended(StackArray *stack, const void* element) {
 	LOG_PROLOG();
 	bool flag = false;
+	StackArrayElement *oldTop = stack->top;
 	if (StackArrayIsFull(stack)) {
 		LOG_INFO("stack array is full\n");
 		flag = false;
 	}
 	else {
 		void *nullptr = NULL;
-		StackArrayElement *oldTop = stack->top;
 		if (oldTop->value != NULL) {
 			LOG_INFO("stackArrayPushContended: oldTop->value was not null");
 			atomic_compare_exchange_strong(&stack->top, &oldTop, oldTop + 1); //finish the job of other and return

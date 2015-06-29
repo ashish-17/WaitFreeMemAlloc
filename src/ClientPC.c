@@ -8,14 +8,14 @@
 
 
 //#define NUM_THREADS 3   //3   // 3    //6
-#define NUM_BLOCKS  36    //18   // 24   //36
-#define CHUNK_SIZE 2
+#define NUM_BLOCKS  54    //18   // 24   //36
+#define CHUNK_SIZE 3
 #define NUM_DONATION_STEPS 2
 #define NUM_PRODUCERS 3
 #define NUM_NORMAL_THREADS 0
 
 #define NUM_THREADS (3 * NUM_PRODUCERS + NUM_NORMAL_THREADS)
-#define NUM_BLOCKS_TO_BE_PASSED (20)
+#define NUM_BLOCKS_TO_BE_PASSED (100)
 #define MAX 10000000000			/* Numbers to produce */
 
 pthread_mutex_t the_mutex[NUM_THREADS];
