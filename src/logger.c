@@ -201,7 +201,7 @@ void getProcessAndThreadId(int *const pid, int *const tid) {
 #elif defined(__MACH__)
 	*tid = pthread_mach_thread_np(pthread_self());
 #else
-	*tid= 0;
+	*tid= pthread_self();
 #endif
 }
 
