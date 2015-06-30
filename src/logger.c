@@ -9,6 +9,7 @@
 #include <time.h>
 #include <sys/time.h>
 #include <pthread.h>
+#include <stdbool.h>
 #include "Logger.h"
 
 #define LOGGER_BUF_SIZE 1024
@@ -51,7 +52,7 @@ void _log_init(int log_output_id) {
     }
 }
 
-void _log_close(int log_output_id) {
+void _log_close() {
     if (g_log_dmp_console != NULL) {
         g_log_dmp_console(LOG_STRING_CLOSE);
     }
@@ -73,22 +74,25 @@ void _log_write(const char *const func,
                 const char *const fmt, ...) {
 	char output[LOGGER_BUF_SIZE] = "\0";
 	char message[LOGGER_BUF_SIZE] = "\0";
+	char tmp[LOGGER_BUF_SIZE] = "\0";
     char prefix[LOGGER_PREFIX_MAX_SIZE] = "\0";
 
+    bool doAssert = false;
 
     switch(level) {
         case LOG_LEVEL_VERBOSE: {
                 switch(prefixId) {
                     case LOG_PREFIX_PROLOG:
                     case LOG_PREFIX_EPILOG: {
-                        sprintf(message, "%s()", func);
+                        sprintf(message, "|%s|", func);
                         break;
                     }
 
                     default: {
                         va_list va;
                         va_start(va, fmt);
-                        sprintf(message, fmt, va);
+                        vsprintf(tmp, fmt, va);
+                        sprintf(message, "|%s| %s", func, tmp);
                         va_end(va);
 
                         break;
@@ -98,10 +102,22 @@ void _log_write(const char *const func,
                 break;
             }
 
+        case LOG_LEVEL_ERROR: {
+            va_list va;
+            va_start(va, fmt);
+            vsprintf(tmp, fmt, va);
+            sprintf(message, "|%s line-%d| %s", func, line, tmp);
+            va_end(va);
+            doAssert = true;
+
+            break;
+        }
+
         default: {
             va_list va;
             va_start(va, fmt);
-            vsprintf(message, fmt, va);
+            vsprintf(tmp, fmt, va);
+            sprintf(message, "|%s| %s", func, tmp);
             va_end(va);
 
             break;
@@ -137,6 +153,11 @@ void _log_write(const char *const func,
 
     if (g_log_dmp_file != NULL) {
         g_log_dmp_file(output);
+    }
+
+    if (doAssert) {
+        LOG_CLOSE();
+        assert(0);
     }
 }
 
@@ -180,7 +201,7 @@ void getProcessAndThreadId(int *const pid, int *const tid) {
 #elif defined(__MACH__)
 	*tid = pthread_mach_thread_np(pthread_self());
 #else
-	*tid= pthread_self();
+	*tid= 0;
 #endif
 }
 
