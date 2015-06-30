@@ -304,7 +304,7 @@ int main() {
 	config1.numProducerGroups = -1;
 	config1.numProducerPerGroup = -1;
 	config1.numProducers = 4;
-	config1.numNormalThreads = 2;
+	config1.numNormalThreads = 0;
 	config1.numBlocksToBePassed = 20;
 	config1.numThreads = (3 * config1.numProducers + config1.numNormalThreads);
 	config1.numBlocks = (config1.numThreads * config1.numChunksPerThread * config1.chunkSize);

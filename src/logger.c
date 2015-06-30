@@ -157,7 +157,7 @@ void _log_write(const char *const func,
 
     if (doAssert) {
         LOG_CLOSE();
-        assert(0);
+        _assert(output, file, line);
     }
 }
 
