@@ -12,6 +12,10 @@ Chunk* createChunk(Chunk *chunk, int number) {
 	return chunk;
 }
 
+void destroyChunk(Chunk* chunk) {
+
+}
+
 bool isChunkEmpty(Chunk *chunk) {
 	LOG_PROLOG();
 	bool flag = stackArrayIsEmpty(chunk->stack);

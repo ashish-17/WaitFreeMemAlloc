@@ -11,4 +11,6 @@ Block* allocate(int threadId, bool toBePassed);
 
 void freeMem(int threadId, Block* block);
 
+void destroyWaitFreePool();
+
 #endif /* WAITFREEMEMALLOC_SRC_WAITFREEPOOL_H_ */

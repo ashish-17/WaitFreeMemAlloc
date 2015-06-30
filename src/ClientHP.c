@@ -11,7 +11,7 @@
 
 //HPStructure *globalHPStructure = NULL;
 
-void* tester1(void *threadId) {
+void* stester(void *threadId) {
 	LOG_INFO("In thread %d\n", (int)threadId);
 	for (int i = 1; i <= ARRAY_LOOP_CTR; i++) {
 		int *element = (int*)my_malloc(sizeof(int));
@@ -29,7 +29,7 @@ int sdmain() {
 	pthread_t threads[NUM_THREADS];
 	for (int t = 0; t < NUM_THREADS; t++) {
 		LOG_INFO("In main: creating thread %d\n", t);
-		rc = pthread_create(&threads[t], NULL, tester1, (void *)t);
+		rc = pthread_create(&threads[t], NULL, stester, (void *)t);
 		if (rc){
 			LOG_INFO("ERROR; return code from pthread_create() is %d\n", rc);
 			exit(-1);

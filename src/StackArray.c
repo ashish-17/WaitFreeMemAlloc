@@ -336,7 +336,7 @@ bool verifyDataOnStack(StackArray *stack) {
     return success;
 }
 
-int main() {
+int ikmain() {
     LOG_INIT_CONSOLE();
 	LOG_INIT_FILE();
 

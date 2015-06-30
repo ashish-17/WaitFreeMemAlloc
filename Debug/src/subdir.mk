@@ -11,6 +11,7 @@ C_SRCS += \
 ../src/Client.c \
 ../src/ClientHP.c \
 ../src/ClientPC.c \
+../src/CodeCorrectness.c \
 ../src/FreePool.c \
 ../src/FullPool.c \
 ../src/HazardPointer.c \
@@ -36,6 +37,7 @@ OBJS += \
 ./src/Client.o \
 ./src/ClientHP.o \
 ./src/ClientPC.o \
+./src/CodeCorrectness.o \
 ./src/FreePool.o \
 ./src/FullPool.o \
 ./src/HazardPointer.o \
@@ -61,6 +63,7 @@ C_DEPS += \
 ./src/Client.d \
 ./src/ClientHP.d \
 ./src/ClientPC.d \
+./src/CodeCorrectness.d \
 ./src/FreePool.d \
 ./src/FullPool.d \
 ./src/HazardPointer.d \

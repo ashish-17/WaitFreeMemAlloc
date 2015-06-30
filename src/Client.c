@@ -15,7 +15,7 @@
 //HPStructure *globalHPStructure = NULL;
 
 // The actual tester
-void* tester(void *threadId) {
+void* clienttester(void *threadId) {
 	/*if ((int)threadId == 1) {
 		LOG_INFO("thread %d is FINSISHED\n",(int)threadId);
 		pthread_exit(NULL);
@@ -73,7 +73,7 @@ int tymain() {
 	pthread_t threads[NUM_THREADS];
 	for (int t = 0; t < NUM_THREADS; t++) {
 		LOG_INFO("In main: creating thread %d\n", t);
-		rc = pthread_create(&threads[t], NULL, tester, (void *)t);
+		rc = pthread_create(&threads[t], NULL, clienttester, (void *)t);
 		if (rc){
 			LOG_INFO("ERROR; return code from pthread_create() is %d\n", rc);
 			exit(-1);

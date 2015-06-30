@@ -10,4 +10,6 @@ typedef struct {
 
 Block* createBlock(int threadId, int number);
 
+void destroyBlock(Block *block) ;
+
 #endif /* WAITFREEMEMALLOC_SRC_BLOCK_H_ */
