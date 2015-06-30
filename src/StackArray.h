@@ -22,9 +22,9 @@ StackArray* stackArrayCreate(int elementSize, int maxElements);
 
 void stackArrayFree(StackArray *stack);
 
-bool stackArrayIsEmpty(const StackArray *stack);
+bool stackArrayIsEmpty(const StackArrayElement *top, const StackArrayElement *baseAddress);
 
-bool StackArrayIsFull(const StackArray *stack);
+bool StackArrayIsFull(const StackArrayElement *top, const StackArrayElement *baseAddress, int sizeOfStack);
 
 bool stackArrayPushUncontended(StackArray *stack, const void* element);
 

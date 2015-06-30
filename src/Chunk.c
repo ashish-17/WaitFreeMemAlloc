@@ -18,14 +18,14 @@ void destroyChunk(Chunk* chunk) {
 
 bool isChunkEmpty(Chunk *chunk) {
 	LOG_PROLOG();
-	bool flag = stackArrayIsEmpty(chunk->stack);
+	bool flag = stackArrayIsEmpty(chunk->stack->top, chunk->stack->elements);
 	LOG_EPILOG();
 	return flag;
 }
 
 bool chunkHasSpace(Chunk *chunk) {
 	LOG_PROLOG();
-	bool flag = (!StackArrayIsFull(chunk->stack));
+	bool flag = (!StackArrayIsFull(chunk->stack->top, chunk->stack->elements, chunk->stack->maxElements));
 	LOG_EPILOG();
 	return flag;
 	/*if (chunk->numOfBlocks != chunk->stack->numberOfElements)

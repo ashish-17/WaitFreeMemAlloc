@@ -81,30 +81,30 @@ void stackArrayFree(StackArray *stack) {
 	LOG_EPILOG();
 }
 
-bool stackArrayIsEmpty(const StackArray *stack) {
+bool stackArrayIsEmpty(const StackArrayElement *top, const StackArrayElement *baseAddress) {
 	LOG_PROLOG();
 	bool flag = false;
 
-	if (stack != NULL) {
-        flag = (stack->top == getStackArrayElement(stack, 0));
+	if (top != NULL && baseAddress != NULL) {
+        flag = (top == baseAddress);
         LOG_DEBUG("Stack array is %s empty", flag ? "" : "not");
 	} else {
-        LOG_ERROR("Invalid memory address for stackArray");
+        LOG_ERROR("Invalid memory addresses for stack");
 	}
 
 	LOG_EPILOG();
 	return flag;
 }
 
-bool StackArrayIsFull(const StackArray *stack) {
+bool StackArrayIsFull(const StackArrayElement *top, const StackArrayElement *baseAddress, int sizeOfStack) {
 	LOG_PROLOG();
 	bool flag = false;
 
-	if (stack != NULL) {
-        flag = (stack->top == getStackArrayElement(stack, stack->maxElements));
+	if (top != NULL && baseAddress != NULL) {
+        flag = (top == (baseAddress + sizeOfStack));
         LOG_DEBUG("Stack array is %s full", flag ? "" : "not");
 	} else {
-        LOG_ERROR("Invalid memory address for stackArray");
+        LOG_ERROR("Invalid memory addresses for stack");
 	}
 
 	LOG_EPILOG();
@@ -117,7 +117,7 @@ bool stackArrayPushUncontended(StackArray *stack, const void* element) {
 
 	if (stack != NULL) {
         if (element != NULL) {
-            if (StackArrayIsFull(stack)) {
+            if (StackArrayIsFull(stack->top, stack->elements, stack->maxElements)) {
                 LOG_WARN("Push uncontended failed as array is full");
             } else {
                 if (stack->top != NULL) {
@@ -143,7 +143,7 @@ void* stackArrayPopUncontended(StackArray *stack) {
 	LOG_PROLOG();
 	void *ptr = NULL;
 	if (stack != NULL) {
-        if (stackArrayIsEmpty(stack)) {
+        if (stackArrayIsEmpty(stack->top, stack->elements)) {
             LOG_WARN("Pop uncontended failed as array is empty");
         } else {
             if (stack->top != NULL) {
@@ -168,7 +168,7 @@ bool stackArrayPushContended(StackArray *stack, const void* element) {
 	if (stack != NULL) {
         if (element != NULL) {
             StackArrayElement *oldTop = stack->top;
-            if (StackArrayIsFull(stack)) {
+            if (StackArrayIsFull(oldTop, stack->elements, stack->maxElements)) {
                 LOG_WARN("Push contended failed as array is full");
             } else {
                 void *nullptr = NULL;
@@ -204,16 +204,29 @@ void* stackArrayPopContended(StackArray *stack) {
 	void *ptr = NULL;
 	if (stack != NULL) {
         StackArrayElement *oldTop = stack->top;
-        if (stackArrayIsEmpty(stack)) {
+        if (stackArrayIsEmpty(oldTop, stack->elements)) {
             LOG_WARN("Pop contended failed as array is empty");
         } else {
+            LOG_DEBUG("Base address = %u, OldTop = %u, top = %u", stack->elements, oldTop, stack->top);
+            if ((oldTop - 1) < stack->elements) {
+                LOG_ERROR("Segmentation fault");
+            }
+
             void *element = (oldTop - 1)->value;
             if (atomic_compare_exchange_strong(&(stack->top - 1)->value, &element, NULL)) {
                 atomic_compare_exchange_strong(&stack->top, &oldTop, oldTop - 1);
+                if (stack->top < stack->elements) {
+                    LOG_ERROR("Segmentation fault");
+                }
                 ptr = element;
-                LOG_INFO("Pop contended successful");
+                LOG_DEBUG("Base address = %u, top = %u", stack->elements, oldTop-1)
+                LOG_INFO("Pop contended successful (%d)", ((stack->top - stack->elements) / sizeof(StackArrayElement)));
             } else {
                 atomic_compare_exchange_strong(&stack->top, &oldTop, oldTop - 1);
+                if (stack->top < stack->elements) {
+                    LOG_ERROR("Segmentation fault");
+                }
+                LOG_DEBUG("Base address = %u, top = %u", stack->elements, oldTop-1)
                 LOG_WARN("Pop contended failed as element already popped by other thread");
             }
         }
@@ -422,7 +435,7 @@ void testStackArray(TestConfigStackArray cfg) {
 
             my_free(threads);
 
-            bool test1Success = StackArrayIsFull(stack);
+            bool test1Success = StackArrayIsFull(stack->top, stack->elements, stack->maxElements);
             if (test1Success) {
                 LOG_INFO("Test 1 part 1 Successful");
 
@@ -432,7 +445,6 @@ void testStackArray(TestConfigStackArray cfg) {
                 } else {
                     LOG_ERROR("Test 1 Part 2 failed");
                 }
-
 
                 threads = (pthread_t*)my_malloc(sizeof(pthread_t) * cfg.numThreads);
                 for (int t = 0; t < cfg.numThreads; t++) {
@@ -456,7 +468,7 @@ void testStackArray(TestConfigStackArray cfg) {
 
                 my_free(threads);
 
-                bool test2Success = stackArrayIsEmpty(stack);
+                bool test2Success = stackArrayIsEmpty(stack->top, stack->elements);
                 if (test2Success) {
                     LOG_INFO("Test 2 Successful");
 
@@ -482,7 +494,7 @@ void testStackArray(TestConfigStackArray cfg) {
 
                     my_free(threads);
 
-                    bool test3Success = stackArrayIsEmpty(stack);
+                    bool test3Success = stackArrayIsEmpty(stack->top, stack->elements);
                     if (test3Success) {
                         LOG_INFO("Test 3 Successful");
 
@@ -527,8 +539,8 @@ void testStackArray(TestConfigStackArray cfg) {
     }
 }
 
-//int main() {
-int mainTestStackArray() {
+int main() {
+//int mainTestStackArray() {
     LOG_INIT_CONSOLE();
 	LOG_INIT_FILE();
 
