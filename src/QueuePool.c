@@ -34,9 +34,21 @@ QueuePool* createQueuePool(int threads, int elementSize)
 void deleteQueuePool(QueuePool* pool)
 {
 	LOG_PROLOG();
-	queueFree(pool->threads->queue);
-	my_free(pool->threads);
-	pool->numberOfThreads = 0;
+	if (pool != NULL) {
+		if (pool->threads != NULL) {
+			my_free(pool->threads);
+			pool->threads = NULL;
+		}
+		else {
+			LOG_ERROR("Trying to free thread pointer which was NULL");
+		}
+		pool->numberOfThreads = 0;
+		my_free(pool);
+		pool = NULL;
+	}
+	else {
+		LOG_ERROR("Trying to free NULL pointer");
+	}
 	LOG_EPILOG();
 }
 

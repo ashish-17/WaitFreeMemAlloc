@@ -251,7 +251,7 @@ void tester(TestConfig cfg) {
 	globalHPStructure = (HPStructure*)my_malloc(sizeof(HPStructure));
 	hpStructureCreate(globalHPStructure, cfg.numThreads, 5);
 	createWaitFreePool(cfg.numBlocks, cfg.numThreads, cfg.chunkSize, cfg.numDonationSteps);
-	initHashTable(cfg.numBlocks);
+	hashTableCreate(cfg.numBlocks);
 
 
 	int rc;
@@ -289,12 +289,12 @@ void tester(TestConfig cfg) {
 	}
 	my_free(threadData);
 	threadData = NULL;
-	clearHashTable(cfg.numBlocks);
+	hashTableFree(cfg.numBlocks);
 
 	LOG_EPILOG();
 }
 
-int masdain() {
+int main() {
 	LOG_INIT_CONSOLE();
 	LOG_INIT_FILE();
 	TestConfig config1;

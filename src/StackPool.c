@@ -32,9 +32,30 @@ StackPool* createStackPool(int threads)
 void deleteStackPool(StackPool* pool)
 {
 	LOG_PROLOG();
-	stackFree(pool->threads->stack);
-	my_free(pool->threads);
-	pool->numberOfThreads = 0;
+	if (pool != NULL) {
+		for (int i = 0; i < pool->numberOfThreads; i++) {
+			StackThread *thread = getStackThread(pool, i);
+			if (thread != NULL) {
+				while (!stackIsEmpty(thread->stack)) {
+					Chunk* chunk = stackPop(thread->stack);
+					destroyChunk(chunk);
+					chunk = NULL;
+				}
+				stackFree(thread->stack);
+			}
+			else {
+				LOG_ERROR("Trying to free thread NULL pointer");
+			}
+		}
+		my_free(pool->threads);
+		pool->threads = NULL;
+		pool->numberOfThreads = 0;
+		my_free(pool);
+		pool = NULL;
+	}
+	else {
+		LOG_ERROR("Trying to free NULL pointer");
+	}
 	LOG_EPILOG();
 }
 

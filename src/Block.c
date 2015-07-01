@@ -11,6 +11,11 @@ Block* createBlock(int threadId, int number) {
 
 void destroyBlock(Block *block) {
 	LOG_PROLOG();
-	my_free(block);
+	if (block != NULL) {
+		my_free(block);
+		block = NULL;
+	} else {
+		LOG_ERROR("Trying to free NULL pointer");
+	}
 	LOG_EPILOG();
 }

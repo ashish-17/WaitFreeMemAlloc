@@ -14,6 +14,8 @@
 
 StackPool* createFullPool(int numThreads);
 
+void destroyFullPool(StackPool *pool);
+
 bool isFullPoolEmpty(StackPool* pool, int threadIndex);
 
 Chunk* getFromOtherFullPool(StackPool* pool, int otherThreadId, int threadIndex);

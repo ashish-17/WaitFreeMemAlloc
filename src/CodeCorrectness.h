@@ -3,9 +3,9 @@
 
 #include "commons.h"
 
-void initHashTable(int numOfBlocks);
+void hashTableCreate(int numOfBlocks);
 
-void clearHashTable(int numOfBlocks);
+void hashTableFree(int numOfBlocks);
 
 bool setFlagForAllocatedBlock(int blockNum);
 

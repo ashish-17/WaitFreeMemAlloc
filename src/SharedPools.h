@@ -16,7 +16,7 @@ typedef struct {
 
 SharedQueuePools* createSharedQueuePools(int threads);
 
-void deleteSharedQueuePools(SharedQueuePools* pool);
+void destroySharedQueuePools(SharedQueuePools* pool);
 
 SharedQueuePool* getSharedQueuePool(SharedQueuePools* pool, int index);
 

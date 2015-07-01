@@ -16,6 +16,13 @@ StackPool* createLocalPool(int numThreads)
 	return localPool;
 }
 
+void destroyLocalPool(StackPool *pool) {
+	LOG_PROLOG();
+	deleteStackPool(pool);
+	pool = NULL;
+	LOG_EPILOG();
+}
+
 Chunk* getFromLocalPool(StackPool* pool, int threadIndex) {
 	LOG_PROLOG();
 	StackThread* thread = getStackThread(pool, threadIndex);

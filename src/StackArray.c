@@ -471,7 +471,7 @@ void testStackArray(TestConfigStackArray cfg) {
                 bool test2Success = stackArrayIsEmpty(stack->top, stack->elements);
                 if (test2Success) {
                     LOG_INFO("Test 2 Successful");
-
+/*
                     threads = (pthread_t*)my_malloc(sizeof(pthread_t) * cfg.numThreads);
                     for (int t = 0; t < cfg.numThreads; t++) {
                         threadData[t].stack = stack;
@@ -493,7 +493,7 @@ void testStackArray(TestConfigStackArray cfg) {
                     }
 
                     my_free(threads);
-
+*/
                     bool test3Success = stackArrayIsEmpty(stack->top, stack->elements);
                     if (test3Success) {
                         LOG_INFO("Test 3 Successful");
@@ -539,7 +539,7 @@ void testStackArray(TestConfigStackArray cfg) {
     }
 }
 
-int main() {
+int stackmain() {
 //int mainTestStackArray() {
     LOG_INIT_CONSOLE();
 	LOG_INIT_FILE();
@@ -577,13 +577,11 @@ int main() {
     cfg[9].numBlocksInStack = 100;
     cfg[9].numThreads = 10;
 
-   /* for (int i = 0; i < COUNT_TEST_CFG; ++i) {
+    for (int i = 0; i < COUNT_TEST_CFG; ++i) {
         LOG_INFO("Test configuration %d, with %d threads and %d number of blocks per thread", (i+1), cfg[i].numThreads, cfg[i].numBlocksInStack);
         testStackArray(cfg[i]);
         LOG_INFO("Test configuration %d, passed", (i+1));
     }
-*/
-    testStackArray(cfg[2]);
 
     LOG_INFO("All tests passed");
 

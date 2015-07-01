@@ -13,7 +13,17 @@ Chunk* createChunk(Chunk *chunk, int number) {
 }
 
 void destroyChunk(Chunk* chunk) {
-
+	LOG_PROLOG();
+	if (chunk != NULL) {
+		stackArrayFree(chunk->stack);
+		chunk->stack = NULL;
+		my_free(chunk);
+		chunk = NULL;
+	}
+	else {
+		LOG_ERROR("Trying to free NULL pointer");
+	}
+	LOG_EPILOG();
 }
 
 bool isChunkEmpty(Chunk *chunk) {

@@ -16,6 +16,13 @@ StackPool* createFullPool(int numThreads)
 	return fullPool;
 }
 
+void destroyFullPool(StackPool *pool) {
+	LOG_PROLOG();
+	deleteStackPool(pool);
+	pool = NULL;
+	LOG_EPILOG();
+}
+
 bool isFullPoolEmpty(StackPool* pool, int threadIndex) {
 	LOG_PROLOG();
 	StackThread* thread = getStackThread(pool, threadIndex);

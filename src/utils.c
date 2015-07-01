@@ -41,7 +41,6 @@ void my_free(void *ptr) {
     LOG_DEBUG("Pointer to actual memory being freed %x", tmp);
 
 	free(tmp);
-	ptr = NULL;
 
 	LOG_EPILOG();
 }

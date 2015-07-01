@@ -11,6 +11,24 @@ ReferenceIntegerPair* createReferenceIntegerPair(void* ref, int i) {
 	return pair;
 }
 
+void freeReferenceIntegerPair(ReferenceIntegerPair* ptr) {
+	LOG_PROLOG();
+	if (ptr != NULL) {
+		ptr->integer = 0;
+		if (ptr->reference != NULL) {
+			my_free(ptr->reference);
+			ptr->reference = NULL;
+			}
+		else {
+			LOG_ERROR("Trying to free reference pointer of RIP which was a NULL pointer");
+		}
+	}
+	else {
+		LOG_ERROR("Trying to free NULL pointer");
+	}
+	LOG_EPILOG();
+}
+
 void createAtomicStampedReference(AtomicStampedReference* current, void* initialRef, int initialStamp) {
 	LOG_PROLOG();
 	current->atomicRef = (ReferenceIntegerPair*)my_malloc(sizeof(ReferenceIntegerPair));
@@ -18,6 +36,18 @@ void createAtomicStampedReference(AtomicStampedReference* current, void* initial
 	current->atomicRef->integer = initialStamp;
 	LOG_EPILOG();
 	//printf("leaving createAtomicStampedReference\n");
+}
+
+void freeAtomicStampedReference(AtomicStampedReference* ptr) {
+	LOG_PROLOG();
+	if (ptr != NULL) {
+		freeReferenceIntegerPair(ptr->atomicRef);
+		ptr->atomicRef = NULL;
+	}
+	else {
+		LOG_ERROR("Trying to free NULL pointer");
+	}
+	LOG_EPILOG();
 }
 
 bool compareAndSet(AtomicStampedReference* current,

@@ -14,6 +14,8 @@
 
 StackPool* createLocalPool(int numThreads);
 
+void destroyLocalPool(StackPool *pool);
+
 Chunk* getFromLocalPool(StackPool* pool, int threadIndex);
 
 bool putInLocalPool(StackPool* pool, int threadIndex, Chunk* chunk);

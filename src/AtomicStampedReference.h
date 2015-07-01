@@ -13,6 +13,8 @@ typedef struct {
 
 ReferenceIntegerPair* createReferenceIntegerPair(void* ref, int i);
 
+void freeAtomicStampedReference(AtomicStampedReference* ptr);
+
 void createAtomicStampedReference(AtomicStampedReference* current, void* initialRef, int initialStamp);
 
 bool compareAndSet(AtomicStampedReference* current,

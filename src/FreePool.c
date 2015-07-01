@@ -18,6 +18,13 @@ StackPool* createFreePoolUC(int numThreads) {
 	return freePool;
 }
 
+void destroyFreePoolUC(StackPool *pool) {
+	LOG_PROLOG();
+	deleteStackPool(pool); // deleteStackPool will empty the StackPool
+	pool = NULL;
+	LOG_EPILOG();
+}
+
 Chunk* getFromFreePoolUC(StackPool* pool, int threadIndex) {
 	LOG_PROLOG();
 	StackThread* thread = getStackThread(pool, threadIndex);
@@ -47,19 +54,49 @@ QueuePool* createFreePoolC(int numThreads) {
 	return freePool;
 }
 
+void destroyFreePoolC(QueuePool *pool) {
+	LOG_PROLOG();
+	// have to empty the pool here.
+	// Can't push the work to deleteQueuePool
+	// as we are pushing Chunks in this QueuePool and Blocks in the QueuePool of SharedPools.
+	// So deleteQueuePool can't differentiate and memory leak might happen.
+	if (pool != NULL) {
+		for (int i = 0; i < pool->numberOfThreads; i++) {
+			QueueThread* thread = getQueueThread(pool, i);
+			if (thread != NULL) {
+				while (!isQueueEmpty(thread->queue)) {
+					Chunk *chunk = queueDeqUC(thread->queue);
+					destroyChunk(chunk);
+				}
+				queueFree(thread->queue);
+				my_free(thread);
+				thread = NULL;
+			}
+			else {
+				LOG_ERROR("Trying to free NULL pointer");
+			}
+		}
+		deleteQueuePool(pool);
+		pool = NULL;
+	}
+	else {
+		LOG_ERROR("Trying to free NULL pointer");
+	}
+	LOG_EPILOG();
+}
+
 Chunk* getFromFreePoolC(QueuePool* pool, int threadIndex, int primThread, QueueElement *oldQueueHead) {
 	LOG_PROLOG();
 	QueueThread* thread = getQueueThread(pool, primThread);
-	Chunk* chunk = queueDeq(thread->queue, oldQueueHead, threadIndex);
+	Chunk* chunk = queueDeqC(thread->queue, oldQueueHead, threadIndex);
 	LOG_EPILOG();
 	return chunk;
 }
 
 bool putInFreePoolC(QueuePool* pool, int threadIndex, Chunk* chunk) {
 	LOG_PROLOG();
-	//printf("putInFreePoolC: threadId : %d\n", threadIndex);
 	QueueThread* thread = getQueueThread(pool, threadIndex);
-	bool flag = queueEnq(thread->queue, chunk, threadIndex);
+	bool flag = queueEnqC(thread->queue, chunk, threadIndex);
 	LOG_EPILOG();
 	return flag;
 }

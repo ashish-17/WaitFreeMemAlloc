@@ -30,8 +30,9 @@ void hpStructureCreate(HPStructure *hpStructure, int noOfThreads, int noOfHP) {
 	LOG_PROLOG();
 	hpStructure->freeQueues = (FreeQueue*) my_malloc(sizeof(FreeQueue) * noOfThreads);
 	for (int i = 0; i < noOfThreads; i++) {
-		getFreeQueue(hpStructure->freeQueues, i)->queue = (CircularQueue*) my_malloc(sizeof(CircularQueue));
-		circularQueueCreate(getFreeQueue(hpStructure->freeQueues, i)->queue, sizeof(int *), noOfThreads * noOfHP);
+		//getFreeQueue(hpStructure->freeQueues, i)->queue = (CircularQueue*) my_malloc(sizeof(CircularQueue));
+		//circularQueueCreate(getFreeQueue(hpStructure->freeQueues, i)->queue, sizeof(int *), noOfThreads * noOfHP);
+		getFreeQueue(hpStructure->freeQueues, i)->queue = circularQueueCreate(sizeof(int *), noOfThreads * noOfHP);
 	}
 	//printf("created Circular queues\n");
 	// pushing sentinel nodes in all the circular queues
@@ -63,6 +64,34 @@ void hpStructureCreate(HPStructure *hpStructure, int noOfThreads, int noOfHP) {
 	//printf("hpCreate: hpStructure = %u\n", hpStructure);
 	LOG_EPILOG();
 }
+
+void hpStructureDestroy(HPStructure *hpStructure) {
+	LOG_PROLOG();
+
+	for(int i = 0; i < hpStructure->numberOfThreads; i++) {
+		circularQueueFree((getFreeQueue(hpStructure->freeQueues, i))->queue);
+	}
+	my_free(hpStructure->freeQueues);
+	hpStructure->freeQueues = NULL;
+
+	for(int i = 0; i < hpStructure->numberOfThreads * hpStructure->numberOfHP; i++) {
+		my_free(hpStructure->hazardPointers[i]);
+	}
+	my_free(hpStructure->hazardPointers);
+	hpStructure->hazardPointers = NULL;
+
+	my_free(hpStructure->roundCounters);
+	hpStructure->roundCounters = NULL;
+
+	my_free(hpStructure->topPointers);
+	hpStructure->topPointers = NULL;
+
+	hpStructure->numberOfHP = 0;
+	hpStructure->numberOfThreads = 0;
+
+	LOG_EPILOG();
+}
+
 
 void freeMemHP(HPStructure *hpStructure, int threadId, void *ptr) {
 	LOG_PROLOG();

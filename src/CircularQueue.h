@@ -18,7 +18,9 @@ typedef struct {
 
 CircularQueueElement * getCircularQueueElement(CircularQueue *queue, int index);
 
-void circularQueueCreate(CircularQueue *queue, int elementSize, int noOfElements);
+CircularQueue* circularQueueCreate(int elementSize, int noOfElements);
+
+void circularQueueFree(CircularQueue *queue);
 
 bool circularQueueEnq(CircularQueue *queue, const void* element);
 

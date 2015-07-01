@@ -15,11 +15,15 @@
 
 StackPool* createFreePoolUC(int numThreads);
 
+void destroyFreePoolUC(StackPool *pool);
+
 Chunk* getFromFreePoolUC(StackPool* pool, int threadIndex);
 
 bool putInFreePoolUC(StackPool* pool, int threadIndex, Chunk* chunk);
 
 QueuePool* createFreePoolC(int numThreads);
+
+void destroyFreePoolC(QueuePool *pool);
 
 Chunk* getFromFreePoolC(QueuePool* pool, int threadIndex, int primThread, QueueElement *oldQueueHead);
 

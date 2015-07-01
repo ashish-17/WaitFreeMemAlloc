@@ -2,6 +2,8 @@
 #include "Block.h"
 #include "HazardPointer.h"
 
+// Single-Enqueuer Multi-Dequeuer
+
 QueueElement* createNode(void *value) {
 	LOG_PROLOG();
 	//printf("createNode blk ptr = %u\n", value);
@@ -10,6 +12,15 @@ QueueElement* createNode(void *value) {
 	element->next = NULL;
 	LOG_EPILOG();
 	return element;
+}
+
+void freeNode(QueueElement* element) {
+	LOG_PROLOG();
+	element->value = NULL;
+	element->next = NULL;
+	my_free(element);
+	element = NULL;
+	LOG_EPILOG();
 }
 
 void queueCreate(Queue *queue, int elementSize) {
@@ -22,30 +33,38 @@ void queueCreate(Queue *queue, int elementSize) {
 }
 
 void queueFree(Queue *queue) {
-
-}
-/*
-bool queueEnq1(Queue *queue, const void* element) {
-	QueueElement *queueElement = createNode(element);
-	printf("queueEnq1: value = %u, next ptr = %u\n", queueElement->value, queueElement->next);
-	QueueElement *last = queue->tail;
-	QueueElement *next = last->next;
-	if (last == queue->tail) {
-		if (next == NULL) {
-			if (atomic_compare_exchange_strong(&last->next, &next, queueElement)) {
-				atomic_compare_exchange_strong(&queue->tail, &last, queueElement);
-				//printf("queueEnq: tailValue = %d, headValue = %d\n", ((Block*)(queue->tail->value))->memBlock, ((Block*)(queue->head->value))->memBlock);
-				return true;
+	LOG_PROLOG();
+	if (queue != NULL) {
+		while (!isQueueEmpty(queue)) {
+			void *value = queueDeqUC(queue);
+			if (value != NULL) {
+				my_free(value);
+				value = NULL;
+			}
+			else {
+				LOG_ERROR("Trying to free NULL pointer pooped out from queue");
 			}
 		}
-		else {
-			atomic_compare_exchange_strong(&queue->tail, &last, next);
-		}
+		queue->elementSize = 0;
+		queue->tail = NULL;
+		freeNode(queue->head); // freeing sentinel node
+		queue->head = NULL;
 	}
-	return false;
-}*/
+	else {
+		LOG_ERROR("Trying to free NULL pointer");
+	}
+	LOG_EPILOG();
+}
 
-bool queueEnq(Queue *queue, const void* element, int threadId) {
+void queueEnqUC(Queue *queue, void* element) {
+	LOG_PROLOG();
+	QueueElement *queueElement = createNode(element);
+	queue->tail->next = queueElement;
+	queue->tail = queue->tail->next;
+	LOG_EPILOG();
+}
+
+bool queueEnqC(Queue *queue, const void* element, int threadId) {
 	LOG_PROLOG();
 	QueueElement *queueElement = createNode(element);
 	//printf("queueEnq: value = %u, blkPtr = %u, next ptr = %u\n", queueElement->value, element, queueElement->next);
@@ -76,7 +95,25 @@ bool isQueueEmpty(Queue *queue) {
 	return flag;
 }
 
-void* queueDeq(Queue *queue, QueueElement *oldQueueHead, int threadId) {
+void* queueDeqUC(Queue *queue) {
+	LOG_PROLOG();
+	void *ptr = NULL;
+	if (queue->head == queue->tail) {
+		ptr = NULL;
+	}
+	else {
+		QueueElement *oldNode = queue->head;
+		queue->head = queue->head->next;
+		ptr = queue->head->value;
+		queue->head = NULL;
+		freeNode(oldNode);
+		oldNode = NULL;
+	}
+	LOG_EPILOG();
+	return ptr;
+}
+
+void* queueDeqC(Queue *queue, QueueElement *oldQueueHead, int threadId) {
 	LOG_PROLOG();
 	void *ptr = NULL;
 	//printf("queueDeq: queuePtr: %u, q->head: %u, q->tail: %u, q->head->next: %u \n",queue, queue->head, queue->tail, queue->head->next);
@@ -101,10 +138,6 @@ void* queueDeq(Queue *queue, QueueElement *oldQueueHead, int threadId) {
 		}
 		else {
 			void *element = next->value;
-			/*
-			 * copy queue->head
-			 * and if atomic_*** success to free copy pointer
-			 */
 			if (atomic_compare_exchange_strong(&queue->head, &first, next)) {
 				//printf("dequeuing successful\n");
 				clearHazardPointer(globalHPStructure, threadId);

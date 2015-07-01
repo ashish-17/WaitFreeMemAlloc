@@ -21,6 +21,8 @@ HPStructure *globalHPStructure;
 
 void hpStructureCreate(HPStructure *hpStructure, int noOfThreads, int noOfHP);
 
+void hpStructureDestroy(HPStructure *hpStructure);
+
 void freeMemHP(HPStructure *hpStructure, int threadId, void *ptr);
 
 void* setHazardPointer(HPStructure *hpStructure, int threadId, void *element);

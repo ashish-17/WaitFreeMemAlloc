@@ -121,14 +121,14 @@ void testQueue1(void *threadId) {
 		for (int i = 0; i < numOfBlocks; i++) {
 			int temp = (int)threadId * numOfBlocks + i;
 			Block *block = createBlock(temp, (int)threadId);
-			LOG_INFO("thread = %d pushing the block = %d was successful = %d\n", (int)threadId, temp, queueEnq(queue,block, (int)threadId));
+			LOG_INFO("thread = %d pushing the block = %d was successful = %d\n", (int)threadId, temp, queueEnqC(queue,block, (int)threadId));
 		}
 		//LOG_INFO("tail ptr = %u, block ptr = %u\n", queue->tail, queue->tail->value);
 		//LOG_INFO("block = %d\n", ((Block*)queue->tail->value)->memBlock);
 	}
 	else {
 		for (int i = 0; i < numOfBlocks; i++) {
-			Block *block = queueDeq(queue, queue->head, (int*)threadId);
+			Block *block = queueDeqC(queue, queue->head, (int*)threadId);
 			if (block == NULL) {
 				LOG_INFO("Thread = %d, didn't get the block\n",(int)threadId);
 			}

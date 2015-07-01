@@ -5,19 +5,37 @@
 void stackCreate(Stack *stack, int elementSize)
 {
 	LOG_PROLOG();
-	//LOG_INFO("In stackCreate\n");
 	stack->top = (AtomicStampedReference*) my_malloc(sizeof(AtomicStampedReference));
 	createAtomicStampedReference(stack->top, NULL, 0);
 	stack->elementSize = elementSize;
-	//LOG_INFO("Inside create stack and size of chunk is %d\n", stack->elementSize);
 	stack->numberOfElements = 0;
-	//LOG_INFO("leaving stackCreate\n");
 	LOG_EPILOG();
 }
 
 void stackFree(Stack *stack)
 {
-
+	LOG_PROLOG();
+	if (stack != NULL) {
+		while (!stackIsEmpty(stack)) {
+			void *element = stackPop(stack);
+			if (element != NULL) {
+				my_free(element);
+				element = NULL;
+			}
+			else {
+				LOG_ERROR("Trying to free NULL pointer popped from stack");
+			}
+		}
+		freeAtomicStampedReference(stack->top);
+		stack->elementSize = 0;
+		stack->numberOfElements = 0;
+		my_free(stack->top);
+		stack->top = NULL;
+	}
+	else {
+		LOG_ERROR("Trying to free NULL stack pointer");
+	}
+	LOG_EPILOG();
 }
 
 bool stackIsEmpty(const Stack *stack)

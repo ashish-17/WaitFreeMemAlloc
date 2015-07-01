@@ -24,9 +24,13 @@ void queueCreate(Queue *queue, int elementSize);
 
 bool isQueueEmpty(Queue *queue);
 
-bool queueEnq(Queue *queue, const void* element, int threadId);
+void queueEnqUC(Queue *queue, void* element);
 
-void* queueDeq(Queue *queue, QueueElement *oldQueueHead, int threadId);
+bool queueEnqC(Queue *queue, const void* element, int threadId);
+
+void* queueDeqUC(Queue *queue);
+
+void* queueDeqC(Queue *queue, QueueElement *oldQueueHead, int threadId);
 
 void queueFree(Queue *queue);
 

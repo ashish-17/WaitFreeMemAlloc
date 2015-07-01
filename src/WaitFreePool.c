@@ -137,7 +137,6 @@ void createWaitFreePool(int m, int n, int c, int C) {
 	memory->info = (Info*)my_malloc(sizeof(Info));
 	memory->info->donors = (Donor*) my_malloc(sizeof(Donor)*numOfThreads);
 	memory->info->numOfDonors = numOfThreads;
-	//memory->info->numOfPassed = 0;
 	for(int i = 0; i < numOfThreads; i++) {
 		Donor* donorEntry = getDonorEntry(i);
 		donorEntry->lastDonated = i;
@@ -148,9 +147,57 @@ void createWaitFreePool(int m, int n, int c, int C) {
 	LOG_EPILOG();
 }
 
-void destroyWaitFreePool() {
+void destroyWaitFreePool(Memory *memory) {
+	LOG_PROLOG();
+	if (memory != NULL) {
+		destroyFullPool(memory->fullPool);
+		destroyFreePoolUC(memory->freePoolUC);
+		destroyFreePoolC(memory->freePoolC);
+		destroyLocalPool(memory->localPool);
+		destroySharedQueuePools(memory->sharedQueuePools);
 
+		if (memory->announce != NULL) {
+			if (memory->announce->helpers != NULL) {
+				for (int i = 0; i < memory->n; i++) {
+					freeAtomicStampedReference(getHelperEntry(i));
+				}
+				my_free(memory->announce->helpers);
+				memory->announce->helpers = NULL;
+			}
+			else {
+				LOG_ERROR("Trying to free helper pointer of announce array which is a NULL pointer");
+			}
+			my_free(memory->announce);
+			memory->announce = NULL;
+		}
+		else {
+			LOG_ERROR("Trying to free announce array which is a NULL pointer");
+		}
 
+		if (memory->info != NULL) {
+			if (memory->info->donors != NULL) {
+				my_free(memory->info->donors);
+				memory->info->donors = NULL;
+			}
+			else {
+				LOG_ERROR("Trying to free donor pointer of info array which is a NULL pointer");
+			}
+			memory->info->numOfDonors = 0;
+			my_free(memory->info);
+			memory->info = NULL;
+		}
+		else {
+			LOG_ERROR("Trying to free info array which is a NULL pointer");
+		}
+
+		my_free(memory);
+		memory = NULL;
+	}
+	else {
+		LOG_ERROR("Trying to free memory pointer which is a NULL pointer");
+	}
+
+	LOG_EPILOG();
 }
 
 Block* allocate(int threadId, bool toBePassed) {
@@ -495,33 +542,33 @@ Chunk* moveFromSharedQueuePools(int threadId) {
 				//getHazardPointer(globalHPStructure, threadId);
 				if (!isQueueEmpty(getQueueThread(memory->freePoolC, primThread)->queue)) {
 					LOG_INFO("Prim queue had free chunks")
-							if (chunkHasSpace(oldQueueHead->next->value)) {
-								if (putInChunkContended(getQueueThread(memory->freePoolC, primThread)->queue->head->next->value, block)) {
-									clearHazardPointer(globalHPStructure, threadId);
-									assert(globalHPStructure->topPointers[threadId] == 1);
-									LOG_INFO("moveFromSharedQueuePools: Block was inserted in chunk");
-									continue; // now go to next secThread
-								}
-								else {
-									// do sth with the removed block
-									clearHazardPointer(globalHPStructure, threadId);
-									LOG_INFO("Chunk had space but someone else simul put the block in the chunk. Putting the removed block in my own queue of prim thread");
-									putInSharedQueuePools(memory->sharedQueuePools, primThread, threadId, block);
-									assert(globalHPStructure->topPointers[threadId] == 1);
-								}
-							}
-							else { //chunk doesn't have space.try moving the chunk to fullPool
-								assert(globalHPStructure->topPointers[threadId] == 2);
-								LOG_INFO("chunk didn't have space. Putting the removed block in my own queue of prim thread");
-								putInSharedQueuePools(memory->sharedQueuePools, primThread, threadId, block);
-								chunk = getFromFreePoolC(memory->freePoolC, threadId, primThread, oldQueueHead);
-								assert(globalHPStructure->topPointers[threadId] == 1);
-								if (chunk != NULL) {
-									LOG_EPILOG();
-									return chunk;
-								}
-								assert(globalHPStructure->topPointers[threadId] == 1);
-							}
+															if (chunkHasSpace(oldQueueHead->next->value)) {
+																if (putInChunkContended(getQueueThread(memory->freePoolC, primThread)->queue->head->next->value, block)) {
+																	clearHazardPointer(globalHPStructure, threadId);
+																	assert(globalHPStructure->topPointers[threadId] == 1);
+																	LOG_INFO("moveFromSharedQueuePools: Block was inserted in chunk");
+																	continue; // now go to next secThread
+																}
+																else {
+																	// do sth with the removed block
+																	clearHazardPointer(globalHPStructure, threadId);
+																	LOG_INFO("Chunk had space but someone else simul put the block in the chunk. Putting the removed block in my own queue of prim thread");
+																	putInSharedQueuePools(memory->sharedQueuePools, primThread, threadId, block);
+																	assert(globalHPStructure->topPointers[threadId] == 1);
+																}
+															}
+															else { //chunk doesn't have space.try moving the chunk to fullPool
+																assert(globalHPStructure->topPointers[threadId] == 2);
+																LOG_INFO("chunk didn't have space. Putting the removed block in my own queue of prim thread");
+																putInSharedQueuePools(memory->sharedQueuePools, primThread, threadId, block);
+																chunk = getFromFreePoolC(memory->freePoolC, threadId, primThread, oldQueueHead);
+																assert(globalHPStructure->topPointers[threadId] == 1);
+																if (chunk != NULL) {
+																	LOG_EPILOG();
+																	return chunk;
+																}
+																assert(globalHPStructure->topPointers[threadId] == 1);
+															}
 				} // prim queue had free chunks
 				else {
 					clearHazardPointer(globalHPStructure, threadId);

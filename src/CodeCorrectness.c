@@ -5,7 +5,7 @@
 bool *hashTable;
 pthread_mutex_t *locks;
 
-void initHashTable(int numOfBlocks) {
+void hashTableCreate(int numOfBlocks) {
 	LOG_PROLOG();
 	hashTable = (bool*) my_malloc(sizeof(bool) * numOfBlocks);
 	locks = (pthread_mutex_t*) my_malloc(sizeof(pthread_mutex_t) * numOfBlocks);
@@ -16,15 +16,25 @@ void initHashTable(int numOfBlocks) {
 	LOG_EPILOG();
 }
 
-void clearHashTable(int numOfBlocks) {
+void hashTableFree(int numOfBlocks) {
 	LOG_PROLOG();
-	my_free(hashTable);
-	hashTable = NULL;
-	for (int i = 0; i < numOfBlocks; i++) {
-		pthread_mutex_destroy(&locks[i]);
+	if (hashTable != NULL) {
+		my_free(hashTable);
+		hashTable = NULL;
 	}
-	my_free(locks);
-	locks = NULL;
+	else {
+		LOG_ERROR("Trying to free hashTable which was a NULL pointer");
+	}
+	if (locks != NULL) {
+		for (int i = 0; i < numOfBlocks; i++) {
+			pthread_mutex_destroy(&locks[i]);
+		}
+		my_free(locks);
+		locks = NULL;
+	}
+	else {
+		LOG_ERROR("Trying to free locks which was a NULL pointer");
+	}
 	LOG_EPILOG();
 }
 
@@ -98,7 +108,7 @@ void thrmain() {
 
 	int NUM_THREADS = 100;
 	int NUM_BLOCKS = 20;
-	initHashTable(NUM_BLOCKS);
+	hashTableCreate(NUM_BLOCKS);
 	pthread_t threads[NUM_THREADS];
 	CodeCorrectnessTestStructure *codeCorrectDS = (CodeCorrectnessTestStructure*)malloc(NUM_THREADS * sizeof(CodeCorrectnessTestStructure));
 
@@ -122,6 +132,6 @@ void thrmain() {
 	for (int t = 0; t < numThreads; t++) {
 		rc = pthread_join(threads[t], &status);
 	}
-
+	hashTableFree(NUM_BLOCKS);
 	LOG_CLOSE();
 }

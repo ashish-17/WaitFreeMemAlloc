@@ -19,6 +19,8 @@ typedef struct {
 
 Chunk* createChunk(Chunk *chunk, int number);
 
+void destroyChunk(Chunk* chunk);
+
 bool isChunkEmpty(Chunk *chunk);
 
 bool chunkHasSpace(Chunk *chunk);
