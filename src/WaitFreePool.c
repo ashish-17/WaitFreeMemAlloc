@@ -147,14 +147,19 @@ void createWaitFreePool(int m, int n, int c, int C) {
 	LOG_EPILOG();
 }
 
-void destroyWaitFreePool(Memory *memory) {
+void destroyWaitFreePool() {
 	LOG_PROLOG();
 	if (memory != NULL) {
 		destroyFullPool(memory->fullPool);
+		LOG_INFO("FullPool successfully destroyed");
 		destroyFreePoolUC(memory->freePoolUC);
+		LOG_INFO("FreePoolUC successfully destroyed");
 		destroyFreePoolC(memory->freePoolC);
+		LOG_INFO("FreePoolC successfully destroyed");
 		destroyLocalPool(memory->localPool);
+		LOG_INFO("LocalPool successfully destroyed");
 		destroySharedQueuePools(memory->sharedQueuePools);
+		LOG_INFO("SharedQueuePools successfully destroyed");
 
 		if (memory->announce != NULL) {
 			if (memory->announce->helpers != NULL) {
@@ -173,6 +178,7 @@ void destroyWaitFreePool(Memory *memory) {
 		else {
 			LOG_ERROR("Trying to free announce array which is a NULL pointer");
 		}
+		LOG_INFO("Announce array successfully destroyed");
 
 		if (memory->info != NULL) {
 			if (memory->info->donors != NULL) {
@@ -189,6 +195,7 @@ void destroyWaitFreePool(Memory *memory) {
 		else {
 			LOG_ERROR("Trying to free info array which is a NULL pointer");
 		}
+		LOG_INFO("Info array successfully destroyed");
 
 		my_free(memory);
 		memory = NULL;

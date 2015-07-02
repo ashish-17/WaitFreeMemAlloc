@@ -18,10 +18,12 @@ void freeReferenceIntegerPair(ReferenceIntegerPair* ptr) {
 		if (ptr->reference != NULL) {
 			my_free(ptr->reference);
 			ptr->reference = NULL;
-			}
+		}
+		// removed this because in some cases the sentinels (like stack) has NULL reference
+		/*
 		else {
 			LOG_ERROR("Trying to free reference pointer of RIP which was a NULL pointer");
-		}
+		}*/
 	}
 	else {
 		LOG_ERROR("Trying to free NULL pointer");

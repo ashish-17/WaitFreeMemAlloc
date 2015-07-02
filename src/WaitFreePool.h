@@ -7,6 +7,8 @@
 
 void createWaitFreePool(int m, int n, int c, int C);
 
+void destroyWaitFreePool();
+
 Block* allocate(int threadId, bool toBePassed);
 
 void freeMem(int threadId, Block* block);

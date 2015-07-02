@@ -69,8 +69,8 @@ void destroyFreePoolC(QueuePool *pool) {
 					destroyChunk(chunk);
 				}
 				queueFree(thread->queue);
-				my_free(thread);
-				thread = NULL;
+				//my_free(thread);
+				thread->queue = NULL;
 			}
 			else {
 				LOG_ERROR("Trying to free NULL pointer");

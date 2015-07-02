@@ -105,7 +105,7 @@ void* queueDeqUC(Queue *queue) {
 		QueueElement *oldNode = queue->head;
 		queue->head = queue->head->next;
 		ptr = queue->head->value;
-		queue->head = NULL;
+		queue->head->value = NULL;
 		freeNode(oldNode);
 		oldNode = NULL;
 	}

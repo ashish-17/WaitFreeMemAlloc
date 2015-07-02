@@ -27,8 +27,8 @@ CircularQueue* circularQueueCreate(int elementSize, int noOfElements) {
 	for (int i = 0; i < noOfElements; i++) {
 		getCircularQueueElement(queue, i)->value = NULL;
 	}
-	return queue;
 	LOG_EPILOG();
+	return queue;
 }
 
 void circularQueueFree(CircularQueue *queue) {
