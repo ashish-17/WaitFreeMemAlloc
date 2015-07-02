@@ -73,6 +73,7 @@ void* normalExec(void *data) {
 				break;
 			}
 			LOG_INFO("Allocated the block %d",block->memBlock);
+			LOG_INFO("noOfAllocBlocks %d", numOfAllocBlocks);
 			stackPush(stack,block);
 		}
 		else {
@@ -81,7 +82,6 @@ void* normalExec(void *data) {
 				continue;
 			}
 			else {
-				LOG_INFO("noOfAllocBlocks %d", numOfAllocBlocks);
 				numOfAllocBlocks--;
 				Block *block = stackPop(stack);
 				//LOG_INFO("thread %d trying to free the block %d\n",(int)threadId, block->memBlock);
@@ -92,6 +92,7 @@ void* normalExec(void *data) {
 					break;
 				}
 				LOG_INFO("Freed the block %d\n",block->memBlock);
+				LOG_INFO("noOfAllocBlocks %d", numOfAllocBlocks);
 			}
 		}
 		totalNumOfOps--;
@@ -337,8 +338,8 @@ int main() {
 	config1.counsumer = consumer1;
 	config1.normalExec = normalExec;
 
-	//tester(config1);
-	//LOG_INFO("Config 1.1 successful");
+	tester(config1);
+	LOG_INFO("Config 1.1 successful");
 
 	config1.numChunksPerThread = 2;
 	config1.chunkSize = 3;
@@ -354,8 +355,8 @@ int main() {
 	config1.counsumer = consumer1;
 	config1.normalExec = normalExec;
 
-	//tester(config1);
-	//LOG_INFO("Config 1.2 successful");
+	tester(config1);
+	LOG_INFO("Config 1.2 successful");
 
 	config1.numChunksPerThread = 2;
 	config1.chunkSize = 3;
@@ -363,7 +364,7 @@ int main() {
 	config1.numProducerGroups = -1;
 	config1.numProducerPerGroup = -1;
 	config1.numProducers = 4;
-	config1.numNormalThreads = 1;
+	config1.numNormalThreads = 0;
 	config1.numBlocksToBePassed = 1000;
 	config1.numThreads = (3 * config1.numProducers + config1.numNormalThreads);
 	config1.numBlocks = (config1.numThreads * config1.numChunksPerThread * config1.chunkSize);
@@ -371,16 +372,16 @@ int main() {
 	config1.counsumer = consumer1;
 	config1.normalExec = normalExec;
 
-	//tester(config1);
-	//LOG_INFO("Config 1.3 successful");
+	tester(config1);
+	LOG_INFO("Config 1.3 successful");
 
 	config1.numChunksPerThread = 2;
 	config1.chunkSize = 3;
 	config1.numDonationSteps = 2;
 	config1.numProducerGroups = -1;
 	config1.numProducerPerGroup = -1;
-	config1.numProducers = 0;
-	config1.numNormalThreads = 1;
+	config1.numProducers = 10;
+	config1.numNormalThreads = 0;
 	config1.numBlocksToBePassed = 10;
 	config1.numThreads = (3 * config1.numProducers + config1.numNormalThreads);
 	config1.numBlocks = (config1.numThreads * config1.numChunksPerThread * config1.chunkSize);
@@ -427,8 +428,8 @@ int main() {
 	config3.counsumer = consumer1; // won't be called
 	config3.normalExec = normalExec;
 
-	tester(config3);
-	LOG_INFO("Config 3.1 successful");
+	//tester(config3);
+	//LOG_INFO("Config 3.1 successful");
 
 	LOG_INFO("Test Client");
 	LOG_CLOSE();
