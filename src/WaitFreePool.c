@@ -254,9 +254,7 @@ Block* allocate(int threadId, bool toBePassed) {
 				stolenChunk = NULL;
 				for(int i = 1; i <= memory->n; i++) {
 					threadToBeHelped = (threadId + i) % memory->n;
-					//announceOfThreadToBeHelped = getHelperEntry(threadToBeHelped);
 					announceOfThreadToBeHelped = setHazardPointer(globalHPStructure, threadId, getHelperEntry(threadToBeHelped)->atomicRef);
-					//if(announceOfThreadToBeHelped->needHelp) {
 					if(*(bool*)announceOfThreadToBeHelped->reference) {
 						LOG_INFO("allocate: going to help thread %d", threadToBeHelped);
 						assert(globalHPStructure->topPointers[threadId] == 1);
@@ -548,34 +546,34 @@ Chunk* moveFromSharedQueuePools(int threadId) {
 				//LOG_INFO("moveFromSQP: setting HP of thread %d for oldQueueHEad %u\n", threadId, oldQueueHead);
 				//getHazardPointer(globalHPStructure, threadId);
 				if (!isQueueEmpty(getQueueThread(memory->freePoolC, primThread)->queue)) {
-					LOG_INFO("Prim queue had free chunks")
-															if (chunkHasSpace(oldQueueHead->next->value)) {
-																if (putInChunkContended(getQueueThread(memory->freePoolC, primThread)->queue->head->next->value, block)) {
-																	clearHazardPointer(globalHPStructure, threadId);
-																	assert(globalHPStructure->topPointers[threadId] == 1);
-																	LOG_INFO("moveFromSharedQueuePools: Block was inserted in chunk");
-																	continue; // now go to next secThread
-																}
-																else {
-																	// do sth with the removed block
-																	clearHazardPointer(globalHPStructure, threadId);
-																	LOG_INFO("Chunk had space but someone else simul put the block in the chunk. Putting the removed block in my own queue of prim thread");
-																	putInSharedQueuePools(memory->sharedQueuePools, primThread, threadId, block);
-																	assert(globalHPStructure->topPointers[threadId] == 1);
-																}
-															}
-															else { //chunk doesn't have space.try moving the chunk to fullPool
-																assert(globalHPStructure->topPointers[threadId] == 2);
-																LOG_INFO("chunk didn't have space. Putting the removed block in my own queue of prim thread");
-																putInSharedQueuePools(memory->sharedQueuePools, primThread, threadId, block);
-																chunk = getFromFreePoolC(memory->freePoolC, threadId, primThread, oldQueueHead);
-																assert(globalHPStructure->topPointers[threadId] == 1);
-																if (chunk != NULL) {
-																	LOG_EPILOG();
-																	return chunk;
-																}
-																assert(globalHPStructure->topPointers[threadId] == 1);
-															}
+					LOG_INFO("Prim queue had free chunks");
+					if (chunkHasSpace(oldQueueHead->next->value)) {
+						if (putInChunkContended(getQueueThread(memory->freePoolC, primThread)->queue->head->next->value, block)) {
+							clearHazardPointer(globalHPStructure, threadId);
+							assert(globalHPStructure->topPointers[threadId] == 1);
+							LOG_INFO("moveFromSharedQueuePools: Block was inserted in chunk");
+							continue; // now go to next secThread
+						}
+						else {
+							// do sth with the removed block
+							clearHazardPointer(globalHPStructure, threadId);
+							LOG_INFO("Chunk had space but someone else simul put the block in the chunk. Putting the removed block in my own queue of prim thread");
+							putInSharedQueuePools(memory->sharedQueuePools, primThread, threadId, block);
+							assert(globalHPStructure->topPointers[threadId] == 1);
+						}
+					}
+					else { //chunk doesn't have space.try moving the chunk to fullPool
+						assert(globalHPStructure->topPointers[threadId] == 2);
+						LOG_INFO("chunk didn't have space. Putting the removed block in my own queue of prim thread");
+						putInSharedQueuePools(memory->sharedQueuePools, primThread, threadId, block);
+						chunk = getFromFreePoolC(memory->freePoolC, threadId, primThread, oldQueueHead);
+						assert(globalHPStructure->topPointers[threadId] == 1);
+						if (chunk != NULL) {
+							LOG_EPILOG();
+							return chunk;
+						}
+						assert(globalHPStructure->topPointers[threadId] == 1);
+					}
 				} // prim queue had free chunks
 				else {
 					clearHazardPointer(globalHPStructure, threadId);

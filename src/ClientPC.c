@@ -55,8 +55,9 @@ void* normalExec(void *data) {
 	int flag = 0; // 0 -> allocate 1 -> free
 
 	srand(time(NULL));
-	int totalNumOfOps = randint(50);
+	int totalNumOfOps = randint(cfg->numBlocks);
 	LOG_INFO("TotalNumOfOps %d", totalNumOfOps);
+
 	Stack* stack = (Stack*) my_malloc(sizeof(Stack));
 	stackCreate(stack, sizeof(Block));
 
@@ -66,7 +67,7 @@ void* normalExec(void *data) {
 		//LOG_INFO("In thread %d, the flag %d\n", (int)threadId, flag);
 		if (flag <= 5) {
 			numOfAllocBlocks++;
-			Block* block = allocate((int)threadId, 0);
+			Block* block = allocate(threadId, 0);
 			bool flag = setFlagForAllocatedBlock(block->memBlock);
 			if (!flag) {
 				LOG_ERROR("Block %d was already allocated to some other thread", block->memBlock);
@@ -85,7 +86,7 @@ void* normalExec(void *data) {
 				numOfAllocBlocks--;
 				Block *block = stackPop(stack);
 				//LOG_INFO("thread %d trying to free the block %d\n",(int)threadId, block->memBlock);
-				freeMem((int)threadId, block);
+				freeMem(threadId, block);
 				bool flag = clearFlagForAllocatedBlock(block->memBlock);
 				if (!flag) {
 					LOG_ERROR("Block %d was already free. Tried to free again", block->memBlock);
@@ -103,7 +104,7 @@ void* normalExec(void *data) {
 	while (numOfAllocBlocks > 0) {
 		numOfAllocBlocks--;
 		Block *block = stackPop(stack);
-		freeMem((int)threadId, block);
+		freeMem(threadId, block);
 		LOG_INFO("Freed the block %d\n", block->memBlock);
 	}
 	LOG_INFO("FINISHED");
@@ -196,57 +197,84 @@ void* consumer1(void *data) {
 
 
 // In this Pd-Cr, more than one producer passes blocks to single consumer
-void producer2(void *threadID) {
-	/*	LOG_PROLOG();
-	int threadId = (int*) threadID;
+void producer2(void *data) {
+	LOG_PROLOG();
+
+	ThreadStructure* threadStructure = (ThreadStructure*)data;
+	int threadId = threadStructure->threadId;
+	TestConfig *cfg = threadStructure->config;
+	TestThreadData *threadData = threadStructure->threadData;
+
 	LOG_INFO("producer: thread has id %d", threadId);
-	int group_no = (threadId) / NUM_PRODUCER_GROUPS;
-	LOG_INFO("Producer = %d, group chosen = %d", threadID, group_no);
-	int con = NUM_PRODUCERS + NUM_NORMAL_THREADS + group_no;
 
-	LOG_INFO("Producer = %d, consumer chosen = %d", threadID, con);
+	int group_no = (threadId) / cfg->numProducerPerGroup;
+	//LOG_INFO("Producer = %d, group chosen = %d", threadID, group_no);
+	int con = cfg->numProducers + cfg->numNormalThreads + group_no;
 
-	for (int i = 1; i <= NUM_BLOCKS_TO_BE_PASSED; i++) {
-		Block* block = allocate(threadID, 1);
+	//LOG_INFO("Producer = %d, consumer chosen = %d", threadID, con);
 
-		pthread_mutex_lock(&the_mutex[con]);	// protect buffer
-		while (buffer[con] != NULL)	{	       // If there is something in the buffer then wait
-			pthread_cond_wait(&condp[con], &the_mutex[con]);
+	for (int i = 1; i <= cfg->numBlocksToBePassed; i++) {
+
+		Block* block = allocate(threadId, 1);
+		bool flag = setFlagForAllocatedBlock(block->memBlock);
+		if (!flag) {
+			LOG_ERROR("Block %d was already allocated to some other thread", block->memBlock);
+			break;
+		}
+
+		pthread_mutex_lock(&threadData[con].the_mutex);	// protect buffer
+		while (threadData[con].buffer != NULL)	{	       // If there is something in the buffer then wait
+			//LOG_INFO("Producer: %d waiting for consumer to consume \n",con);
+			pthread_cond_wait(&threadData[con].condp, &threadData[con].the_mutex);
 		}
 		LOG_INFO("Producer %d passing block %d to thread %d", threadId, block->memBlock, con);
-		buffer[con] = block;
-		pthread_cond_signal(&condc[con]);	// wake up consumer
-		pthread_mutex_unlock(&the_mutex[con]);	// release the buffer
+		threadData[con].buffer = block;
+		pthread_cond_signal(&threadData[con].condc);	// wake up consumer
+		pthread_mutex_unlock(&threadData[con].the_mutex);	// release the buffer
 	}
 	LOG_INFO("PRODUCER FINISHED");
 	LOG_EPILOG();
-	pthread_exit(0);*/
+	pthread_exit(0);
 }
 
-void* consumer2(void *threadID) {
-	/*	LOG_PROLOG();
-	int threadId = (int*) threadID;
+void* consumer2(void *data) {
+	LOG_PROLOG();
+
+	ThreadStructure* threadStructure = (ThreadStructure*)data;
+	int threadId = threadStructure->threadId;
+	TestConfig *cfg = threadStructure->config;
+	TestThreadData *threadData = threadStructure->threadData;
+
 	LOG_INFO("consumer: thread has id %d", threadId);
 	Block *block;
 
-	for(int i = 1; i <= NUM_BLOCKS_TO_BE_PASSED * NUM_PRODUCERS_PER_GROUP; i++) {
-		pthread_mutex_lock(&the_mutex[threadId]);	// protect buffer
-		while (buffer[threadId] == NULL) {	// If there is nothing in the buffer then wait
-			pthread_cond_wait(&condc[threadId], &the_mutex[threadId]);
+	LOG_INFO("index value %d",cfg->numBlocksToBePassed * cfg->numProducerPerGroup);
+	for(int i = 1; i <= cfg->numBlocksToBePassed * cfg->numProducerPerGroup; i++) {
+
+		pthread_mutex_lock(&threadData[threadId].the_mutex);	// protect buffer
+		while (threadData[threadId].buffer == NULL) {	// If there is nothing in the buffer then wait
+			//LOG_INFO("Consumer: %d waiting for producer \n",threadId);
+			pthread_cond_wait(&threadData[threadId].condc, &threadData[threadId].the_mutex);
 		}
-		block = buffer[threadId];
+		//LOG_INFO("Consumer: %d done waiting \n",threadId);
+		block = threadData[threadId].buffer;
 		//LOG_INFO("Consumer: %d read the block \n",threadId);
-		buffer[threadId] = NULL;
-		pthread_cond_broadcast(&condp[threadId]);	// wake up producer
-		pthread_mutex_unlock(&the_mutex[threadId]);	// release the buffer
-		LOG_INFO("Consumer %d going to consume the block %d", threadId, block->memBlock);
+		threadData[threadId].buffer = NULL;
+		pthread_cond_signal(&threadData[threadId].condp);	// wake up consumer
+		pthread_mutex_unlock(&threadData[threadId].the_mutex);	// release the buffer
+		//LOG_INFO("Consumer %d consumed the block %d\n", threadId, block->memBlock);
 		freeMem(threadId, block);
-		LOG_INFO("Consumer %d consumed the block %d", threadId, block->memBlock);
+		LOG_INFO("Consumer consumed the block %d", block->memBlock);
+		bool flag = clearFlagForAllocatedBlock(block->memBlock);
+		if (!flag) {
+			LOG_ERROR("Block %d was already free. Tried to free again", block->memBlock);
+			break;
+		}
 	}
 	LOG_INFO("CONSUMER FINISHED");
 
 	LOG_EPILOG();
-	pthread_exit(0);*/
+	pthread_exit(0);
 }
 
 
@@ -286,7 +314,7 @@ void tester(TestConfig cfg) {
 		else if ((t >= cfg.numProducers) && (t < cfg.numProducers + cfg.numNormalThreads))
 			rc = pthread_create(&threads[t], NULL, cfg.normalExec, (threadStructure + t));
 		else
-			rc = pthread_create(&threads[t], NULL, consumer1, (threadStructure + t));
+			rc = pthread_create(&threads[t], NULL, cfg.counsumer, (threadStructure + t));
 		if (rc){
 			LOG_INFO("ERROR; return code from pthread_create() is %d", rc);
 			exit(-1);
@@ -389,9 +417,10 @@ int main() {
 	config1.counsumer = consumer1;
 	config1.normalExec = normalExec;
 
-	//tester(config1);
-	//LOG_INFO("Config 1.4 successful");
+	tester(config1);
+	LOG_INFO("Config 1.4 successful");
 
+	// config2 had multiple producers sending to same consumer
 	TestConfig config2;
 
 	config2.numChunksPerThread = 2;
@@ -404,14 +433,48 @@ int main() {
 	config2.numBlocksToBePassed = 100;
 	config2.numThreads = (config2.numProducers + config2.numNormalThreads + config2.numProducerGroups);
 	config2.numBlocks = (config2.numThreads * config2.numChunksPerThread * config2.chunkSize);
-	config2.producer = producer1;
-	config2.counsumer = consumer1;
+	config2.producer = producer2;
+	config2.counsumer = consumer2;
 	config2.normalExec = normalExec;
 
-	//tester(config2);
+	tester(config2);
+	LOG_INFO("Config 2.1 successful");
 
-	// config3 just tests normal execution.
-	// numOfProducers = 0 and numOfConsumers = 0.
+	config2.numChunksPerThread = 4;
+	config2.chunkSize = 3;
+	config2.numDonationSteps = 2;
+	config2.numProducerGroups = 2;
+	config2.numProducerPerGroup = 4;
+	config2.numProducers = config2.numProducerGroups * config2.numProducerPerGroup;
+	config2.numNormalThreads = 0;
+	config2.numBlocksToBePassed = 100;
+	config2.numThreads = (config2.numProducers + config2.numNormalThreads + config2.numProducerGroups);
+	config2.numBlocks = (config2.numThreads * config2.numChunksPerThread * config2.chunkSize);
+	config2.producer = producer2;
+	config2.counsumer = consumer2;
+	config2.normalExec = normalExec;
+
+	tester(config2);
+	LOG_INFO("Config 2.2 successful");
+
+	config2.numChunksPerThread = 4;
+	config2.chunkSize = 3;
+	config2.numDonationSteps = 2;
+	config2.numProducerGroups = 5;
+	config2.numProducerPerGroup = 4;
+	config2.numProducers = config2.numProducerGroups * config2.numProducerPerGroup;
+	config2.numNormalThreads = 0;
+	config2.numBlocksToBePassed = 100;
+	config2.numThreads = (config2.numProducers + config2.numNormalThreads + config2.numProducerGroups);
+	config2.numBlocks = (config2.numThreads * config2.numChunksPerThread * config2.chunkSize);
+	config2.producer = producer2;
+	config2.counsumer = consumer2;
+	config2.normalExec = normalExec;
+
+	tester(config2);
+	LOG_INFO("Config 2.3 successful");
+
+	// config3 tests a single normalExec with different consumers
 	TestConfig config3;
 
 	config3.numChunksPerThread = 2;
@@ -422,14 +485,32 @@ int main() {
 	config3.numProducers = 0;
 	config3.numNormalThreads = 1;
 	config3.numBlocksToBePassed = 0;
-	config3.numThreads = (config1.numNormalThreads);
-	config3.numBlocks = (config1.numThreads * config1.numChunksPerThread * config1.chunkSize);
-	config3.producer = producer1; // won't be called
-	config3.counsumer = consumer1; // won't be called
+	config3.numThreads = (3 * config3.numProducers + config3.numNormalThreads);
+	config3.numBlocks = (config3.numThreads * config3.numChunksPerThread * config3.chunkSize);
+	config3.producer = producer1;
+	config3.counsumer = consumer1;
 	config3.normalExec = normalExec;
 
 	//tester(config3);
-	//LOG_INFO("Config 3.1 successful");
+	LOG_INFO("Config 3.1 successful");
+
+
+	config3.numChunksPerThread = 2;
+	config3.chunkSize = 3;
+	config3.numDonationSteps = 2;
+	config3.numProducerGroups = -1;
+	config3.numProducerPerGroup = -1;
+	config3.numProducers = 4;
+	config3.numNormalThreads = 1;
+	config3.numBlocksToBePassed = 10;
+	config3.numThreads = (3 * config3.numProducers + config3.numNormalThreads);
+	config3.numBlocks = (config3.numThreads * config3.numChunksPerThread * config3.chunkSize);
+	config3.producer = producer1;
+	config3.counsumer = consumer1;
+	config3.normalExec = normalExec;
+
+	//tester(config3);
+	LOG_INFO("Config 3.2 successful");
 
 	LOG_INFO("Test Client");
 	LOG_CLOSE();
