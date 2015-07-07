@@ -3,24 +3,15 @@
 
 #include "commons.h"
 
-typedef struct _CircularQueueElement {
-	void* value;
-} CircularQueueElement;
-
-typedef struct {
-	int head;
-	int tail;
-
-	CircularQueueElement *baseAddress;
-	int elementSize;
-	int maxNumberOfElements;
-} CircularQueue;
-
-CircularQueueElement * getCircularQueueElement(CircularQueue *queue, int index);
+typedef struct CircularQueue CircularQueue;
 
 CircularQueue* circularQueueCreate(int elementSize, int noOfElements);
 
 void circularQueueFree(CircularQueue *queue);
+
+int circularQueueGetElementSize(CircularQueue *queue);
+
+int circularQueueGetMaxNumberOfElements(CircularQueue *queue);
 
 bool circularQueueEnq(CircularQueue *queue, const void* element);
 
