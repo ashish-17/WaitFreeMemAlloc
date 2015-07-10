@@ -43,6 +43,8 @@ typedef struct _Memory {
 
 Memory* memory = NULL;
 
+HPStructure *globalHPStructure = NULL;
+
 //Chunk* doHelp(int threadToBeHelped, Chunk *stolenChunk, Helper *announceOfThreadToBeHelped);
 Chunk* doHelp(int threadId, int threadToBeHelped, Chunk *stolenChunk, ReferenceIntegerPair *announceOfThreadToBeHelped);
 bool donate(int threadId, Chunk *chunk);
@@ -79,6 +81,9 @@ void createWaitFreePool(int m, int n, int c, int C) {
 	int numOfChunksPerThread = numOfChunks/numOfThreads;
 
 	//numOfThreads = n + 1;
+	globalHPStructure = (HPStructure*)my_malloc(sizeof(HPStructure));
+	hpStructureCreate(globalHPStructure, n, 5);
+	//LOG_INFO("globalHPStructure is %u", globalHPStructure);
 	memory->fullPool = createFullPool(numOfThreads);
 	memory->localPool = createLocalPool(numOfThreads);
 	memory->freePoolUC = createFreePoolUC(numOfThreads);
@@ -144,6 +149,7 @@ void createWaitFreePool(int m, int n, int c, int C) {
 		donorEntry->numOfPassed = 0;
 		donorEntry->addInFreePoolC = false;
 	}
+
 	LOG_EPILOG();
 }
 

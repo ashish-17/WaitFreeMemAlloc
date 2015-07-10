@@ -3,6 +3,8 @@
 #include "Block.h"
 #include "HazardPointer.h"
 
+HPStructure *globalHPStructure;
+
 SharedQueuePools* createSharedQueuePools(int threads)
 {
 	LOG_PROLOG();

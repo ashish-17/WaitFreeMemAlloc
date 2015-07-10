@@ -17,7 +17,7 @@ typedef struct {
 	int numberOfHP;
 }HPStructure;
 
-HPStructure *globalHPStructure;
+extern HPStructure *globalHPStructure;
 
 void hpStructureCreate(HPStructure *hpStructure, int noOfThreads, int noOfHP);
 

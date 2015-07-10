@@ -1,11 +1,11 @@
-#include "WaitFreePool.h"
-#include "RandomGenerator.h"
-#include "commons.h"
+#include "../WaitFreePool.h"
+#include "../RandomGenerator.h"
+#include "../commons.h"
 #include <pthread.h>
-# include "Block.h"
-#include "Stack.h"
-#include "HazardPointer.h"
-#include "CodeCorrectness.h"
+# include "../Block.h"
+#include "../Stack.h"
+//#include "HazardPointer.h"
+#include "../CodeCorrectness.h"
 
 typedef void (*ThreadFunc)(void*);
 
@@ -39,7 +39,7 @@ typedef struct _ThreadStructure {
 	TestThreadData *threadData;
 } ThreadStructure;
 
-HPStructure *globalHPStructure = NULL;
+//HPStructure *globalHPStructure = NULL;
 
 void* normalExec(void *data) {
 	LOG_PROLOG();
@@ -296,8 +296,6 @@ void tester(TestConfig cfg) {
 
 	LOG_INFO("created all the arrays");
 
-	globalHPStructure = (HPStructure*)my_malloc(sizeof(HPStructure));
-	hpStructureCreate(globalHPStructure, cfg.numThreads, 5);
 	createWaitFreePool(cfg.numBlocks, cfg.numThreads, cfg.chunkSize, cfg.numDonationSteps);
 	hashTableCreate(cfg.numBlocks);
 
@@ -344,7 +342,7 @@ void tester(TestConfig cfg) {
 	LOG_EPILOG();
 }
 
-int masdfdsin() {
+int main() {
 	LOG_INIT_CONSOLE();
 	LOG_INIT_FILE();
 
@@ -383,7 +381,7 @@ int masdfdsin() {
 	config1.counsumer = consumer1;
 	config1.normalExec = normalExec;
 
-	tester(config1);
+	//tester(config1);
 	LOG_INFO("Config 1.2 successful");
 
 	config1.numChunksPerThread = 2;
@@ -400,7 +398,7 @@ int masdfdsin() {
 	config1.counsumer = consumer1;
 	config1.normalExec = normalExec;
 
-	tester(config1);
+	//tester(config1);
 	LOG_INFO("Config 1.3 successful");
 
 	config1.numChunksPerThread = 2;
@@ -437,7 +435,7 @@ int masdfdsin() {
 	config2.counsumer = consumer2;
 	config2.normalExec = normalExec;
 
-	tester(config2);
+	//tester(config2);
 	LOG_INFO("Config 2.1 successful");
 
 	config2.numChunksPerThread = 4;
@@ -454,7 +452,7 @@ int masdfdsin() {
 	config2.counsumer = consumer2;
 	config2.normalExec = normalExec;
 
-	tester(config2);
+	//tester(config2);
 	LOG_INFO("Config 2.2 successful");
 
 	config2.numChunksPerThread = 4;
@@ -471,7 +469,7 @@ int masdfdsin() {
 	config2.counsumer = consumer2;
 	config2.normalExec = normalExec;
 
-	tester(config2);
+	//tester(config2);
 	LOG_INFO("Config 2.3 successful");
 
 	// config3 tests a single normalExec with different consumers

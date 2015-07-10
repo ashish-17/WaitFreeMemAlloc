@@ -4,6 +4,8 @@
 
 // Single-Enqueuer Multi-Dequeuer
 
+HPStructure *globalHPStructure;
+
 QueueElement* createNode(void *value) {
 	LOG_PROLOG();
 	//printf("createNode blk ptr = %u\n", value);

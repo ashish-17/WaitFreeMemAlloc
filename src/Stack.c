@@ -2,6 +2,8 @@
 #include "Stack.h"
 #include "HazardPointer.h"
 
+HPStructure *globalHPStructure;
+
 void stackCreate(Stack *stack, int elementSize)
 {
 	LOG_PROLOG();
@@ -100,6 +102,7 @@ bool stackPushOwner(Stack *stack, const void* element, int threadId)
 	node->value = element;
 	node->next = (StackElement*)stack->top->atomicRef->reference;
 	//LOG_INFO("stackPushOwner before setting HP\n");
+	LOG_INFO("global Structure is %u", globalHPStructure);
 	ReferenceIntegerPair *oldTop = setHazardPointer(globalHPStructure, threadId, stack->top->atomicRef);
 	//LOG_INFO("stackPushOwner: setting HP of thread %d for oldTop %u\n", threadId, oldTop);
 	//LOG_INFO("stack->top->atomicRef = %u\n", stack->top->atomicRef);

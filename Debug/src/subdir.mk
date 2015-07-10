@@ -4,13 +4,11 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
+../src/AtomicStampedRef.c \
 ../src/AtomicStampedReference.c \
 ../src/Block.c \
 ../src/Chunk.c \
 ../src/CircularQueue.c \
-../src/Client.c \
-../src/ClientHP.c \
-../src/ClientPC.c \
 ../src/CodeCorrectness.c \
 ../src/FreePool.c \
 ../src/FullPool.c \
@@ -25,18 +23,14 @@ C_SRCS += \
 ../src/StackPool.c \
 ../src/WaitFreePool.c \
 ../src/logger.c \
-../src/test.c \
-../src/testMulti.c \
 ../src/utils.c 
 
 OBJS += \
+./src/AtomicStampedRef.o \
 ./src/AtomicStampedReference.o \
 ./src/Block.o \
 ./src/Chunk.o \
 ./src/CircularQueue.o \
-./src/Client.o \
-./src/ClientHP.o \
-./src/ClientPC.o \
 ./src/CodeCorrectness.o \
 ./src/FreePool.o \
 ./src/FullPool.o \
@@ -51,18 +45,14 @@ OBJS += \
 ./src/StackPool.o \
 ./src/WaitFreePool.o \
 ./src/logger.o \
-./src/test.o \
-./src/testMulti.o \
 ./src/utils.o 
 
 C_DEPS += \
+./src/AtomicStampedRef.d \
 ./src/AtomicStampedReference.d \
 ./src/Block.d \
 ./src/Chunk.d \
 ./src/CircularQueue.d \
-./src/Client.d \
-./src/ClientHP.d \
-./src/ClientPC.d \
 ./src/CodeCorrectness.d \
 ./src/FreePool.d \
 ./src/FullPool.d \
@@ -77,8 +67,6 @@ C_DEPS += \
 ./src/StackPool.d \
 ./src/WaitFreePool.d \
 ./src/logger.d \
-./src/test.d \
-./src/testMulti.d \
 ./src/utils.d 
 
 

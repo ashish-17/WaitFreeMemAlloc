@@ -3,6 +3,8 @@
 #include <stdatomic.h>
 #include "HazardPointer.h"
 
+HPStructure *globalHPStructure;
+
 ReferenceIntegerPair* createReferenceIntegerPair(void* ref, int i) {
 	LOG_PROLOG();
 	ReferenceIntegerPair* pair = (ReferenceIntegerPair*)my_malloc(sizeof(ReferenceIntegerPair)); //added.. shouldn't we first free memory pointed by pair
