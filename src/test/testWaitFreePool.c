@@ -1,11 +1,11 @@
 #include "../WaitFreePool.h"
-#include "../RandomGenerator.h"
+#include "RandomGenerator.h"
 #include "../commons.h"
 #include <pthread.h>
 # include "../Block.h"
 #include "../Stack.h"
 //#include "HazardPointer.h"
-#include "../CodeCorrectness.h"
+#include "CodeCorrectness.h"
 
 typedef void (*ThreadFunc)(void*);
 
@@ -342,7 +342,7 @@ void tester(TestConfig cfg) {
 	LOG_EPILOG();
 }
 
-int main() {
+int TestWFPmain() {
 	LOG_INIT_CONSOLE();
 	LOG_INIT_FILE();
 

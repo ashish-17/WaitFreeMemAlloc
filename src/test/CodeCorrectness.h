@@ -1,7 +1,7 @@
 #ifndef WAITFREEMEMALLOC_SRC_CODECORRECTNESS_H_
 #define WAITFREEMEMALLOC_SRC_CODECORRECTNESS_H_
 
-#include "commons.h"
+#include "../commons.h"
 
 void hashTableCreate(int numOfBlocks);
 

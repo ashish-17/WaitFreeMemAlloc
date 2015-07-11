@@ -9,20 +9,17 @@ C_SRCS += \
 ../src/Block.c \
 ../src/Chunk.c \
 ../src/CircularQueue.c \
-../src/CodeCorrectness.c \
 ../src/FreePool.c \
 ../src/FullPool.c \
 ../src/HazardPointer.c \
 ../src/LocalPool.c \
 ../src/Queue.c \
 ../src/QueuePool.c \
-../src/RandomGenerator.c \
 ../src/SharedPools.c \
 ../src/Stack.c \
 ../src/StackArray.c \
 ../src/StackPool.c \
 ../src/WaitFreePool.c \
-../src/logger.c \
 ../src/utils.c 
 
 OBJS += \
@@ -31,20 +28,17 @@ OBJS += \
 ./src/Block.o \
 ./src/Chunk.o \
 ./src/CircularQueue.o \
-./src/CodeCorrectness.o \
 ./src/FreePool.o \
 ./src/FullPool.o \
 ./src/HazardPointer.o \
 ./src/LocalPool.o \
 ./src/Queue.o \
 ./src/QueuePool.o \
-./src/RandomGenerator.o \
 ./src/SharedPools.o \
 ./src/Stack.o \
 ./src/StackArray.o \
 ./src/StackPool.o \
 ./src/WaitFreePool.o \
-./src/logger.o \
 ./src/utils.o 
 
 C_DEPS += \
@@ -53,20 +47,17 @@ C_DEPS += \
 ./src/Block.d \
 ./src/Chunk.d \
 ./src/CircularQueue.d \
-./src/CodeCorrectness.d \
 ./src/FreePool.d \
 ./src/FullPool.d \
 ./src/HazardPointer.d \
 ./src/LocalPool.d \
 ./src/Queue.d \
 ./src/QueuePool.d \
-./src/RandomGenerator.d \
 ./src/SharedPools.d \
 ./src/Stack.d \
 ./src/StackArray.d \
 ./src/StackPool.d \
 ./src/WaitFreePool.d \
-./src/logger.d \
 ./src/utils.d 
 
 
@@ -74,7 +65,7 @@ C_DEPS += \
 src/%.o: ../src/%.c
 	@echo 'Building file: $<'
 	@echo 'Invoking: GCC C Compiler'
-	gcc -std=c11 -O0 -g3 -Wall -c -fmessage-length=0 -std=c11 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
+	gcc -std=c11 -I/Users/architaagarwal/hpc-gcc/lib/gcc/x86_64-apple-darwin14.0.0/4.9.2/include -I"/Users/architaagarwal/Documents/workspace/Logger" -O0 -g3 -Wall -c -fmessage-length=0 -std=c11 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
 	@echo 'Finished building: $<'
 	@echo ' '
 

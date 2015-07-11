@@ -1,5 +1,5 @@
 #include "../CircularQueue.h"
-#include "../RandomGenerator.h""
+#include "RandomGenerator.h""
 
 typedef struct TestCircularQueueConfig {
     int elementSize;

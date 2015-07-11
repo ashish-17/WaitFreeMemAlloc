@@ -72,6 +72,7 @@ Donor* getDonorEntry(int index) {
 
 void createWaitFreePool(int m, int n, int c, int C) {
 	LOG_PROLOG();
+
 	memory = (Memory*)my_malloc(sizeof(Memory));
 
 	int numOfThreads = n;
@@ -149,7 +150,6 @@ void createWaitFreePool(int m, int n, int c, int C) {
 		donorEntry->numOfPassed = 0;
 		donorEntry->addInFreePoolC = false;
 	}
-
 	LOG_EPILOG();
 }
 
