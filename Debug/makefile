@@ -36,7 +36,7 @@ libWaitFreePool.a: $(OBJS) $(USER_OBJS)
 
 # Other Targets
 clean:
-	-$(RM) $(OBJS)$(ARCHIVES)$(C_DEPS) libWaitFreePool.a
+	-$(RM) $(ARCHIVES)$(OBJS)$(C_DEPS) libWaitFreePool.a
 	-@echo ' '
 
 .PHONY: all clean dependents

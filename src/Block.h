@@ -2,14 +2,21 @@
 #define WAITFREEMEMALLOC_SRC_BLOCK_H_
 
 #include "commons.h"
-
+/*
 typedef struct {
 	int threadId;
 	int memBlock;
-}Block;
+}Block;*/
 
-Block* createBlock(int threadId, int number);
+#define Block void
 
-void destroyBlock(Block *block) ;
+Block* createBlock(int nBytes);
+
+void destroyBlock(Block *block);
+
+void setBlockThreadIndex(Block *block, int threadIndex);
+
+int getBlockThreadIndex(Block *block);
+
 
 #endif /* WAITFREEMEMALLOC_SRC_BLOCK_H_ */

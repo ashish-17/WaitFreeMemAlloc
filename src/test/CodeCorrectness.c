@@ -77,8 +77,10 @@ typedef struct _CodeCorrectnessTestStructure {
 } CodeCorrectnessTestStructure;
 
 
-void testCodeCorrectness(CodeCorrectnessTestStructure *codeCorrectDS) {
+void* testCodeCorrectness(void *data) {
 	LOG_PROLOG();
+
+	CodeCorrectnessTestStructure *codeCorrectDS = (CodeCorrectnessTestStructure*) data;
 	int threadId = codeCorrectDS->threadId;
 	int numOfBlocks = codeCorrectDS->numOfBlocks;
 
@@ -99,6 +101,7 @@ void testCodeCorrectness(CodeCorrectnessTestStructure *codeCorrectDS) {
 			LOG_WARN("thread %d could not set the flag for block %d", threadId, allocBlock);
 		}
 	}
+
 	LOG_EPILOG();
 }
 
@@ -110,7 +113,7 @@ void thrmain() {
 	int NUM_BLOCKS = 20;
 	hashTableCreate(NUM_BLOCKS);
 	pthread_t threads[NUM_THREADS];
-	CodeCorrectnessTestStructure *codeCorrectDS = (CodeCorrectnessTestStructure*)malloc(NUM_THREADS * sizeof(CodeCorrectnessTestStructure));
+	CodeCorrectnessTestStructure *codeCorrectDS = (CodeCorrectnessTestStructure*)my_malloc(NUM_THREADS * sizeof(CodeCorrectnessTestStructure));
 
 	int rc = -1;
 	int numThreads = 0;

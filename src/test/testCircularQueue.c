@@ -174,7 +174,7 @@ bool doTestCircularQueue(TestCircularQueueConfig cfg) {
 	return success;
 }
 
-int Cismain() {
+int cismain() {
     LOG_INIT_CONSOLE();
 	LOG_INIT_FILE();
 

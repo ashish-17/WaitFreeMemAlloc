@@ -14,7 +14,7 @@ typedef struct TestDataAtomicStampedRef {
     TestConfigAtomicStampedRef* cfg;
 } TestDataAtomicStampedRef;
 
-void testAtomicValChange(void* value) {
+void* testAtomicValChange(void* value) {
     LOG_PROLOG();
 
     TestDataAtomicStampedRef* testData = (TestDataAtomicStampedRef*)value;

@@ -17,6 +17,7 @@ typedef struct {
 	int maxElements;
 } StackArray;
 
+StackArrayElement* getStackArrayElement(const StackArray* stack, int index);
 
 StackArray* stackArrayCreate(int elementSize, int maxElements);
 

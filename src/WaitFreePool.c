@@ -104,7 +104,8 @@ void createWaitFreePool(int m, int n, int c, int C) {
 		for(int i = 0; i < 1; i++) {
 			chunk = createChunk(chunk,numOfBlocksPerChunk);
 			for(int k = 0; k < numOfBlocksPerChunk; k++) {
-				block = createBlock(-1, blockNumber); //set the owner of the block to be -1 initially
+				block = createBlock(sizeof(int)); //set the owner of the block to be -1 initially
+				*((int*)block) = blockNumber;
 				blockNumber++;
 				putInChunkUncontended(chunk, block);
 			}
@@ -118,7 +119,8 @@ void createWaitFreePool(int m, int n, int c, int C) {
 		for(int i = 0; i < numOfChunksPerThread - 1; i++) {
 			chunk = createChunk(chunk,numOfBlocksPerChunk);
 			for(int k = 0; k < numOfBlocksPerChunk; k++) {
-				block = createBlock(-1, blockNumber);
+				block = createBlock(sizeof(int));
+				*((int*)block) = blockNumber;
 				blockNumber++;
 				putInChunkUncontended(chunk, block);
 			}
@@ -236,7 +238,7 @@ Block* allocate(int threadId, bool toBePassed) {
 	//LOG_INFO("allocate: threadID = %d, chunk ptr = %u\n", threadId, chunk);
 	if (!isChunkEmpty(chunk)) {
 		block = getFromChunkUncontended(chunk);
-		block->threadId = threadId;
+		setBlockThreadIndex(block, threadId);
 		putInLocalPool(memory->localPool, threadId, chunk);
 		LOG_EPILOG();
 		return block;
@@ -292,7 +294,7 @@ Block* allocate(int threadId, bool toBePassed) {
 						getDonorEntry(threadId)->noOfOps++;
 						putInLocalPool(memory->localPool, threadId, chunk);
 						block = getFromChunkUncontended(chunk);
-						block->threadId = threadId;
+						setBlockThreadIndex(block, threadId);
 						LOG_EPILOG();
 						return block;
 					}
@@ -302,7 +304,7 @@ Block* allocate(int threadId, bool toBePassed) {
 						if (!donate(threadId, chunk)) {
 							putInLocalPool(memory->localPool, threadId, chunk);
 							block = getFromChunkUncontended(chunk);
-							block->threadId = threadId;
+							setBlockThreadIndex(block, threadId);
 							LOG_EPILOG();
 							return block;
 						}
@@ -407,9 +409,9 @@ void freeMem(int threadId, Block *block) {
 	assert(globalHPStructure->topPointers[threadId] == 0);
 	//LOG_INFO("freeMem: threadID = %d, entered freeMem\n", threadId);
 	Chunk *chunk;
-	if (block->threadId != threadId) {
+	if (getBlockThreadIndex(block) != threadId) {
 		//LOG_INFO("freeMem: threadid = %d, freeing block %d\n", threadId, block->memBlock);
-		putInSharedQueuePools(memory->sharedQueuePools, block->threadId, threadId, block);
+		putInSharedQueuePools(memory->sharedQueuePools, getBlockThreadIndex(block), threadId, block);
 		LOG_EPILOG();
 		return;
 	}
@@ -432,7 +434,7 @@ void freeMem(int threadId, Block *block) {
 				if(donate(threadId, chunk)) { // donation successful
 					chunk = getFromFreePoolUC(memory->freePoolUC, threadId); // get a chunk from freePoolUC
 					if (chunk == NULL) { // not multiples of c were passed to other threads
-						putInSharedQueuePools(memory->sharedQueuePools, block->threadId, threadId, block);
+						putInSharedQueuePools(memory->sharedQueuePools, getBlockThreadIndex(block), threadId, block);
 						LOG_EPILOG();
 						return;
 					}
@@ -446,7 +448,7 @@ void freeMem(int threadId, Block *block) {
 				else if (putInOwnFullPool(memory->fullPool, threadId, chunk)) { //move full chunk to fullPool
 					chunk = getFromFreePoolUC(memory->freePoolUC, threadId);
 					if (chunk == NULL) { // not multiples of c were passed to other threads
-						putInSharedQueuePools(memory->sharedQueuePools, block->threadId, threadId, block);
+						putInSharedQueuePools(memory->sharedQueuePools, getBlockThreadIndex(block), threadId, block);
 						LOG_EPILOG();
 						return;
 					}
@@ -462,7 +464,7 @@ void freeMem(int threadId, Block *block) {
 				getDonorEntry(threadId)->noOfOps++;
 				chunk = getFromFreePoolUC(memory->freePoolUC, threadId);
 				if (chunk == NULL) { // not multiples of c were passed to other threads
-					putInSharedQueuePools(memory->sharedQueuePools, block->threadId, threadId, block);
+					putInSharedQueuePools(memory->sharedQueuePools, getBlockThreadIndex(block), threadId, block);
 					LOG_EPILOG();
 					return;
 				}

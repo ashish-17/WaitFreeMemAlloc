@@ -67,13 +67,13 @@ void* normalExec(void *data) {
 		//LOG_INFO("In thread %d, the flag %d\n", (int)threadId, flag);
 		if (flag <= 5) {
 			numOfAllocBlocks++;
-			Block* block = allocate(threadId, 0);
-			bool flag = setFlagForAllocatedBlock(block->memBlock);
+			int* block =(int*) allocate(threadId, 0);
+			bool flag = setFlagForAllocatedBlock(*block);
 			if (!flag) {
-				LOG_ERROR("Block %d was already allocated to some other thread", block->memBlock);
+				LOG_ERROR("Block %d was already allocated to some other thread", *block);
 				break;
 			}
-			LOG_INFO("Allocated the block %d",block->memBlock);
+			LOG_INFO("Allocated the block %d",*block);
 			LOG_INFO("noOfAllocBlocks %d", numOfAllocBlocks);
 			stackPush(stack,block);
 		}
@@ -84,15 +84,15 @@ void* normalExec(void *data) {
 			}
 			else {
 				numOfAllocBlocks--;
-				Block *block = stackPop(stack);
+				int *block = stackPop(stack);
 				//LOG_INFO("thread %d trying to free the block %d\n",(int)threadId, block->memBlock);
 				freeMem(threadId, block);
-				bool flag = clearFlagForAllocatedBlock(block->memBlock);
+				bool flag = clearFlagForAllocatedBlock(*block);
 				if (!flag) {
-					LOG_ERROR("Block %d was already free. Tried to free again", block->memBlock);
+					LOG_ERROR("Block %d was already free. Tried to free again", *block);
 					break;
 				}
-				LOG_INFO("Freed the block %d\n",block->memBlock);
+				LOG_INFO("Freed the block %d\n", *block);
 				LOG_INFO("noOfAllocBlocks %d", numOfAllocBlocks);
 			}
 		}
@@ -103,9 +103,9 @@ void* normalExec(void *data) {
 	LOG_INFO("Normal execution finished. Going to free allocated blocks");
 	while (numOfAllocBlocks > 0) {
 		numOfAllocBlocks--;
-		Block *block = stackPop(stack);
+		int *block = stackPop(stack);
 		freeMem(threadId, block);
-		LOG_INFO("Freed the block %d\n", block->memBlock);
+		LOG_INFO("Freed the block %d\n", *block);
 	}
 	LOG_INFO("FINISHED");
 	LOG_EPILOG();
@@ -127,10 +127,10 @@ void* producer1(void *data) {
 
 	int con;
 	for (int i = 1; i <= cfg->numBlocksToBePassed; i++) {
-		Block* block = allocate(threadId, 1);
-		bool flag = setFlagForAllocatedBlock(block->memBlock);
+		int* block = allocate(threadId, 1);
+		bool flag = setFlagForAllocatedBlock(*block);
 		if (!flag) {
-			LOG_ERROR("Block %d was already allocated to some other thread", block->memBlock);
+			LOG_ERROR("Block %d was already allocated to some other thread", *block);
 			break;
 		}
 		int con1 = 2*threadId + cfg->numProducers + cfg->numNormalThreads;
@@ -148,7 +148,7 @@ void* producer1(void *data) {
 			//LOG_INFO("Producer: %d waiting for consumer to consume \n",con);
 			pthread_cond_wait(&threadData[con].condp, &threadData[con].the_mutex);
 		}
-		LOG_INFO("Producer %d passing block %d to thread %d", threadId, block->memBlock, con);
+		LOG_INFO("Producer %d passing block %d to thread %d", threadId, *block, con);
 		threadData[con].buffer = block;
 		pthread_cond_signal(&threadData[con].condc);	// wake up consumer
 		pthread_mutex_unlock(&threadData[con].the_mutex);	// release the buffer
@@ -165,7 +165,7 @@ void* consumer1(void *data) {
 	TestConfig *cfg = threadStructure->config;
 	TestThreadData *threadData = threadStructure->threadData;
 	LOG_INFO("consumer: thread has id %d", threadId);
-	Block *block;
+	int *block;
 
 	for(int i = 1; i <= cfg->numBlocksToBePassed/2; i++) {
 		pthread_mutex_lock(&threadData[threadId].the_mutex);	// protect buffer
@@ -181,10 +181,10 @@ void* consumer1(void *data) {
 		pthread_mutex_unlock(&threadData[threadId].the_mutex);	// release the buffer
 		//LOG_INFO("Consumer %d consumed the block %d\n", threadId, block->memBlock);
 		freeMem(threadId, block);
-		LOG_INFO("Consumer consumed the block %d", block->memBlock);
-		bool flag = clearFlagForAllocatedBlock(block->memBlock);
+		LOG_INFO("Consumer consumed the block %d", *block);
+		bool flag = clearFlagForAllocatedBlock(*block);
 		if (!flag) {
-			LOG_ERROR("Block %d was already free. Tried to free again", block->memBlock);
+			LOG_ERROR("Block %d was already free. Tried to free again", *block);
 			break;
 		}
 	}
@@ -215,10 +215,10 @@ void producer2(void *data) {
 
 	for (int i = 1; i <= cfg->numBlocksToBePassed; i++) {
 
-		Block* block = allocate(threadId, 1);
-		bool flag = setFlagForAllocatedBlock(block->memBlock);
+		int* block = allocate(threadId, 1);
+		bool flag = setFlagForAllocatedBlock(*block);
 		if (!flag) {
-			LOG_ERROR("Block %d was already allocated to some other thread", block->memBlock);
+			LOG_ERROR("Block %d was already allocated to some other thread", *block);
 			break;
 		}
 
@@ -227,7 +227,7 @@ void producer2(void *data) {
 			//LOG_INFO("Producer: %d waiting for consumer to consume \n",con);
 			pthread_cond_wait(&threadData[con].condp, &threadData[con].the_mutex);
 		}
-		LOG_INFO("Producer %d passing block %d to thread %d", threadId, block->memBlock, con);
+		LOG_INFO("Producer %d passing block %d to thread %d", threadId, *block, con);
 		threadData[con].buffer = block;
 		pthread_cond_signal(&threadData[con].condc);	// wake up consumer
 		pthread_mutex_unlock(&threadData[con].the_mutex);	// release the buffer
@@ -246,7 +246,7 @@ void* consumer2(void *data) {
 	TestThreadData *threadData = threadStructure->threadData;
 
 	LOG_INFO("consumer: thread has id %d", threadId);
-	Block *block;
+	int *block;
 
 	LOG_INFO("index value %d",cfg->numBlocksToBePassed * cfg->numProducerPerGroup);
 	for(int i = 1; i <= cfg->numBlocksToBePassed * cfg->numProducerPerGroup; i++) {
@@ -264,10 +264,10 @@ void* consumer2(void *data) {
 		pthread_mutex_unlock(&threadData[threadId].the_mutex);	// release the buffer
 		//LOG_INFO("Consumer %d consumed the block %d\n", threadId, block->memBlock);
 		freeMem(threadId, block);
-		LOG_INFO("Consumer consumed the block %d", block->memBlock);
-		bool flag = clearFlagForAllocatedBlock(block->memBlock);
+		LOG_INFO("Consumer consumed the block %d", *block);
+		bool flag = clearFlagForAllocatedBlock(*block);
 		if (!flag) {
-			LOG_ERROR("Block %d was already free. Tried to free again", block->memBlock);
+			LOG_ERROR("Block %d was already free. Tried to free again", *block);
 			break;
 		}
 	}
@@ -342,7 +342,7 @@ void tester(TestConfig cfg) {
 	LOG_EPILOG();
 }
 
-int TestWFPmain() {
+int testWFPmain() {
 	LOG_INIT_CONSOLE();
 	LOG_INIT_FILE();
 
@@ -381,7 +381,7 @@ int TestWFPmain() {
 	config1.counsumer = consumer1;
 	config1.normalExec = normalExec;
 
-	//tester(config1);
+	tester(config1);
 	LOG_INFO("Config 1.2 successful");
 
 	config1.numChunksPerThread = 2;
@@ -398,7 +398,7 @@ int TestWFPmain() {
 	config1.counsumer = consumer1;
 	config1.normalExec = normalExec;
 
-	//tester(config1);
+	tester(config1);
 	LOG_INFO("Config 1.3 successful");
 
 	config1.numChunksPerThread = 2;

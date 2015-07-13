@@ -14,8 +14,11 @@ environment/project/cdt.managedbuild.config.gnu.cross.exe.debug.1609753565/PATH/
 environment/project/cdt.managedbuild.config.gnu.cross.exe.debug.1609753565/append=true
 environment/project/cdt.managedbuild.config.gnu.cross.exe.debug.1609753565/appendContributed=true
 environment/project/cdt.managedbuild.config.gnu.cross.exe.release.959816933/CPATH/delimiter=\:
-environment/project/cdt.managedbuild.config.gnu.cross.exe.release.959816933/CPATH/operation=append
-environment/project/cdt.managedbuild.config.gnu.cross.exe.release.959816933/CPATH/value=${HOME}/hpc-gcc/include
+environment/project/cdt.managedbuild.config.gnu.cross.exe.release.959816933/CPATH/operation=replace
+environment/project/cdt.managedbuild.config.gnu.cross.exe.release.959816933/CPATH/value=${HOME}/hpc-gcc/lib/gcc/x86_64-apple-darwin14.0.0/4.9.2/include
+environment/project/cdt.managedbuild.config.gnu.cross.exe.release.959816933/DYLD_LIBRARY_PATH/delimiter=\:
+environment/project/cdt.managedbuild.config.gnu.cross.exe.release.959816933/DYLD_LIBRARY_PATH/operation=append
+environment/project/cdt.managedbuild.config.gnu.cross.exe.release.959816933/DYLD_LIBRARY_PATH/value=${HOME}/hpc-gcc/lib
 environment/project/cdt.managedbuild.config.gnu.cross.exe.release.959816933/LIBRARY_PATH/delimiter=\:
 environment/project/cdt.managedbuild.config.gnu.cross.exe.release.959816933/LIBRARY_PATH/operation=append
 environment/project/cdt.managedbuild.config.gnu.cross.exe.release.959816933/LIBRARY_PATH/value=${HOME}/hpc-gcc/lib

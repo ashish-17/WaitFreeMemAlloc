@@ -12,4 +12,8 @@ bool isDirty(void* ptr);
 
 void setDirty(void *ptr, bool isDirty);
 
+int getIndex(void *ptr);
+
+void setIndex(void *ptr, int threadIndex);
+
 #endif /* WAITFREEMEMALLOC_SRC_UTILS_H_ */

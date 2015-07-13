@@ -1,5 +1,4 @@
 #include "AtomicStampedRef.h"
-#include <stdatomic.h>
 #include "HazardPointer.h"
 
 #define STAMP_INVALID_VAL -1
