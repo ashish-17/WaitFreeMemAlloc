@@ -20,7 +20,8 @@ StackPool* createStackPool(int threads)
 		//printf("Thread ptr = %u \n", getThread(pool, i));
 		StackThread* ptr = getStackThread(pool, i);
 		ptr->stack = (Stack*)my_malloc(sizeof(Stack));
-		//printf("Stack ptr = %u\n", ptr->stack);
+		//LOG_INFO("thread ptr at index %i is %u\n", i, ptr);
+		//LOG_INFO("Stack ptr = %u", ptr->stack);
 		//printf("Inside create pool and size of chunk is %u\n", sizeof(Chunk));
 		stackCreate(ptr->stack, sizeof(Chunk));
 	}
