@@ -66,8 +66,9 @@ void queueEnqUC(Queue *queue, void* element) {
 	LOG_EPILOG();
 }
 
-bool queueEnqC(Queue *queue, const void* element, int threadId) {
+bool queueEnqC(Queue *queue, void* element, int threadId) {
 	LOG_PROLOG();
+	LOG_INFO("%d", threadId);
 	QueueElement *queueElement = createNode(element);
 	//printf("queueEnq: value = %u, blkPtr = %u, next ptr = %u\n", queueElement->value, element, queueElement->next);
 	QueueElement *last = queue->tail;

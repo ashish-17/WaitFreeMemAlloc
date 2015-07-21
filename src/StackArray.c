@@ -34,11 +34,7 @@ StackArray* stackArrayCreate(int elementSize, int maxElements) {
         stack->elements = (StackArrayElement*)my_malloc(sizeOfStackElements);
         LOG_INFO("stack->elements ptr %u", stack->elements);
         if (stack->elements != NULL) {
-            memset(stack->elements, NULL, sizeOfStackElements);
             stack->top = stack->elements;
-            LOG_INFO("stack->top ptr %u", stack->top);
-            LOG_INFO("stack->elementSize ptr %u", stack->elementSize);
-            LOG_INFO("stack->maxElements ptr %u", stack->maxElements);
             stack->elementSize = elementSize;
             stack->maxElements = maxElements;
         } else {
@@ -116,7 +112,7 @@ bool StackArrayIsFull(const StackArrayElement *top, const StackArrayElement *bas
 	return flag;
 }
 
-bool stackArrayPushUncontended(StackArray *stack, const void* element) {
+bool stackArrayPushUncontended(StackArray *stack, void* element) {
 	LOG_PROLOG();
 	bool flag = false;
 

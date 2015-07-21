@@ -27,7 +27,7 @@ bool stackArrayIsEmpty(const StackArrayElement *top, const StackArrayElement *ba
 
 bool StackArrayIsFull(const StackArrayElement *top, const StackArrayElement *baseAddress, int sizeOfStack);
 
-bool stackArrayPushUncontended(StackArray *stack, const void* element);
+bool stackArrayPushUncontended(StackArray *stack, void* element);
 
 void* stackArrayPopUncontended(StackArray *stack);
 

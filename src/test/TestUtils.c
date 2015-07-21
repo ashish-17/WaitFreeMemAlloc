@@ -11,8 +11,9 @@
 
 #include "../utils.h"
 #include "logger.h"
+#include <string.h>
 
-int testUtilsmain() {
+int utilsmain() {
 	LOG_INIT_CONSOLE();
 	LOG_INIT_FILE();
 
@@ -66,7 +67,7 @@ int testUtilsmain() {
 	//Test 3
 	pass = false;
 	LOG_INFO("Test case 3 (Try to allocate very large chunk of memory)");
-	char *ptr_test3 = my_malloc(200000000000UL);
+	char *ptr_test3 = my_malloc(200000000000000UL);
 	if (ptr_test3 != NULL) {
 
 		my_free(ptr_test3);

@@ -2,6 +2,7 @@
 #include <pthread.h>
 #include <time.h>
 #include "logger.h"
+#include <string.h>
 
 extern int errno;
 
@@ -81,8 +82,6 @@ void * my_malloc(size_t nBytes) {
 		char* tmp = ptr;
 		tmp += sizeof(hp_malloc_header);
 		ptr = tmp;
-		setDirty(ptr, 0);
-		setBlockPtr(ptr, NULL);
 		LOG_DEBUG("Pointer(%d bytes) returned to caller %x", nBytes, ptr);
 	} else {
 		int err = errno;        // Preserve the errno from the failed malloc().

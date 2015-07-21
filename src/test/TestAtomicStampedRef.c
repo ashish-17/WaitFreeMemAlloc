@@ -29,7 +29,7 @@ void* testAtomicValChange(void* value) {
             int newStamp = (oldStamp + 1);
 
             LOG_DEBUG("Old Ref = %x", getRef(testData->ref));
-            CASResult result = cmpAndSet(testData->ref, oldRef, newRef, oldStamp, newStamp, testData->threadIndex);
+            CASResult result = cmpAndSet(testData->ref, oldRef, newRef, oldStamp, newStamp);
             if (result.success) {
                 testData->cfg->threadSucessStatus[testData->threadIndex] = THREAD_CAS_SUCCESS;
                 LOG_DEBUG("New Atomic Ref = %x", getRef(testData->ref));
@@ -46,6 +46,7 @@ void* testAtomicValChange(void* value) {
     }
 
     LOG_EPILOG();
+    return NULL;
 }
 
 void doTestAtomicStampedRef(TestConfigAtomicStampedRef* cfg) {

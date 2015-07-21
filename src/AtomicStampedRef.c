@@ -115,8 +115,7 @@ CASResult cmpAndSet(AtomicStampedRef* currentRef,
                    void* expectedRef,
                    void* newRef,
                    int expectedStamp,
-                   int newStamp,
-                   int threadIndex) {
+                   int newStamp) {
     LOG_PROLOG();
 
     CASResult result = {false, newRef};

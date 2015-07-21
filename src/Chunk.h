@@ -17,7 +17,7 @@ typedef struct {
 	//int numOfBlocks;
 } Chunk;
 
-Chunk* createChunk(Chunk *chunk, int number);
+Chunk* createChunk(int number);
 
 void destroyChunk(Chunk* chunk);
 

@@ -103,6 +103,7 @@ void* testCodeCorrectness(void *data) {
 	}
 
 	LOG_EPILOG();
+	return NULL;
 }
 
 void thrmain() {

@@ -26,7 +26,7 @@ bool isQueueEmpty(Queue *queue);
 
 void queueEnqUC(Queue *queue, void* element);
 
-bool queueEnqC(Queue *queue, const void* element, int threadId);
+bool queueEnqC(Queue *queue, void* element, int threadId);
 
 void* queueDeqUC(Queue *queue);
 

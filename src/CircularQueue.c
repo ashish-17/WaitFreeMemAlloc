@@ -103,7 +103,7 @@ int circularQueueGetMaxNumberOfElements(CircularQueue *queue){
 	return numElementes;
 }
 
-bool circularQueueEnq(CircularQueue *queue, const void* element) {
+bool circularQueueEnq(CircularQueue *queue, void* element) {
 	LOG_PROLOG();
 
 	bool flag = false;

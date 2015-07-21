@@ -13,7 +13,7 @@ int circularQueueGetElementSize(CircularQueue *queue);
 
 int circularQueueGetMaxNumberOfElements(CircularQueue *queue);
 
-bool circularQueueEnq(CircularQueue *queue, const void* element);
+bool circularQueueEnq(CircularQueue *queue, void* element);
 
 void* circularQueueDeq(CircularQueue *queue);
 

@@ -95,24 +95,19 @@ void hpStructureDestroy(HPStructure *hpStructure) {
 
 void freeMemHP(HPStructure *hpStructure, int threadId, void *ptr) {
 	LOG_PROLOG();
-	bool flag = circularQueueEnq(getFreeQueue(hpStructure->freeQueues, threadId)->queue, ptr);
+	circularQueueEnq(getFreeQueue(hpStructure->freeQueues, threadId)->queue, ptr);
+
 	//LOG_INFO("freeMemHP:  enqueue of %u was successful = %u", ptr, flag);
 	void* node = NULL;
 	while (node == NULL) {
-		//printf("came here\n");
-		//printf("threadId = %d roundCounter = %u\n", threadId, hpStructure->roundCounters[threadId]);
-		//printf("threadId = %d, size of queue = %d\n", threadId,hpStructure->numberOfHP * hpStructure->numberOfThreads);
 		void *inspect = hpStructure->hazardPointers[hpStructure->roundCounters[threadId]];
 		hpStructure->roundCounters[threadId] = (hpStructure->roundCounters[threadId] + 1) % (hpStructure->numberOfHP * hpStructure->numberOfThreads);
-		//printf("freeMemHP: threadId = %d roundCounter = %u\n", threadId, hpStructure->roundCounters[threadId]);
-		//printf("threadId = %d inspectPtr = %u\n", threadId, inspect);
+
 		if (inspect != NULL) {
 			setDirty(inspect, 1);
 		}
 		node = circularQueueDeq(getFreeQueue(hpStructure->freeQueues, threadId)->queue);
-		//printf("freeMemHp: threadId = %d nodePtr = %u dequeued\n", threadId, node);
 		if (node == NULL) {
-			//printf("threadId = %d node dequeued was null\n", threadId);
 			break;
 		}
 		else if (isDirty(node) == 0) {
@@ -121,7 +116,6 @@ void freeMemHP(HPStructure *hpStructure, int threadId, void *ptr) {
 			break;
 		}
 		else {
-			//LOG_INFO("***** threadID = %d marking the non null node\n", threadId);
 			setDirty(node, 0);
 			circularQueueEnq(getFreeQueue(hpStructure->freeQueues, threadId)->queue, node);
 		}

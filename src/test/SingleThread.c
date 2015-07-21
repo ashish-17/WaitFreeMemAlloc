@@ -13,6 +13,7 @@
 #include "../Stack.h"
 //#include "HazardPointer.h"
 #include "CodeCorrectness.h"
+#include <stdio.h>
 
 typedef struct _ThreadData {
 	int allocatorNo;
@@ -25,7 +26,7 @@ typedef struct _ThreadData {
 } ThreadData;
 
 
-void workerWaitFreePool(void *data) {
+void* workerWaitFreePool(void *data) {
 	LOG_PROLOG();
 	ThreadData* threadData = (ThreadData*) data;
 	freeMem(threadData->threadId, threadData->obj);
@@ -41,11 +42,12 @@ void workerWaitFreePool(void *data) {
 		freeMem(threadData->threadId, ptr);
 	}
 	LOG_EPILOG();
+	return NULL;
 }
 
 
 
-int SingleThreadmain(int argc, char* argv[]) {
+void SingleThreadmain() {
 	LOG_INIT_CONSOLE();
 	LOG_INIT_FILE();
 	LOG_PROLOG();

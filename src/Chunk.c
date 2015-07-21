@@ -1,14 +1,14 @@
 #include "Chunk.h"
 #include "logger.h"
+#include "utils.h"
 
-Chunk* createChunk(Chunk *chunk, int number) {
+Chunk* createChunk(int number) {
 	LOG_PROLOG();
-	chunk = (Chunk*) my_malloc(sizeof(Chunk));
-	//printf("chunk ptr in createChunk= %u\n", chunk);
+	Chunk* chunk = (Chunk*) my_malloc(sizeof(Chunk));
+
 	LOG_INFO("chunk ptr = %u", chunk);
 	chunk->stack = stackArrayCreate(sizeof(BLOCK_MEM), number);
-	//printf("stack ptr= %u\n", chunk->stack);
-	//chunk->numOfBlocks = number;
+
 	LOG_EPILOG();
 	return chunk;
 }

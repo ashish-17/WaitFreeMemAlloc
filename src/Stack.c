@@ -52,7 +52,7 @@ bool stackIsEmpty(const Stack *stack)
 	return flag;
 }
 
-bool stackPush(Stack *stack, const void* element) {
+bool stackPush(Stack *stack, void* element) {
 	LOG_PROLOG();
 	//LOG_INFO("inside stackPush\n");
 	StackElement *node = (StackElement*)my_malloc(sizeof(StackElement));
@@ -95,7 +95,7 @@ void* stackPop(Stack *stack) {
 	return ptr;
 }
 
-bool stackPushOwner(Stack *stack, const void* element, int threadId)
+bool stackPushOwner(Stack *stack, void* element, int threadId)
 {
 	LOG_PROLOG();
 	StackElement *node = (StackElement*)my_malloc(sizeof(StackElement));
@@ -115,13 +115,12 @@ bool stackPushOwner(Stack *stack, const void* element, int threadId)
 	return flag;
 }
 
-bool stackPushOther(Stack *stack, const void* element, ReferenceIntegerPair* oldTop, int otherThreadId, int threadId)
+bool stackPushOther(Stack *stack, void* element, ReferenceIntegerPair* oldTop, int threadId)
 {
 	LOG_PROLOG();
 	StackElement *node = (StackElement*)my_malloc(sizeof(StackElement));
 	node->value = element;
 	node->next = (StackElement*)stack->top->atomicRef->reference;
-	//LOG_INFO("stackPushOther: threadId:%d going to call CAS\n", threadId);
 	bool flag = compareAndSet(stack->top, NULL, node, oldTop->integer, (oldTop->integer + 1), threadId);
 	LOG_EPILOG();
 	return flag;
@@ -158,7 +157,7 @@ void* stackPopOwner(Stack* stack, int threadId)
 	return ptr;
 }
 
-void* stackPopOther(Stack* stack, int otherThreadId, int threadIndex)
+void* stackPopOther(Stack* stack, int threadIndex)
 {
 	LOG_PROLOG();
 	void *ptr = NULL;

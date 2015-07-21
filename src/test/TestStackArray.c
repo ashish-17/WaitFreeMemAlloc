@@ -26,7 +26,7 @@ typedef struct _StackArrayTestThreadData {
 	int threadId;
 } StackArrayTestThreadData;
 
-void testStackArrayPushAndPop(void *data) {
+void* testStackArrayPushAndPop(void *data) {
 	LOG_PROLOG();
 	StackArrayTestThreadData *threadData = (StackArrayTestThreadData*)data;
 	if (threadData->stack != NULL) {
@@ -59,9 +59,10 @@ void testStackArrayPushAndPop(void *data) {
 	}
 
 	LOG_EPILOG();
+	return NULL;
 }
 
-void testStackArrayOnlyPop(void *data) {
+void* testStackArrayOnlyPop(void *data) {
 	LOG_PROLOG();
 	StackArrayTestThreadData *threadData = (StackArrayTestThreadData*)data;
 	if (threadData->stack != NULL) {
@@ -80,9 +81,10 @@ void testStackArrayOnlyPop(void *data) {
 	}
 
 	LOG_EPILOG();
+	return NULL;
 }
 
-void testStackArrayOnlyPush(void *data) {
+void* testStackArrayOnlyPush(void *data) {
 	LOG_PROLOG();
 	StackArrayTestThreadData *threadData = (StackArrayTestThreadData*)data;
 	if (threadData->stack != NULL) {
@@ -104,9 +106,10 @@ void testStackArrayOnlyPush(void *data) {
 	}
 
 	LOG_EPILOG();
+	return NULL;
 }
 
-void testStackArrayForcePush(void *data) {
+void* testStackArrayForcePush(void *data) {
 	LOG_PROLOG();
 	StackArrayTestThreadData *threadData = (StackArrayTestThreadData*)data;
 	if (threadData->stack != NULL) {
@@ -135,6 +138,7 @@ void testStackArrayForcePush(void *data) {
 	}
 
 	LOG_EPILOG();
+	return NULL;
 }
 
 bool verifyDataOnStack(TestConfigStackArray cfg, StackArray *stack) {

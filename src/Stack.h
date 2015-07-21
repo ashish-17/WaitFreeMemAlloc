@@ -22,16 +22,16 @@ void stackFree(Stack *stack);
 
 bool stackIsEmpty(const Stack *stack);
 
-bool stackPush(Stack *stack, const void* element);
+bool stackPush(Stack *stack, void* element);
 
 void* stackPop(Stack *stack);
 
-bool stackPushOwner(Stack *stack, const void* element, int threadId);
+bool stackPushOwner(Stack *stack, void* element, int threadId);
 
-bool stackPushOther(Stack *stack, const void* element, ReferenceIntegerPair* oldTop, int otherThreadID, int threadId);
+bool stackPushOther(Stack *stack, void* element, ReferenceIntegerPair* oldTop, int threadId);
 
 void* stackPopOwner(Stack *stack, int threadId);
 
-void* stackPopOther(Stack *stack, int otherThreadId, int threadId);
+void* stackPopOther(Stack *stack, int threadId);
 
 #endif /* WAITFREEMEMALLOC_SRC_STACK_H_ */

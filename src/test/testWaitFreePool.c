@@ -7,7 +7,7 @@
 //#include "HazardPointer.h"
 #include "CodeCorrectness.h"
 
-typedef void (*ThreadFunc)(void*);
+typedef void* (*ThreadFunc)(void*);
 
 typedef struct _TestConfig {
 	int numThreads;
@@ -46,7 +46,8 @@ void* normalExec(void *data) {
 
 	ThreadStructure* threadStructure = (ThreadStructure*)data;
 	int threadId = threadStructure->threadId;
-	TestConfig *cfg = threadStructure->config;
+	LOG_INFO("%d", threadId);
+	/*	TestConfig *cfg = threadStructure->config;
 	TestThreadData *threadData = threadStructure->threadData;
 
 	LOG_INFO("normalExec: thread has id %d", threadId);
@@ -107,9 +108,10 @@ void* normalExec(void *data) {
 		freeMem(threadId, block);
 		LOG_INFO("Freed the block %d\n", *block);
 	}
-	LOG_INFO("FINISHED");
+	LOG_INFO("FINISHED"); */
 	LOG_EPILOG();
 	pthread_exit(NULL);
+	return NULL;
 }
 
 
@@ -156,6 +158,7 @@ void* producer1(void *data) {
 	LOG_INFO("PRODUCER FINISHED");
 	LOG_EPILOG();
 	pthread_exit(0);
+	return NULL;
 }
 
 void* consumer1(void *data) {
@@ -192,12 +195,13 @@ void* consumer1(void *data) {
 
 	LOG_EPILOG();
 	pthread_exit(0);
+	return NULL;
 }
 
 
 
 // In this Pd-Cr, more than one producer passes blocks to single consumer
-void producer2(void *data) {
+void* producer2(void *data) {
 	LOG_PROLOG();
 
 	ThreadStructure* threadStructure = (ThreadStructure*)data;
@@ -235,6 +239,7 @@ void producer2(void *data) {
 	LOG_INFO("PRODUCER FINISHED");
 	LOG_EPILOG();
 	pthread_exit(0);
+	return NULL;
 }
 
 void* consumer2(void *data) {
@@ -275,6 +280,7 @@ void* consumer2(void *data) {
 
 	LOG_EPILOG();
 	pthread_exit(0);
+	return NULL;
 }
 
 
@@ -398,7 +404,7 @@ int main() {
 	config1.counsumer = consumer1;
 	config1.normalExec = normalExec;
 
-	tester(config1);
+	//	tester(config1);
 	LOG_INFO("Config 1.3 successful");
 
 	config1.numChunksPerThread = 2;
@@ -415,7 +421,7 @@ int main() {
 	config1.counsumer = consumer1;
 	config1.normalExec = normalExec;
 
-	tester(config1);
+	//	tester(config1);
 	LOG_INFO("Config 1.4 successful");
 
 	// config2 had multiple producers sending to same consumer

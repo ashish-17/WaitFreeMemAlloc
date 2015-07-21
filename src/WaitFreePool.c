@@ -76,7 +76,6 @@ void createWaitFreePool(int m, int n, int c, int C) {
 	memory = (Memory*)my_malloc(sizeof(Memory));
 
 	int numOfThreads = n;
-	int totalBlocks = m;
 	int numOfBlocksPerChunk = c;
 	int numOfChunks = m/c;
 	int numOfChunksPerThread = numOfChunks/numOfThreads;
@@ -102,7 +101,7 @@ void createWaitFreePool(int m, int n, int c, int C) {
 	// Set-up of initial local pools
 	for(int j = 0; j < numOfThreads ; j++) {
 		for(int i = 0; i < 1; i++) {
-			chunk = createChunk(chunk,numOfBlocksPerChunk);
+			chunk = createChunk(numOfBlocksPerChunk);
 			for(int k = 0; k < numOfBlocksPerChunk; k++) {
 				block = createBlock(sizeof(int)); //set the owner of the block to be -1 initially
 				*((int*)block) = blockNumber;
@@ -117,7 +116,7 @@ void createWaitFreePool(int m, int n, int c, int C) {
 	// Set-up of initial full pools
 	for(int j = 0; j < numOfThreads ; j++) {
 		for(int i = 0; i < numOfChunksPerThread - 1; i++) {
-			chunk = createChunk(chunk,numOfBlocksPerChunk);
+			chunk = createChunk(numOfBlocksPerChunk);
 			for(int k = 0; k < numOfBlocksPerChunk; k++) {
 				block = createBlock(sizeof(int));
 				*((int*)block) = blockNumber;
@@ -220,7 +219,6 @@ BLOCK_MEM allocate(int threadId, bool toBePassed) {
 	Chunk *stolenChunk;
 	BLOCK_MEM block = NULL;
 	int threadToBeHelped;
-	bool addInFreePoolC = false;
 	Donor *donor;
 
 	//Helper *announceOfThreadToBeHelped;
@@ -491,12 +489,10 @@ bool donate(int threadId, Chunk *chunk) {
 		ReferenceIntegerPair *announceOfThreadToBeHelped = setHazardPointer(globalHPStructure, threadId, getHelperEntry(i)->atomicRef);
 		ReferenceIntegerPair *oldTop = setHazardPointer(globalHPStructure, threadId, getStackThread(memory->fullPool, i)->stack->top->atomicRef);
 		assert(globalHPStructure->topPointers[threadId] == 2);
-		int oldTS = announceOfThreadToBeHelped->integer;
-		//	if (*(bool*)announceOfThreadToBeHelped->atomicRef->reference == true)
+	//	int oldTS = announceOfThreadToBeHelped->integer;
 		if ((*(bool*)announceOfThreadToBeHelped->reference == true) && (getStackThread(memory->fullPool, i)->stack->top->atomicRef->reference == NULL) && (getHelperEntry(i)->atomicRef->integer == announceOfThreadToBeHelped->integer)) {
 			LOG_INFO("donate: %d needed help", i);
 			if (putInOtherFullPool(memory->fullPool, i, chunk, oldTop, threadId)) {
-				//getHelperEntry(i)->compareAndSet(...);
 				assert(globalHPStructure->topPointers[threadId] == 1);
 				LOG_INFO("donate: successfully donated to %d", i);
 				tempBoolObj = (bool*)my_malloc(sizeof(bool));
