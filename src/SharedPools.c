@@ -14,7 +14,7 @@ SharedQueuePools* createSharedQueuePools(int threads)
 
 	for (int i = 0; i < threads; i++) {
 		SharedQueuePool* ptr = getSharedQueuePool(pool, i);
-		ptr->sharedQueuePool = createQueuePool(threads, sizeof(Block));
+		ptr->sharedQueuePool = createQueuePool(threads, sizeof(BLOCK_MEM));
 		//printf("createSQP: SQPPtr = %u, queuePtr = %u, HeadPtr = %u, TailPtr = %u\n", ptr->sharedQueuePool, getQueueThread(ptr->sharedQueuePool,i)->queue, getQueueThread(ptr->sharedQueuePool,i)->queue->head, getQueueThread(ptr->sharedQueuePool,i)->queue->tail);
 	}
 	LOG_EPILOG();
@@ -32,7 +32,7 @@ void destroySharedQueuePools(SharedQueuePools* pool)
 				SharedQueuePool *ptr = getSharedQueuePool(pool, i);
 				for (int j = 0; j < ptr->sharedQueuePool->numberOfThreads; j++) {
 					while (!isQueueEmpty(getQueueThread(ptr->sharedQueuePool, j)->queue)) {
-						Block *block = queueDeqUC(getQueueThread(ptr->sharedQueuePool,j)->queue);
+						BLOCK_MEM block = queueDeqUC(getQueueThread(ptr->sharedQueuePool,j)->queue);
 						destroyBlock(block);
 						block = NULL;
 					}
@@ -68,7 +68,7 @@ void* getFromSharedQueuePools(SharedQueuePools* pool, int threadId, int primThre
 	return ptr;
 }
 
-bool putInSharedQueuePools(SharedQueuePools* pool, int threadIndex, int secThreadIndex, Block* block) {
+bool putInSharedQueuePools(SharedQueuePools* pool, int threadIndex, int secThreadIndex, BLOCK_MEM block) {
 	LOG_PROLOG();
 	SharedQueuePool* queuePool = getSharedQueuePool(pool, threadIndex);
 	Queue *queue = getQueueThread(queuePool->sharedQueuePool, secThreadIndex)->queue;

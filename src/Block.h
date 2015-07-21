@@ -1,22 +1,17 @@
 #ifndef WAITFREEMEMALLOC_SRC_BLOCK_H_
 #define WAITFREEMEMALLOC_SRC_BLOCK_H_
 
-#include "commons.h"
-/*
-typedef struct {
-	int threadId;
-	int memBlock;
-}Block;*/
+#define INVALID_THREAD_INDEX -1
 
-#define Block void
+typedef struct Block Block;
+typedef void* BLOCK_MEM;
 
-Block* createBlock(int nBytes);
+BLOCK_MEM createBlock(int nBytes);
 
-void destroyBlock(Block *block);
+void destroyBlock(BLOCK_MEM ptr);
 
-void setBlockThreadIndex(Block *block, int threadIndex);
+void setBlockThreadIndex(BLOCK_MEM ptr, int threadIndex);
 
-int getBlockThreadIndex(Block *block);
-
+int getBlockThreadIndex(BLOCK_MEM ptr);
 
 #endif /* WAITFREEMEMALLOC_SRC_BLOCK_H_ */

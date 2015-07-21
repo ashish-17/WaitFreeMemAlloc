@@ -30,7 +30,7 @@ typedef struct _TestThreadData {
 	pthread_mutex_t the_mutex;
 	pthread_cond_t condc;
 	pthread_cond_t condp;
-	Block* buffer;
+	BLOCK_MEM buffer;
 } TestThreadData;
 
 typedef struct _ThreadStructure {
@@ -59,7 +59,7 @@ void* normalExec(void *data) {
 	LOG_INFO("TotalNumOfOps %d", totalNumOfOps);
 
 	Stack* stack = (Stack*) my_malloc(sizeof(Stack));
-	stackCreate(stack, sizeof(Block));
+	stackCreate(stack, sizeof(BLOCK_MEM));
 
 	while(totalNumOfOps > 0) {
 		flag = randint(11);
@@ -342,7 +342,7 @@ void tester(TestConfig cfg) {
 	LOG_EPILOG();
 }
 
-int testWFPmain() {
+int main() {
 	LOG_INIT_CONSOLE();
 	LOG_INIT_FILE();
 

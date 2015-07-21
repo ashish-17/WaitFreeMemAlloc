@@ -187,7 +187,7 @@ void testStackArray(TestConfigStackArray cfg) {
 	int numOfElements = cfg.numThreads * cfg.numBlocksInStack;
 	StackArrayTestThreadData *threadData = (StackArrayTestThreadData*)my_malloc(cfg.numThreads * sizeof(StackArrayTestThreadData));
 	if (threadData != NULL) {
-		StackArray *stack = stackArrayCreate(sizeof(Block), numOfElements);
+		StackArray *stack = stackArrayCreate(sizeof(BLOCK_MEM), numOfElements);
 		if (stack != NULL) {
 			int rc = -1;
 			int numThreads = 0;
@@ -316,7 +316,7 @@ void testStackArray(TestConfigStackArray cfg) {
 	}
 }
 
-int testStackArraymain() {
+int testSAmain() {
 	//int mainTestStackArray() {
 	LOG_INIT_CONSOLE();
 	LOG_INIT_FILE();

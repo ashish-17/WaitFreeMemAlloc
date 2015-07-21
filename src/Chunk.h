@@ -25,13 +25,13 @@ bool isChunkEmpty(Chunk *chunk);
 
 bool chunkHasSpace(Chunk *chunk);
 
-Block* getFromChunkUncontended(Chunk *chunk);
+BLOCK_MEM getFromChunkUncontended(Chunk *chunk);
 
-bool putInChunkUncontended(Chunk *chunk, Block *block);
+bool putInChunkUncontended(Chunk *chunk, BLOCK_MEM block);
 
-Block* getFromChunkContended(Chunk *chunk);
+BLOCK_MEM getFromChunkContended(Chunk *chunk);
 
-bool putInChunkContended(Chunk *chunk, Block *block);
+bool putInChunkContended(Chunk *chunk, BLOCK_MEM block);
 
 
 #endif /* WAITFREEMEMALLOC_SRC_CHUNK_H_ */

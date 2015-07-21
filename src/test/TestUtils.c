@@ -10,8 +10,9 @@
  */
 
 #include "../utils.h"
+#include "logger.h"
 
-int testUtilmain() {
+int testUtilsmain() {
 	LOG_INIT_CONSOLE();
 	LOG_INIT_FILE();
 
@@ -105,7 +106,7 @@ int testUtilmain() {
 	}
 
 	// Test 5
-	pass = false;
+/*	pass = false;
 	LOG_INFO("Test case 5 (Try to set the threadIndex on memory block)");
 	char *ptr_test5 = my_malloc(sizeof(char) * 10);
 	if (ptr_test5!= NULL) {
@@ -131,7 +132,7 @@ int testUtilmain() {
 		LOG_INFO("Test case 5 pass");
 	} else {
 		LOG_INFO("Test case 5 fail");
-	}
+	}*/
 
 	LOG_CLOSE();
 	return 0;

@@ -45,7 +45,7 @@ void workerWaitFreePool(void *data) {
 
 
 
-int main(int argc, char* argv[]) {
+int SingleThreadmain(int argc, char* argv[]) {
 	LOG_INIT_CONSOLE();
 	LOG_INIT_FILE();
 	LOG_PROLOG();

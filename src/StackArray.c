@@ -37,6 +37,8 @@ StackArray* stackArrayCreate(int elementSize, int maxElements) {
             memset(stack->elements, NULL, sizeOfStackElements);
             stack->top = stack->elements;
             LOG_INFO("stack->top ptr %u", stack->top);
+            LOG_INFO("stack->elementSize ptr %u", stack->elementSize);
+            LOG_INFO("stack->maxElements ptr %u", stack->maxElements);
             stack->elementSize = elementSize;
             stack->maxElements = maxElements;
         } else {
@@ -47,7 +49,7 @@ StackArray* stackArrayCreate(int elementSize, int maxElements) {
     } else {
         LOG_ERROR("Error creating a stackArray");
     }
-
+    LOG_INFO("here");
 	LOG_EPILOG();
 	return stack;
 }

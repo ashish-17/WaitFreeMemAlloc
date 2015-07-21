@@ -1,11 +1,12 @@
 #include "Chunk.h"
+#include "logger.h"
 
 Chunk* createChunk(Chunk *chunk, int number) {
 	LOG_PROLOG();
 	chunk = (Chunk*) my_malloc(sizeof(Chunk));
 	//printf("chunk ptr in createChunk= %u\n", chunk);
-	//printf("chunk ptr= %u\n", chunk->stack);
-	chunk->stack = stackArrayCreate(sizeof(Block), number);
+	LOG_INFO("chunk ptr = %u", chunk);
+	chunk->stack = stackArrayCreate(sizeof(BLOCK_MEM), number);
 	//printf("stack ptr= %u\n", chunk->stack);
 	//chunk->numOfBlocks = number;
 	LOG_EPILOG();
@@ -44,14 +45,14 @@ bool chunkHasSpace(Chunk *chunk) {
 		return false;*/
 }
 
-Block* getFromChunkUncontended(Chunk *chunk) {
+BLOCK_MEM getFromChunkUncontended(Chunk *chunk) {
 	LOG_PROLOG();
 	void *ptr =  stackArrayPopUncontended(chunk->stack);
 	LOG_EPILOG();
 	return ptr;
 }
 
-bool putInChunkUncontended(Chunk *chunk, Block *block) {
+bool putInChunkUncontended(Chunk *chunk, BLOCK_MEM block) {
 	LOG_PROLOG();
 	bool res = stackArrayPushUncontended(chunk->stack, block);
 	//printf("chunksize %d\n", chunk->stack->maxElements);
@@ -59,13 +60,13 @@ bool putInChunkUncontended(Chunk *chunk, Block *block) {
 	return res;
 }
 
-Block* getFromChunkContended(Chunk *chunk) {
+BLOCK_MEM getFromChunkContended(Chunk *chunk) {
 	LOG_PROLOG();
 	return stackArrayPopContended(chunk->stack);
 	LOG_EPILOG();
 }
 
-bool putInChunkContended(Chunk *chunk, Block *block) {
+bool putInChunkContended(Chunk *chunk, BLOCK_MEM block) {
 	LOG_PROLOG();
 	bool res = stackArrayPushContended(chunk->stack, block);
 	//printf("chunksize %d\n", chunk->stack->numberOfElements);

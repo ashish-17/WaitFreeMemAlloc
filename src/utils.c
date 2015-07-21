@@ -1,12 +1,13 @@
 #include"utils.h"
 #include <pthread.h>
 #include <time.h>
+#include "logger.h"
 
 extern int errno;
 
 typedef struct {
 	unsigned int isDirty;
-	unsigned int threadIndex;
+	void* block;
 } hp_malloc_header;
 
 
@@ -41,24 +42,20 @@ void setDirty(void *ptr, bool isDirty) {
 	LOG_EPILOG();
 }
 
-int getIndex(void *ptr) {
+Block* getBlockPtr(BLOCK_MEM ptr) {
 	LOG_PROLOG();
 
 	char *tmp = ptr;
 	tmp -= sizeof(hp_malloc_header);
 
 	hp_malloc_header *header = (hp_malloc_header*)tmp;
-	int threadIndex = header->threadIndex;
-/*
-	if(threadIndex == -1) {
-		LOG_ERROR("ThreadIndex is -1. Trying to fetch it.");
-	}*/
+	Block *block = header->block;
 
 	LOG_EPILOG();
-	return threadIndex;
+	return block;
 }
 
-void setIndex(void *ptr, int threadIndex) {
+void setBlockPtr(BLOCK_MEM ptr, Block* block) {
 	LOG_PROLOG();
 
 	char *tmp = ptr;
@@ -66,7 +63,7 @@ void setIndex(void *ptr, int threadIndex) {
 
 	hp_malloc_header *header = (hp_malloc_header*)tmp;
 
-	header->threadIndex = threadIndex;
+	header->block = block;
 	LOG_EPILOG();
 }
 
@@ -85,7 +82,7 @@ void * my_malloc(size_t nBytes) {
 		tmp += sizeof(hp_malloc_header);
 		ptr = tmp;
 		setDirty(ptr, 0);
-		setIndex(ptr, -1);
+		setBlockPtr(ptr, NULL);
 		LOG_DEBUG("Pointer(%d bytes) returned to caller %x", nBytes, ptr);
 	} else {
 		int err = errno;        // Preserve the errno from the failed malloc().
@@ -100,8 +97,6 @@ void my_free(void *ptr) {
 	LOG_PROLOG();
 	LOG_DEBUG("Pointer to be freed %x", ptr);
 
-	setDirty(ptr, 0);
-	setIndex(ptr, -1);
 	char* tmp = ptr;
 	tmp -= sizeof(hp_malloc_header);
 	LOG_DEBUG("Pointer to actual memory being freed %x", tmp);

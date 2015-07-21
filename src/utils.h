@@ -1,8 +1,9 @@
 #ifndef WAITFREEMEMALLOC_SRC_UTILS_H_
 #define WAITFREEMEMALLOC_SRC_UTILS_H_
 
-#include"stdlib.h"
-#include"commons.h"
+#include <stdlib.h>
+#include <stdbool.h>
+#include "Block.h"
 
 void * my_malloc(size_t nBytes);
 
@@ -12,8 +13,8 @@ bool isDirty(void* ptr);
 
 void setDirty(void *ptr, bool isDirty);
 
-int getIndex(void *ptr);
+Block* getBlockPtr(BLOCK_MEM ptr);
 
-void setIndex(void *ptr, int threadIndex);
+void setBlockPtr(BLOCK_MEM ptr, Block* block);
 
 #endif /* WAITFREEMEMALLOC_SRC_UTILS_H_ */

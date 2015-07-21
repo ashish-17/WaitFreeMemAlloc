@@ -48,8 +48,8 @@ HPStructure *globalHPStructure = NULL;
 //Chunk* doHelp(int threadToBeHelped, Chunk *stolenChunk, Helper *announceOfThreadToBeHelped);
 Chunk* doHelp(int threadId, int threadToBeHelped, Chunk *stolenChunk, ReferenceIntegerPair *announceOfThreadToBeHelped);
 bool donate(int threadId, Chunk *chunk);
-Block* allocate(int threadId, bool toBePassed);
-void freeMem(int threadId, Block *block);
+BLOCK_MEM allocate(int threadId, bool toBePassed);
+void freeMem(int threadId, BLOCK_MEM block);
 Chunk* moveFromSharedQueuePools(int threadId);
 
 /*Helper* getHelperEntry(int index) {
@@ -96,7 +96,7 @@ void createWaitFreePool(int m, int n, int c, int C) {
 	memory->m = m; memory->n = n; memory->c = c; memory->C = C;
 
 	Chunk *chunk;
-	Block *block;
+	BLOCK_MEM block;
 	int blockNumber = 0;
 
 	// Set-up of initial local pools
@@ -215,10 +215,10 @@ void destroyWaitFreePool() {
 	LOG_EPILOG();
 }
 
-Block* allocate(int threadId, bool toBePassed) {
+BLOCK_MEM allocate(int threadId, bool toBePassed) {
 	LOG_PROLOG();
 	Chunk *stolenChunk;
-	Block *block = NULL;
+	BLOCK_MEM block = NULL;
 	int threadToBeHelped;
 	bool addInFreePoolC = false;
 	Donor *donor;
@@ -404,7 +404,7 @@ Chunk* doHelp(int threadId, int threadToBeHelped, Chunk *stolenChunk, ReferenceI
 	return stolenChunk;
 }
 
-void freeMem(int threadId, Block *block) {
+void freeMem(int threadId, BLOCK_MEM block) {
 	LOG_PROLOG();
 	assert(globalHPStructure->topPointers[threadId] == 0);
 	//LOG_INFO("freeMem: threadID = %d, entered freeMem\n", threadId);
@@ -537,7 +537,7 @@ Chunk* moveFromSharedQueuePools(int threadId) {
 	assert(globalHPStructure->topPointers[threadId] == 1);
 	//LOG_INFO("moveFromSQP: threadID: %d\n", threadId);
 	int primThread = 0, secThread = 0;
-	Block *block;
+	BLOCK_MEM block;
 	Chunk* chunk;
 	QueueElement *oldQueueHead;
 	for (primThread = 0; primThread < memory->n; primThread++) {
