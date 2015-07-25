@@ -30,7 +30,7 @@ all: WaitFreePool
 WaitFreePool: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: GCC C Linker'
-	gcc -L"/Users/architaagarwal/Documents/workspace/Logger/Debug" -o "WaitFreePool" $(OBJS) $(USER_OBJS) $(LIBS)
+	gcc -L"/Users/architaagarwal/Documents/workspace/Logger/Debug" -pg -o "WaitFreePool" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 

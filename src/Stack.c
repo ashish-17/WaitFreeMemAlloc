@@ -54,24 +54,12 @@ bool stackIsEmpty(const Stack *stack)
 
 bool stackPush(Stack *stack, void* element) {
 	LOG_PROLOG();
-	//LOG_INFO("inside stackPush\n");
 	StackElement *node = (StackElement*)my_malloc(sizeof(StackElement));
-	//LOG_INFO("allocated a node\n");
 	node->value = element;
-	//LOG_INFO("the elementSize in stackPush is %u\n",stack->elementSize);
-	//LOG_INFO("the element in stackPush is %u\n",element);
-	//LOG_INFO("CDSC\n");
-	//LOG_INFO("in stackPush the element is %d\n", element->value);
-
-	//memcpy(node->value, element, stack->elementSize);
-	//node->value = element;
-
-	//LOG_INFO("after memcpy node value = %u\n",node->value);
 	node->next = (StackElement*)stack->top->atomicRef->reference;
 
 	stack->top->atomicRef->reference = node;
 	stack->numberOfElements++;
-	//LOG_INFO("reached here\n");
 	LOG_EPILOG();
 	return true;
 }
@@ -104,12 +92,7 @@ bool stackPushOwner(Stack *stack, void* element, int threadId)
 	//LOG_INFO("stackPushOwner before setting HP\n");
 	LOG_INFO("global Structure is %u", globalHPStructure);
 	ReferenceIntegerPair *oldTop = setHazardPointer(globalHPStructure, threadId, stack->top->atomicRef);
-	//LOG_INFO("stackPushOwner: setting HP of thread %d for oldTop %u\n", threadId, oldTop);
-	//LOG_INFO("stack->top->atomicRef = %u\n", stack->top->atomicRef);
-	//ReferenceIntegerPair *oldTop = (ReferenceIntegerPair*)getHazardPointer(globalHPStructure, threadId);
-	//LOG_INFO("oldTop = %u\n", oldTop);
-	//AtomicStampedReference* oldTop = stack->top;
-	//LOG_INFO("stackPushOwner after setting HP\n");
+
 	bool flag = compareAndSet(stack->top, oldTop->reference, node, oldTop->integer, (oldTop->integer + 1), threadId);
 	LOG_EPILOG();
 	return flag;

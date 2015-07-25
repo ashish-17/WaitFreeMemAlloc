@@ -14,6 +14,7 @@
 //#include "HazardPointer.h"
 #include "CodeCorrectness.h"
 #include <stdio.h>
+#include <time.h>
 
 typedef struct _ThreadData {
 	int allocatorNo;
@@ -29,36 +30,36 @@ typedef struct _ThreadData {
 void* workerWaitFreePool(void *data) {
 	LOG_PROLOG();
 	ThreadData* threadData = (ThreadData*) data;
-	freeMem(threadData->threadId, threadData->obj);
+	printf("threadid %d \n", threadData->threadId);
+	char **ptr = (char**) malloc(sizeof(char*) * threadData->iterations);
 	for (int i = 0; i < threadData->iterations; i++) {
-		char* ptr = allocate(threadData->threadId, 0);
+		ptr[i] = allocate(threadData->threadId, 0);
 		LOG_INFO("thread %d ptr got is %u\n", threadData->threadId, ptr);
-		// Write into ptr a bunch of times
-		for (int j = 0; j < threadData->repetitions; j++) {
-			for  (int k = 0; k < threadData->objSize; k++) {
-				*(ptr + k) = (char)k;
-			}
-		}
-		freeMem(threadData->threadId, ptr);
 	}
+	for (int i = 0; i < threadData->iterations; i++) {
+		freeMem(threadData->threadId, ptr[i]);
+		LOG_INFO("thread %d ptr got is %u\n", threadData->threadId, ptr);
+	}
+	free(ptr);
 	LOG_EPILOG();
 	return NULL;
 }
 
 
 
-void SingleThreadmain() {
+int main() {
 	LOG_INIT_CONSOLE();
 	LOG_INIT_FILE();
 	LOG_PROLOG();
 
 	int allocatorNo, nThreads, objSize, iterations, repetitions;
+	clock_t start, diff;
 
-		allocatorNo = 1;
-		nThreads = 1;
-		objSize = 8;
-		iterations = 10000;
-		repetitions = 1000;
+	allocatorNo = 1;
+	nThreads = 1;
+	objSize = 8;
+	iterations = 10000;
+	repetitions = 1000;
 
 
 	ThreadData *threadData = (ThreadData*)malloc(nThreads * sizeof(ThreadData));
@@ -66,14 +67,12 @@ void SingleThreadmain() {
 	int rc;
 
 	if (allocatorNo == 1) {
-		int nBlocks = nThreads * 1 + 3 * nThreads;
-		createWaitFreePool(nBlocks, nThreads, 1, iterations); // nBlocks, nThreads, chunkSize, donationsSteps
-		//hashTableCreate(nBlocks);
-		for (int t = 0; t < nThreads; t++) {
-			threadData[t].obj = allocate(0,1);
-		}
-	}
+		int nBlocks = nThreads * iterations;
+		createWaitFreePool(nBlocks, nThreads, iterations, iterations); // nBlocks, nThreads, chunkSize, donationsSteps
 
+	}
+	LOG_INFO("hereeee\n");
+	start = clock();
 	for (int t = 0; t < nThreads; t++) {
 		threadData[t].allocatorNo = allocatorNo;
 		threadData[t].nThreads = nThreads;
@@ -96,16 +95,18 @@ void SingleThreadmain() {
 	for (int t = 0; t < nThreads; t++) {
 		rc = pthread_join(threads[t], &status);
 	}
-
+	diff = clock() - start;
 	if (allocatorNo == 1) {
 		destroyWaitFreePool();
 	}
-
+	int msec = diff * 1000 / CLOCKS_PER_SEC;
+	printf("%d", msec);
 	free(threadData);
 
 	LOG_EPILOG();
-	LOG_INFO("Test Client");
+	//printf("Test Client");
 	LOG_CLOSE();
+	return 0;
 }
 
 

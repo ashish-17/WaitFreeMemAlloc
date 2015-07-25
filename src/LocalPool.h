@@ -18,6 +18,8 @@ void destroyLocalPool(StackPool *pool);
 
 Chunk* getFromLocalPool(StackPool* pool, int threadIndex);
 
+Chunk* removeFromLocalPool(StackPool* pool, int threadIndex);
+
 bool putInLocalPool(StackPool* pool, int threadIndex, Chunk* chunk);
 
 #endif /* WAITFREEMEMALLOC_SRC_LOCALPOOL_H_ */

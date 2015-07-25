@@ -26,9 +26,14 @@ void destroyLocalPool(StackPool *pool) {
 Chunk* getFromLocalPool(StackPool* pool, int threadIndex) {
 	LOG_PROLOG();
 	StackThread* thread = getStackThread(pool, threadIndex);
-	//LOG_INFO("thread ptr at index %i is %u\n", threadIndex, thread);
-	//LOG_INFO("Stack ptr %u\n", thread->stack);
-	//printf("getFromLocalPool: threadId %d, stack ptr = %u\n",threadIndex, thread->stack);
+	Chunk *chunk = ((StackElement*)(thread->stack->top->atomicRef->reference))->value;
+	LOG_EPILOG();
+	return chunk;
+}
+
+Chunk* removeFromLocalPool(StackPool* pool, int threadIndex) {
+	LOG_PROLOG();
+	StackThread* thread = getStackThread(pool, threadIndex);
 	Chunk* chunk =  stackPop(thread->stack);
 	//printf("getFromLocalPool: threadId %d, chunk ptr = %u\n", threadIndex, chunk);
 	LOG_EPILOG();

@@ -237,11 +237,12 @@ BLOCK_MEM allocate(int threadId, bool toBePassed) {
 	if (!isChunkEmpty(chunk)) {
 		block = getFromChunkUncontended(chunk);
 		setBlockThreadIndex(block, threadId);
-		putInLocalPool(memory->localPool, threadId, chunk);
+		//putInLocalPool(memory->localPool, threadId, chunk);
 		LOG_EPILOG();
 		return block;
 	}
 	else {
+		Chunk* chunk = removeFromLocalPool(memory->localPool, threadId);
 		LOG_INFO("allocate: chunk in localPool is empty");
 		donor = getDonorEntry(threadId);
 		if (donor->addInFreePoolC) {
@@ -418,13 +419,14 @@ void freeMem(int threadId, BLOCK_MEM block) {
 	if (chunkHasSpace(chunk)) {
 		//LOG_INFO("freeMem: threadId = %d: chunk in localPool has space\n", threadId);
 		putInChunkUncontended(chunk,block);
-		putInLocalPool(memory->localPool,threadId, chunk);
+		//putInLocalPool(memory->localPool,threadId, chunk);
 		//LOG_INFO("freeMem: threadID = %d, chunk ptr = %u\n", threadId, chunk);
 		//putInLocalPool(memory->localPool,threadId,chunk);
 		LOG_EPILOG();
 		return;
 	}
 	else {
+		chunk = removeFromLocalPool(memory->localPool,threadId);
 		//LOG_INFO("freeMem: threadID = %d, chunk in localPool doesn't have space\n", threadId);
 		while(true) {
 			if (getDonorEntry(threadId)->noOfOps == memory->C) { // have to donate

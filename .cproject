@@ -39,13 +39,11 @@
 								<option defaultValue="gnu.c.optimization.level.none" id="gnu.c.compiler.option.optimization.level.106509855" name="Optimization Level" superClass="gnu.c.compiler.option.optimization.level" value="gnu.c.optimization.level.most" valueType="enumerated"/>
 								<option id="gnu.c.compiler.option.debugging.level.362765458" name="Debug Level" superClass="gnu.c.compiler.option.debugging.level" value="gnu.c.debugging.level.max" valueType="enumerated"/>
 								<option id="gnu.c.compiler.option.dialect.std.2051760617" name="Language standard" superClass="gnu.c.compiler.option.dialect.std" value="gnu.c.compiler.dialect.default" valueType="enumerated"/>
-								<option id="gnu.c.compiler.option.misc.other.73639156" name="Other flags" superClass="gnu.c.compiler.option.misc.other" value="-c -fmessage-length=0 -std=c11" valueType="string"/>
+								<option id="gnu.c.compiler.option.misc.other.73639156" name="Other flags" superClass="gnu.c.compiler.option.misc.other" value="-c -fmessage-length=0 -std=c11 -pg -O3 -finline-limit=20000" valueType="string"/>
 								<option id="gnu.c.compiler.option.optimization.flags.145195696" name="Other optimization flags" superClass="gnu.c.compiler.option.optimization.flags" value="" valueType="string"/>
-								<option id="gnu.c.compiler.option.preprocessor.def.symbols.1680036042" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols" valueType="definedSymbols">
-									<listOptionValue builtIn="false" value="LOGGING_LEVEL=LOG_LEVEL_VERBOSE"/>
-								</option>
-								<option id="gnu.c.compiler.option.warnings.extrawarn.1405776602" superClass="gnu.c.compiler.option.warnings.extrawarn" value="true" valueType="boolean"/>
-								<option id="gnu.c.compiler.option.warnings.toerrors.1977146647" superClass="gnu.c.compiler.option.warnings.toerrors" value="true" valueType="boolean"/>
+								<option id="gnu.c.compiler.option.preprocessor.def.symbols.1680036042" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols" valueType="definedSymbols"/>
+								<option id="gnu.c.compiler.option.warnings.extrawarn.1405776602" name="Extra warnings (-Wextra)" superClass="gnu.c.compiler.option.warnings.extrawarn" value="true" valueType="boolean"/>
+								<option id="gnu.c.compiler.option.warnings.toerrors.1977146647" name="Warnings as errors (-Werror)" superClass="gnu.c.compiler.option.warnings.toerrors" value="true" valueType="boolean"/>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.743756638" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>
 							<tool command="gcc" id="cdt.managedbuild.tool.gnu.c.linker.base.1540032561" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.base">
@@ -56,6 +54,7 @@
 									<listOptionValue builtIn="false" value="Logger"/>
 								</option>
 								<option defaultValue="true" id="gnu.c.link.option.shared.1571361402" name="Shared (-shared)" superClass="gnu.c.link.option.shared" value="false" valueType="boolean"/>
+								<option id="gnu.c.link.option.ldflags.82331514" name="Linker flags" superClass="gnu.c.link.option.ldflags" value="-pg" valueType="string"/>
 								<inputType id="cdt.managedbuild.tool.gnu.c.linker.input.1220187856" superClass="cdt.managedbuild.tool.gnu.c.linker.input">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
 									<additionalInput kind="additionalinput" paths="$(LIBS)"/>
@@ -103,7 +102,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Logger}&quot;"/>
 								</option>
 								<option id="gnu.c.compiler.option.preprocessor.def.symbols.1930107600" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols" useByScannerDiscovery="false" valueType="definedSymbols">
-									<listOptionValue builtIn="false" value="LOGGING_LEVEL=LOGGING_LEVEL_VERBOSE"/>
+									<listOptionValue builtIn="false" value="&quot;LOGGING_LEVEL= LOG_LEVEL_NONE&quot;"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.160384812" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>

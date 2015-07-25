@@ -348,7 +348,7 @@ void tester(TestConfig cfg) {
 	LOG_EPILOG();
 }
 
-int main() {
+int testWFPmain() {
 	LOG_INIT_CONSOLE();
 	LOG_INIT_FILE();
 
@@ -387,7 +387,7 @@ int main() {
 	config1.counsumer = consumer1;
 	config1.normalExec = normalExec;
 
-	tester(config1);
+	//tester(config1);
 	LOG_INFO("Config 1.2 successful");
 
 	config1.numChunksPerThread = 2;
