@@ -19,11 +19,12 @@ typedef struct {
 	int numberOfThreads;
 } StackPool;
 
+#define GET_STACK_THREAD(pool, index) ((pool->threads + index))
+
 StackPool* createStackPool(int threads);
 
 void deleteStackPool(StackPool* pool);
 
-StackThread* getStackThread(StackPool* pool, int index);
 
 
 #endif /* WAITFREEMEMALLOC_SRC_STACKPOOL_H_ */

@@ -302,7 +302,7 @@ void tester(TestConfig cfg) {
 
 	LOG_INFO("created all the arrays");
 
-	createWaitFreePool(cfg.numBlocks, cfg.numThreads, cfg.chunkSize, cfg.numDonationSteps);
+	createWaitFreePool(cfg.numBlocks, cfg.numThreads, cfg.chunkSize, cfg.numDonationSteps, 8);
 	hashTableCreate(cfg.numBlocks);
 
 
@@ -348,7 +348,7 @@ void tester(TestConfig cfg) {
 	LOG_EPILOG();
 }
 
-int testWFPmain() {
+int vfvfmain() {
 	LOG_INIT_CONSOLE();
 	LOG_INIT_FILE();
 
@@ -387,7 +387,7 @@ int testWFPmain() {
 	config1.counsumer = consumer1;
 	config1.normalExec = normalExec;
 
-	//tester(config1);
+	tester(config1);
 	LOG_INFO("Config 1.2 successful");
 
 	config1.numChunksPerThread = 2;
@@ -404,7 +404,7 @@ int testWFPmain() {
 	config1.counsumer = consumer1;
 	config1.normalExec = normalExec;
 
-	//	tester(config1);
+	//tester(config1);
 	LOG_INFO("Config 1.3 successful");
 
 	config1.numChunksPerThread = 2;

@@ -27,7 +27,7 @@ void destroyFreePoolUC(StackPool *pool) {
 
 Chunk* getFromFreePoolUC(StackPool* pool, int threadIndex) {
 	LOG_PROLOG();
-	StackThread* thread = getStackThread(pool, threadIndex);
+	StackThread* thread = GET_STACK_THREAD(pool, threadIndex);
 	Chunk* chunk = stackPop(thread->stack);
 	LOG_EPILOG();
 	return chunk;
@@ -38,7 +38,7 @@ bool putInFreePoolUC(StackPool* pool, int threadIndex, Chunk* chunk) {
 	/*printf("inside putInFreePool with threadIndex %d\n", threadIndex);
 	printf("Inside putInfreePool the valeue of pool ptr is %u\n", pool);
 	printf("Inside putInfreePool the valeue of StackThread ptr is %u\n", pool->threads);*/
-	StackThread* thread = getStackThread(pool, threadIndex);
+	StackThread* thread = GET_STACK_THREAD(pool, threadIndex);
 	/*printf("inside putinFreePool the value of thread ptr is %u\n", thread);
 	printf("Stack ptr in putInFreePool %u\n", thread->stack);
 	printf("Stack element size = %d\n", thread->stack->elementSize);*/
@@ -62,9 +62,9 @@ void destroyFreePoolC(QueuePool *pool) {
 	// So deleteQueuePool can't differentiate and memory leak might happen.
 	if (pool != NULL) {
 		for (int i = 0; i < pool->numberOfThreads; i++) {
-			QueueThread* thread = getQueueThread(pool, i);
+			QueueThread* thread = GET_QUEUE_THREAD(pool, i);
 			if (thread != NULL) {
-				while (!isQueueEmpty(thread->queue)) {
+				while (!IS_QUEUE_EMPTY(thread->queue)) {
 					Chunk *chunk = queueDeqUC(thread->queue);
 					destroyChunk(chunk);
 				}
@@ -87,7 +87,7 @@ void destroyFreePoolC(QueuePool *pool) {
 
 Chunk* getFromFreePoolC(QueuePool* pool, int threadIndex, int primThread, QueueElement *oldQueueHead) {
 	LOG_PROLOG();
-	QueueThread* thread = getQueueThread(pool, primThread);
+	QueueThread* thread = GET_QUEUE_THREAD(pool, primThread);
 	Chunk* chunk = queueDeqC(thread->queue, oldQueueHead, threadIndex);
 	LOG_EPILOG();
 	return chunk;
@@ -95,7 +95,7 @@ Chunk* getFromFreePoolC(QueuePool* pool, int threadIndex, int primThread, QueueE
 
 bool putInFreePoolC(QueuePool* pool, int threadIndex, Chunk* chunk) {
 	LOG_PROLOG();
-	QueueThread* thread = getQueueThread(pool, threadIndex);
+	QueueThread* thread = GET_QUEUE_THREAD(pool, threadIndex);
 	bool flag = queueEnqC(thread->queue, chunk, threadIndex);
 	LOG_EPILOG();
 	return flag;

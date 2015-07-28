@@ -18,7 +18,7 @@ void stackFree(Stack *stack)
 {
 	LOG_PROLOG();
 	if (stack != NULL) {
-		while (!stackIsEmpty(stack)) {
+		while (!STACK_IS_EMPTY(stack)) {
 			void *element = stackPop(stack);
 			if (element != NULL) {
 				my_free(element);
@@ -40,17 +40,6 @@ void stackFree(Stack *stack)
 	LOG_EPILOG();
 }
 
-bool stackIsEmpty(const Stack *stack)
-{
-	LOG_PROLOG();
-	bool flag;
-	if (stack->top->atomicRef->reference == NULL)
-		flag = true;
-	else
-		flag = false;
-	LOG_EPILOG();
-	return flag;
-}
 
 bool stackPush(Stack *stack, void* element) {
 	LOG_PROLOG();
@@ -114,9 +103,6 @@ void* stackPopOwner(Stack* stack, int threadId)
 	LOG_PROLOG();
 	void *ptr = NULL;
 	ReferenceIntegerPair *oldTop = setHazardPointer(globalHPStructure, threadId, stack->top->atomicRef);
-	//LOG_INFO("stackPopOwner: setting HP of thread %d for oldTop %u\n", threadId, oldTop);
-	//ReferenceIntegerPair *oldTop = (ReferenceIntegerPair*)getHazardPointer(globalHPStructure, threadId);
-	//AtomicStampedReference *oldTop = stack->top; //initially it was this .. then accordingly add atomicRef everywhere
 
 	if(stack->top->atomicRef->reference == NULL){
 		LOG_INFO("stackPopOwner: stack was empty\n");
@@ -143,25 +129,15 @@ void* stackPopOwner(Stack* stack, int threadId)
 void* stackPopOther(Stack* stack, int threadIndex)
 {
 	LOG_PROLOG();
-	void *ptr = NULL;
-	//LOG_INFO("stackPopOther:\n");
-	//LOG_INFO("stackPopOther: currentTop = %u, expected top = %u\n", stack->top->atomicRef->reference, (oldTop->reference));
-	if (stack->top->atomicRef->reference == NULL) {
-		//LOG_INFO("stackPopOther: stack was already empty \n");
+	void *ptr = NULL;if (stack->top->atomicRef->reference == NULL) {
 		ptr = NULL;
 	}
 	else {
-		//LOG_INFO("stackPopOther: victim's stack value\n");
 		ReferenceIntegerPair *oldTop = setHazardPointer(globalHPStructure, threadIndex, stack->top->atomicRef);
-		//LOG_INFO("stackPopOther: setting HP of thread %d for oldTop %u\n", threadIndex, oldTop);
-		//ReferenceIntegerPair *oldTop = (ReferenceIntegerPair*)getHazardPointer(globalHPStructure, threadId);
-		//LOG_INFO("stackPopOther: oldTop = %u\n",oldTop);
 		StackElement *copy = (StackElement*)(oldTop->reference);
 		StackElement *nextTopReference = ((StackElement*)(oldTop->reference))->next;
 		if (nextTopReference == NULL) {
-			//LOG_INFO("stackPopOther: stack had only one chunk \n");
 			clearHazardPointer(globalHPStructure, threadIndex);
-			//LOG_INFO("stackPopOther: clearing HP of thread %d nextTopRef was null (stack had one node)\n", threadIndex);
 			ptr = NULL;
 		}
 		else if (compareAndSet(stack->top, oldTop->reference, ((StackElement*)oldTop->reference)->next, oldTop->integer, (oldTop->integer + 1), threadIndex)) {

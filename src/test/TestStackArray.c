@@ -216,7 +216,7 @@ void testStackArray(TestConfigStackArray cfg) {
 			}
 			my_free(threads);
 
-			bool test1Success = StackArrayIsFull(stack->top, stack->elements, stack->maxElements);
+			bool test1Success = stackArrayIsFull(stack->top, stack->elements, stack->maxElements);
 			if (test1Success) {
 				LOG_INFO("Test 1 part 1 Successful");
 
@@ -320,12 +320,12 @@ void testStackArray(TestConfigStackArray cfg) {
 	}
 }
 
-int testSAmain() {
+int main() {
 	//int mainTestStackArray() {
 	LOG_INIT_CONSOLE();
 	LOG_INIT_FILE();
 
-	const int COUNT_TEST_CFG = 10;
+	const int COUNT_TEST_CFG = 3;
 	TestConfigStackArray cfg[COUNT_TEST_CFG];
 
 	cfg[0].numBlocksInStack = 1;
@@ -363,6 +363,8 @@ int testSAmain() {
 		testStackArray(cfg[i]);
 		LOG_INFO("Test configuration %d, passed", (i+1));
 	}
+
+	//testStackArray(cfg[2]);
 
 	LOG_INFO("All tests passed");
 

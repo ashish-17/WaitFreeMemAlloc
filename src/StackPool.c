@@ -18,7 +18,7 @@ StackPool* createStackPool(int threads)
 
 	for (int i = 0; i < threads; i++) {
 		//printf("Thread ptr = %u \n", getThread(pool, i));
-		StackThread* ptr = getStackThread(pool, i);
+		StackThread* ptr = GET_STACK_THREAD(pool, i);
 		ptr->stack = (Stack*)my_malloc(sizeof(Stack));
 		//LOG_INFO("thread ptr at index %i is %u\n", i, ptr);
 		//LOG_INFO("Stack ptr = %u", ptr->stack);
@@ -35,9 +35,9 @@ void deleteStackPool(StackPool* pool)
 	LOG_PROLOG();
 	if (pool != NULL) {
 		for (int i = 0; i < pool->numberOfThreads; i++) {
-			StackThread *thread = getStackThread(pool, i);
+			StackThread *thread = GET_STACK_THREAD(pool, i);
 			if (thread != NULL) {
-				while (!stackIsEmpty(thread->stack)) {
+				while (!STACK_IS_EMPTY(thread->stack)) {
 					Chunk* chunk = stackPop(thread->stack);
 					destroyChunk(chunk);
 					chunk = NULL;
@@ -60,10 +60,4 @@ void deleteStackPool(StackPool* pool)
 	LOG_EPILOG();
 }
 
-StackThread* getStackThread(StackPool* pool, int index)
-{
-	LOG_PROLOG();
-	StackThread* ptr = (pool->threads + index);
-	LOG_EPILOG();
-	return ptr;
-}
+

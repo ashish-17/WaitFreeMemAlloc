@@ -3,28 +3,7 @@
 #include<pthread.h>
 
 //#define log_debug(str, threadId) printf("%s%d", str, threadId);
-
-
-FreeQueue* getFreeQueue(FreeQueue *queue, int index) {
-	LOG_PROLOG();
-	FreeQueue* ptr = (queue + index);
-	LOG_EPILOG();
-	return ptr;
-}
-
-/*int* getHP(int *hazardPointers, int numberOfHP, int priIndex, int secIndex) {
-	return (hazardPointers + (priIndex*numberOfHP) + secIndex);
-}
-
-uintptr_t combine(void *ptr, bool mark) {
-	if (mark) {
-		return (((uintptr_t) ptr) | ((uintptr_t) 0x1));
-	}
-	else {
-		return (uintptr_t) ptr;
-	}
-}*/
-
+#define GET_FREE_QUEUE(queue, index) ((queue + index))
 
 void hpStructureCreate(HPStructure *hpStructure, int noOfThreads, int noOfHP) {
 	LOG_PROLOG();
@@ -32,12 +11,12 @@ void hpStructureCreate(HPStructure *hpStructure, int noOfThreads, int noOfHP) {
 	for (int i = 0; i < noOfThreads; i++) {
 		//getFreeQueue(hpStructure->freeQueues, i)->queue = (CircularQueue*) my_malloc(sizeof(CircularQueue));
 		//circularQueueCreate(getFreeQueue(hpStructure->freeQueues, i)->queue, sizeof(int *), noOfThreads * noOfHP);
-		getFreeQueue(hpStructure->freeQueues, i)->queue = circularQueueCreate(sizeof(int *), noOfThreads * noOfHP);
+		GET_FREE_QUEUE(hpStructure->freeQueues, i)->queue = circularQueueCreate(sizeof(int *), noOfThreads * noOfHP);
 	}
 	//printf("created Circular queues\n");
 	// pushing sentinel nodes in all the circular queues
 	for (int i = 0; i < noOfThreads; i++) {
-		CircularQueue *queue = getFreeQueue(hpStructure->freeQueues, i)->queue;
+		CircularQueue *queue = GET_FREE_QUEUE(hpStructure->freeQueues, i)->queue;
 		//printf("CQueuePtr = %u\n", queue);
 		for (int j = 1; j < noOfHP * noOfThreads; j++) {
 			circularQueueEnq(queue, NULL);
@@ -69,7 +48,7 @@ void hpStructureDestroy(HPStructure *hpStructure) {
 	LOG_PROLOG();
 
 	for(int i = 0; i < hpStructure->numberOfThreads; i++) {
-		circularQueueFree((getFreeQueue(hpStructure->freeQueues, i))->queue);
+		circularQueueFree((GET_FREE_QUEUE(hpStructure->freeQueues, i))->queue);
 	}
 	my_free(hpStructure->freeQueues);
 	hpStructure->freeQueues = NULL;
@@ -95,7 +74,7 @@ void hpStructureDestroy(HPStructure *hpStructure) {
 
 void freeMemHP(HPStructure *hpStructure, int threadId, void *ptr) {
 	LOG_PROLOG();
-	circularQueueEnq(getFreeQueue(hpStructure->freeQueues, threadId)->queue, ptr);
+	circularQueueEnq(GET_FREE_QUEUE(hpStructure->freeQueues, threadId)->queue, ptr);
 
 	//LOG_INFO("freeMemHP:  enqueue of %u was successful = %u", ptr, flag);
 	void* node = NULL;
@@ -106,7 +85,7 @@ void freeMemHP(HPStructure *hpStructure, int threadId, void *ptr) {
 		if (inspect != NULL) {
 			setDirty(inspect, 1);
 		}
-		node = circularQueueDeq(getFreeQueue(hpStructure->freeQueues, threadId)->queue);
+		node = circularQueueDeq(GET_FREE_QUEUE(hpStructure->freeQueues, threadId)->queue);
 		if (node == NULL) {
 			break;
 		}
@@ -117,7 +96,7 @@ void freeMemHP(HPStructure *hpStructure, int threadId, void *ptr) {
 		}
 		else {
 			setDirty(node, 0);
-			circularQueueEnq(getFreeQueue(hpStructure->freeQueues, threadId)->queue, node);
+			circularQueueEnq(GET_FREE_QUEUE(hpStructure->freeQueues, threadId)->queue, node);
 		}
 	}
 	LOG_EPILOG();

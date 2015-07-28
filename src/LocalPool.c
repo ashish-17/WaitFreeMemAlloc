@@ -25,7 +25,7 @@ void destroyLocalPool(StackPool *pool) {
 
 Chunk* getFromLocalPool(StackPool* pool, int threadIndex) {
 	LOG_PROLOG();
-	StackThread* thread = getStackThread(pool, threadIndex);
+	StackThread* thread = GET_STACK_THREAD(pool, threadIndex);
 	Chunk *chunk = ((StackElement*)(thread->stack->top->atomicRef->reference))->value;
 	LOG_EPILOG();
 	return chunk;
@@ -33,7 +33,7 @@ Chunk* getFromLocalPool(StackPool* pool, int threadIndex) {
 
 Chunk* removeFromLocalPool(StackPool* pool, int threadIndex) {
 	LOG_PROLOG();
-	StackThread* thread = getStackThread(pool, threadIndex);
+	StackThread* thread = GET_STACK_THREAD(pool, threadIndex);
 	Chunk* chunk =  stackPop(thread->stack);
 	//printf("getFromLocalPool: threadId %d, chunk ptr = %u\n", threadIndex, chunk);
 	LOG_EPILOG();
@@ -43,7 +43,7 @@ Chunk* removeFromLocalPool(StackPool* pool, int threadIndex) {
 bool putInLocalPool(StackPool* pool, int threadIndex, Chunk* chunk) {
 	LOG_PROLOG();
 	//printf("putInLocalPool: Chunk's stack ptr: %u\n", chunk->stack);
-	StackThread* thread = getStackThread(pool, threadIndex);
+	StackThread* thread = GET_STACK_THREAD(pool, threadIndex);
 	//LOG_INFO("thread ptr in putInLocakPool %u\n", thread);
 	//LOG_INFO("Stack ptr in putInLocakPool %u\n", thread->stack);
 	//printf("Stack element size = %d\n", thread->stack->elementSize);

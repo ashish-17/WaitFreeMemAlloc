@@ -14,11 +14,11 @@ typedef struct {
 	int numberOfThreads;
 } SharedQueuePools;
 
+#define GET_SHARED_QUEUE_POOL(pool, index) ((pool->sharedQueuePools + index))
+
 SharedQueuePools* createSharedQueuePools(int threads);
 
 void destroySharedQueuePools(SharedQueuePools* pool);
-
-SharedQueuePool* getSharedQueuePool(SharedQueuePools* pool, int index);
 
 void* getFromSharedQueuePools(SharedQueuePools* pool, int threadId, int primThreadIndex, int secThreadIndex);
 

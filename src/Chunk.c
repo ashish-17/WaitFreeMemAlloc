@@ -27,24 +27,10 @@ void destroyChunk(Chunk* chunk) {
 	LOG_EPILOG();
 }
 
-bool isChunkEmpty(Chunk *chunk) {
-	LOG_PROLOG();
-	bool flag = stackArrayIsEmpty(chunk->stack->top, chunk->stack->elements);
-	LOG_EPILOG();
-	return flag;
+/*bool CHUNK_HAS_SPACE(Chunk *chunk) {
+	return (!(stackArrayIsFull(chunk->stack->top, chunk->stack->elements, chunk->stack->maxElements)));
 }
-
-bool chunkHasSpace(Chunk *chunk) {
-	LOG_PROLOG();
-	bool flag = (!StackArrayIsFull(chunk->stack->top, chunk->stack->elements, chunk->stack->maxElements));
-	LOG_EPILOG();
-	return flag;
-	/*if (chunk->numOfBlocks != chunk->stack->numberOfElements)
-		return true;
-	else
-		return false;*/
-}
-
+*/
 BLOCK_MEM getFromChunkUncontended(Chunk *chunk) {
 	LOG_PROLOG();
 	void *ptr =  stackArrayPopUncontended(chunk->stack);

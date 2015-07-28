@@ -13,7 +13,7 @@ SharedQueuePools* createSharedQueuePools(int threads)
 	pool->numberOfThreads = threads;
 
 	for (int i = 0; i < threads; i++) {
-		SharedQueuePool* ptr = getSharedQueuePool(pool, i);
+		SharedQueuePool* ptr = GET_SHARED_QUEUE_POOL(pool, i);
 		ptr->sharedQueuePool = createQueuePool(threads, sizeof(BLOCK_MEM));
 		//printf("createSQP: SQPPtr = %u, queuePtr = %u, HeadPtr = %u, TailPtr = %u\n", ptr->sharedQueuePool, getQueueThread(ptr->sharedQueuePool,i)->queue, getQueueThread(ptr->sharedQueuePool,i)->queue->head, getQueueThread(ptr->sharedQueuePool,i)->queue->tail);
 	}
@@ -29,15 +29,15 @@ void destroySharedQueuePools(SharedQueuePools* pool)
 	if (pool != NULL) {
 		if (pool->sharedQueuePools != NULL) {
 			for (int i = 0; i < pool->numberOfThreads; i++) {
-				SharedQueuePool *ptr = getSharedQueuePool(pool, i);
+				SharedQueuePool *ptr = GET_SHARED_QUEUE_POOL(pool, i);
 				for (int j = 0; j < ptr->sharedQueuePool->numberOfThreads; j++) {
-					while (!isQueueEmpty(getQueueThread(ptr->sharedQueuePool, j)->queue)) {
-						BLOCK_MEM block = queueDeqUC(getQueueThread(ptr->sharedQueuePool,j)->queue);
+					while (!IS_QUEUE_EMPTY(GET_QUEUE_THREAD(ptr->sharedQueuePool, j)->queue)) {
+						BLOCK_MEM block = queueDeqUC(GET_QUEUE_THREAD(ptr->sharedQueuePool,j)->queue);
 						destroyBlock(block);
 						block = NULL;
 					}
-					queueFree(getQueueThread(ptr->sharedQueuePool, j)->queue);
-					getQueueThread(ptr->sharedQueuePool, j)->queue = NULL;
+					queueFree(GET_QUEUE_THREAD(ptr->sharedQueuePool, j)->queue);
+					GET_QUEUE_THREAD(ptr->sharedQueuePool, j)->queue = NULL;
 				}
 				deleteQueuePool(ptr->sharedQueuePool);
 			}
@@ -58,8 +58,8 @@ void destroySharedQueuePools(SharedQueuePools* pool)
 
 void* getFromSharedQueuePools(SharedQueuePools* pool, int threadId, int primThreadIndex, int secThreadIndex) {
 	LOG_PROLOG();
-	SharedQueuePool* queuePool = getSharedQueuePool(pool, primThreadIndex);
-	Queue *queue = getQueueThread(queuePool->sharedQueuePool, secThreadIndex)->queue;
+	SharedQueuePool* queuePool = GET_SHARED_QUEUE_POOL(pool, primThreadIndex);
+	Queue *queue = GET_QUEUE_THREAD(queuePool->sharedQueuePool, secThreadIndex)->queue;
 	//printf("getFromSQP: threadId = %d, queuePtr = %u\n", threadIndex, queue);
 	//printf("getFRomSQP: setting HP of thread %d for secondary queue head %u\n", threadId, queue->head);
 	QueueElement *oldHead = setHazardPointer(globalHPStructure, threadId, queue->head);
@@ -70,18 +70,11 @@ void* getFromSharedQueuePools(SharedQueuePools* pool, int threadId, int primThre
 
 bool putInSharedQueuePools(SharedQueuePools* pool, int threadIndex, int secThreadIndex, BLOCK_MEM block) {
 	LOG_PROLOG();
-	SharedQueuePool* queuePool = getSharedQueuePool(pool, threadIndex);
-	Queue *queue = getQueueThread(queuePool->sharedQueuePool, secThreadIndex)->queue;
+	SharedQueuePool* queuePool = GET_SHARED_QUEUE_POOL(pool, threadIndex);
+	Queue *queue = GET_QUEUE_THREAD(queuePool->sharedQueuePool, secThreadIndex)->queue;
 	bool flag = queueEnqC(queue, block, secThreadIndex);
 	LOG_EPILOG();
 	return flag;
 }
 
-SharedQueuePool* getSharedQueuePool(SharedQueuePools* pool, int index)
-{
-	LOG_PROLOG();
-	SharedQueuePool *ptr = (pool->sharedQueuePools + index);
-	LOG_EPILOG();
-	return ptr;
-}
 

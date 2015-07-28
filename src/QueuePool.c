@@ -19,7 +19,7 @@ QueuePool* createQueuePool(int threads, int elementSize)
 
 	for (int i = 0; i < threads; i++) {
 		//printf("Thread ptr = %u \n", getThread(pool, i));
-		QueueThread* ptr = getQueueThread(pool, i);
+		QueueThread* ptr = GET_QUEUE_THREAD(pool, i);
 		ptr->queue = (Queue*)my_malloc(sizeof(Queue));
 		//printf("Stack ptr = %u\n", ptr->stack);
 		//printf("Inside create pool and size of chunk is %u\n", sizeof(Chunk));
@@ -50,17 +50,4 @@ void deleteQueuePool(QueuePool* pool)
 		LOG_ERROR("Trying to free NULL pointer");
 	}
 	LOG_EPILOG();
-}
-
-QueueThread* getQueueThread(QueuePool* pool, int index)
-{
-	LOG_PROLOG();
-	//printf("getQueueThread: thread = %d\n", pthread_self());
-	//printf("address of stacks %u\n", pool->threads);
-	//printf("size of thread*index %u\n", sizeof(Thread)*index);
-	//printf("address of index stack %u\n", pool->threads + sizeof(Thread)*index);
-	//printf("**************\n");
-	QueueThread* ptr = (pool->threads + index);
-	LOG_EPILOG();
-	return ptr;
 }

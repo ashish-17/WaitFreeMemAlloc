@@ -18,11 +18,9 @@ typedef struct {
 //	int numberOfElements;
 } Queue;
 
-//bool queueEnq1(Queue *queue, const void* element);
+#define IS_QUEUE_EMPTY(queue) ((queue->head == queue->tail))
 
 void queueCreate(Queue *queue, int elementSize);
-
-bool isQueueEmpty(Queue *queue);
 
 void queueEnqUC(Queue *queue, void* element);
 

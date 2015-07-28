@@ -5,7 +5,7 @@
 #include "commons.h"
 
 
-void createWaitFreePool(int m, int n, int c, int C);
+void createWaitFreePool(int m, int n, int c, int C, int blkSize);
 
 void destroyWaitFreePool();
 

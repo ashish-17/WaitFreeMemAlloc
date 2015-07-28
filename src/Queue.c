@@ -37,7 +37,7 @@ void queueCreate(Queue *queue, int elementSize) {
 void queueFree(Queue *queue) {
 	LOG_PROLOG();
 	if (queue != NULL) {
-		while (!isQueueEmpty(queue)) {
+		while (!IS_QUEUE_EMPTY(queue)) {
 			void *value = queueDeqUC(queue);
 			if (value != NULL) {
 				my_free(value);
@@ -87,13 +87,6 @@ bool queueEnqC(Queue *queue, void* element, int threadId) {
 			atomic_compare_exchange_strong(&queue->tail, &last, next);
 		}
 	}
-	LOG_EPILOG();
-	return flag;
-}
-
-bool isQueueEmpty(Queue *queue) {
-	LOG_PROLOG();
-	bool flag = (queue->head == queue->tail);
 	LOG_EPILOG();
 	return flag;
 }

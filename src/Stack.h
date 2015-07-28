@@ -16,11 +16,11 @@ typedef struct {
 	int numberOfElements;
 } Stack;
 
+#define STACK_IS_EMPTY(stack) ((stack->top->atomicRef->reference == NULL))
+
 void stackCreate(Stack *stack, int elementSize);
 
 void stackFree(Stack *stack);
-
-bool stackIsEmpty(const Stack *stack);
 
 bool stackPush(Stack *stack, void* element);
 

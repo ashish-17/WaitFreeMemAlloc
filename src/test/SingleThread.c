@@ -47,7 +47,7 @@ void* workerWaitFreePool(void *data) {
 
 
 
-int main() {
+int csdcsdcmain() {
 	LOG_INIT_CONSOLE();
 	LOG_INIT_FILE();
 	LOG_PROLOG();
@@ -57,7 +57,7 @@ int main() {
 
 	allocatorNo = 1;
 	nThreads = 1;
-	objSize = 8;
+	objSize = 100;
 	iterations = 10000;
 	repetitions = 1000;
 
@@ -68,7 +68,7 @@ int main() {
 
 	if (allocatorNo == 1) {
 		int nBlocks = nThreads * iterations;
-		createWaitFreePool(nBlocks, nThreads, iterations, iterations); // nBlocks, nThreads, chunkSize, donationsSteps
+		createWaitFreePool(nBlocks, nThreads, iterations, iterations, objSize); // nBlocks, nThreads, chunkSize, donationsSteps
 
 	}
 	LOG_INFO("hereeee\n");

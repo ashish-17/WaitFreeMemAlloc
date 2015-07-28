@@ -10,6 +10,7 @@
 #include "SharedPools.h"
 #include <assert.h>
 #include "HazardPointer.h"
+#include "StackArray.h"
 
 typedef struct {
 	AtomicStampedReference *helpers;
@@ -70,7 +71,7 @@ Donor* getDonorEntry(int index) {
 	return ptr;
 }
 
-void createWaitFreePool(int m, int n, int c, int C) {
+void createWaitFreePool(int m, int n, int c, int C, int blkSize) {
 	LOG_PROLOG();
 
 	memory = (Memory*)my_malloc(sizeof(Memory));
@@ -103,7 +104,7 @@ void createWaitFreePool(int m, int n, int c, int C) {
 		for(int i = 0; i < 1; i++) {
 			chunk = createChunk(numOfBlocksPerChunk);
 			for(int k = 0; k < numOfBlocksPerChunk; k++) {
-				block = createBlock(sizeof(int)); //set the owner of the block to be -1 initially
+				block = createBlock(blkSize); //set the owner of the block to be -1 initially
 				*((int*)block) = blockNumber;
 				blockNumber++;
 				putInChunkUncontended(chunk, block);
@@ -118,7 +119,7 @@ void createWaitFreePool(int m, int n, int c, int C) {
 		for(int i = 0; i < numOfChunksPerThread - 1; i++) {
 			chunk = createChunk(numOfBlocksPerChunk);
 			for(int k = 0; k < numOfBlocksPerChunk; k++) {
-				block = createBlock(sizeof(int));
+				block = createBlock(blkSize);
 				*((int*)block) = blockNumber;
 				blockNumber++;
 				putInChunkUncontended(chunk, block);
@@ -233,11 +234,9 @@ BLOCK_MEM allocate(int threadId, bool toBePassed) {
 		}
 	}
 	Chunk* chunk = getFromLocalPool(memory->localPool, threadId);
-	//LOG_INFO("allocate: threadID = %d, chunk ptr = %u\n", threadId, chunk);
-	if (!isChunkEmpty(chunk)) {
+	if (!IS_CHUNK_EMPTY(chunk)) {
 		block = getFromChunkUncontended(chunk);
 		setBlockThreadIndex(block, threadId);
-		//putInLocalPool(memory->localPool, threadId, chunk);
 		LOG_EPILOG();
 		return block;
 	}
@@ -275,21 +274,21 @@ BLOCK_MEM allocate(int threadId, bool toBePassed) {
 					}
 				}
 				if (stolenChunk != NULL) {
-					//LOG_INFO("allocate: threadId = %d: stolenChunk was not null. Putting in own fullPool\n", threadId);
+					LOG_INFO("allocate: threadId = %d: stolenChunk was not null. Putting in own fullPool\n", threadId);
 					putInOwnFullPool(memory->fullPool, threadId, stolenChunk);
-					//LOG_INFO("allocate: threadId = %d: stolenChunk was not null. Putting in own fullPool successful\n", threadId);
+					LOG_INFO("allocate: threadId = %d: stolenChunk was not null. Putting in own fullPool successful\n", threadId);
 				}
 			}
 
 			while(true) {
-				//LOG_INFO("allocate: threadId = %d, isFullPoolEmpty = %d\n", threadId, isFullPoolEmpty(memory->fullPool,threadId));
+				LOG_INFO("allocate: threadId = %d, isFullPoolEmpty = %d\n", threadId, isFullPoolEmpty(memory->fullPool,threadId));
 				chunk = getFromOwnFullPool(memory->fullPool,threadId);
-				//LOG_INFO("allocate: threadId = %d, after removing a chunk, isFullPoolEmpty = %d\n", threadId, isFullPoolEmpty(memory->fullPool,threadId));
+				LOG_INFO("allocate: threadId = %d, after removing a chunk, isFullPoolEmpty = %d\n", threadId, isFullPoolEmpty(memory->fullPool,threadId));
 				assert(globalHPStructure->topPointers[threadId] == 0);
 				if (chunk != NULL) {
 					assert(globalHPStructure->topPointers[threadId] == 0);
 					if (getDonorEntry(threadId)->noOfOps != memory->C) {
-						//LOG_INFO("allocate: threadId = %d: noOfOps = %d\n", threadId,getDonorEntry(threadId)->noOfOps);
+						LOG_INFO("allocate: threadId = %d: noOfOps = %d\n", threadId,getDonorEntry(threadId)->noOfOps);
 						getDonorEntry(threadId)->noOfOps++;
 						putInLocalPool(memory->localPool, threadId, chunk);
 						block = getFromChunkUncontended(chunk);
@@ -334,14 +333,12 @@ Chunk* doHelp(int threadId, int threadToBeHelped, Chunk *stolenChunk, ReferenceI
 		return stolenChunk;
 	}
 
-	//ReferenceIntegerPair *oldTop = (ReferenceIntegerPair*)getHazardPointer(globalHPStructure, threadId);
-	//AtomicStampedReference* oldTop = getStackThread(memory->fullPool, threadToBeHelped)->stack->top;
 	if (stolenChunk == NULL) {
 		LOG_INFO("doHelp: stolenChunk is null");
 		//LOG_INFO("doHelp: threadId %d, top reference = %u\n", threadId, getStackThread(memory->fullPool, threadToBeHelped)->stack->top->atomicRef->reference);
 		//LOG_INFO("doHelp: threadId %d, current annTS = %d, old annTS = %d\n",threadId, getHelperEntry(threadToBeHelped)->atomicRef->integer, announceOfThreadToBeHelped->atomicRef->integer);
 		assert(globalHPStructure->topPointers[threadId] == 1);
-		while ((getStackThread(memory->fullPool, threadToBeHelped)->stack->top->atomicRef->reference == NULL) && (getHelperEntry(threadToBeHelped)->atomicRef->integer == announceOfThreadToBeHelped->integer)) {
+		while ((GET_STACK_THREAD(memory->fullPool, threadToBeHelped)->stack->top->atomicRef->reference == NULL) && (getHelperEntry(threadToBeHelped)->atomicRef->integer == announceOfThreadToBeHelped->integer)) {
 			//LOG_INFO("doHelp: inside while");
 			stolenChunk = getFromOtherFullPool(memory->fullPool, i, threadId);
 			LOG_INFO("doHelp: victim = %d",i);
@@ -366,11 +363,11 @@ Chunk* doHelp(int threadId, int threadToBeHelped, Chunk *stolenChunk, ReferenceI
 		}
 	}
 	assert(globalHPStructure->topPointers[threadId] == 1);
-	ReferenceIntegerPair *oldTop = setHazardPointer(globalHPStructure, threadId, getStackThread(memory->fullPool, threadToBeHelped)->stack->top->atomicRef);
+	ReferenceIntegerPair *oldTop = setHazardPointer(globalHPStructure, threadId, GET_STACK_THREAD(memory->fullPool, threadToBeHelped)->stack->top->atomicRef);
 	//LOG_INFO("doHelp: setting HP of thread %d for oldTop %u\n", threadId, oldTop);
 	assert(globalHPStructure->topPointers[threadId] == 2);
 	bool *tempBoolObj;
-	if ((getStackThread(memory->fullPool, threadToBeHelped)->stack->top->atomicRef->reference == NULL) && (getHelperEntry(threadToBeHelped)->atomicRef->integer == announceOfThreadToBeHelped->integer)) {
+	if ((GET_STACK_THREAD(memory->fullPool, threadToBeHelped)->stack->top->atomicRef->reference == NULL) && (getHelperEntry(threadToBeHelped)->atomicRef->integer == announceOfThreadToBeHelped->integer)) {
 		assert(globalHPStructure->topPointers[threadId] == 2);
 		if (putInOtherFullPool(memory->fullPool, threadToBeHelped, stolenChunk, oldTop, threadId)) {
 			LOG_INFO("successfully helped thread %d", threadToBeHelped);
@@ -416,7 +413,7 @@ void freeMem(int threadId, BLOCK_MEM block) {
 	}
 	chunk = getFromLocalPool(memory->localPool,threadId);
 	//LOG_INFO("freeMem: threadID = %d, chunk ptr = %u\n", threadId, chunk);
-	if (chunkHasSpace(chunk)) {
+	if (CHUNK_HAS_SPACE(chunk)) {
 		//LOG_INFO("freeMem: threadId = %d: chunk in localPool has space\n", threadId);
 		putInChunkUncontended(chunk,block);
 		//putInLocalPool(memory->localPool,threadId, chunk);
@@ -489,10 +486,10 @@ bool donate(int threadId, Chunk *chunk) {
 	do {
 		LOG_INFO("donate: trying to donate to %d", i);
 		ReferenceIntegerPair *announceOfThreadToBeHelped = setHazardPointer(globalHPStructure, threadId, getHelperEntry(i)->atomicRef);
-		ReferenceIntegerPair *oldTop = setHazardPointer(globalHPStructure, threadId, getStackThread(memory->fullPool, i)->stack->top->atomicRef);
+		ReferenceIntegerPair *oldTop = setHazardPointer(globalHPStructure, threadId, GET_STACK_THREAD(memory->fullPool, i)->stack->top->atomicRef);
 		assert(globalHPStructure->topPointers[threadId] == 2);
 	//	int oldTS = announceOfThreadToBeHelped->integer;
-		if ((*(bool*)announceOfThreadToBeHelped->reference == true) && (getStackThread(memory->fullPool, i)->stack->top->atomicRef->reference == NULL) && (getHelperEntry(i)->atomicRef->integer == announceOfThreadToBeHelped->integer)) {
+		if ((*(bool*)announceOfThreadToBeHelped->reference == true) && (GET_STACK_THREAD(memory->fullPool, i)->stack->top->atomicRef->reference == NULL) && (getHelperEntry(i)->atomicRef->integer == announceOfThreadToBeHelped->integer)) {
 			LOG_INFO("donate: %d needed help", i);
 			if (putInOtherFullPool(memory->fullPool, i, chunk, oldTop, threadId)) {
 				assert(globalHPStructure->topPointers[threadId] == 1);
@@ -547,14 +544,14 @@ Chunk* moveFromSharedQueuePools(int threadId) {
 			//LOG_INFO("moveFromSQP: threadID: %d block ptr : %u\n", threadId, block);
 			if (block != NULL) {
 				LOG_INFO("moveFromSharedQueuePools: block was was taken out from sec queue of prim thread");
-				oldQueueHead = setHazardPointer(globalHPStructure, threadId, getQueueThread(memory->freePoolC, primThread)->queue->head);
+				oldQueueHead = setHazardPointer(globalHPStructure, threadId, GET_QUEUE_THREAD(memory->freePoolC, primThread)->queue->head);
 				assert(globalHPStructure->topPointers[threadId] == 2);
 				//LOG_INFO("moveFromSQP: setting HP of thread %d for oldQueueHEad %u\n", threadId, oldQueueHead);
 				//getHazardPointer(globalHPStructure, threadId);
-				if (!isQueueEmpty(getQueueThread(memory->freePoolC, primThread)->queue)) {
+				if (!IS_QUEUE_EMPTY(GET_QUEUE_THREAD(memory->freePoolC, primThread)->queue)) {
 					LOG_INFO("Prim queue had free chunks");
-					if (chunkHasSpace(oldQueueHead->next->value)) {
-						if (putInChunkContended(getQueueThread(memory->freePoolC, primThread)->queue->head->next->value, block)) {
+					if (CHUNK_HAS_SPACE(oldQueueHead->next->value)) {
+						if (putInChunkContended(GET_QUEUE_THREAD(memory->freePoolC, primThread)->queue->head->next->value, block)) {
 							clearHazardPointer(globalHPStructure, threadId);
 							assert(globalHPStructure->topPointers[threadId] == 1);
 							LOG_INFO("moveFromSharedQueuePools: Block was inserted in chunk");
@@ -592,11 +589,11 @@ Chunk* moveFromSharedQueuePools(int threadId) {
 				//clearHazardPointer(globalHPStructure, threadId);
 				LOG_INFO("block couldn't be taken out from sec queue of prim SQP");
 				assert(globalHPStructure->topPointers[threadId] == 1);
-				oldQueueHead = setHazardPointer(globalHPStructure, threadId, getQueueThread(memory->freePoolC, primThread)->queue->head);
+				oldQueueHead = setHazardPointer(globalHPStructure, threadId, GET_QUEUE_THREAD(memory->freePoolC, primThread)->queue->head);
 				//LOG_INFO("moveFromSharedQueuePools: setting HP. of thread %d for oldQueuHEad %u\n", threadId, oldQueueHead);
 				//oldQueueHead = getHazardPointer(globalHPStructure, threadId);
-				if (!isQueueEmpty(getQueueThread(memory->freePoolC, primThread)->queue)) {
-					if (!chunkHasSpace(oldQueueHead->next->value)) {
+				if (!IS_QUEUE_EMPTY(GET_QUEUE_THREAD(memory->freePoolC, primThread)->queue)) {
+					if (!CHUNK_HAS_SPACE(oldQueueHead->next->value)) {
 						LOG_INFO("moveFromSMP: trying to pop a chunk from prim queue");
 						chunk = getFromFreePoolC(memory->freePoolC, threadId, primThread, oldQueueHead);
 						assert(globalHPStructure->topPointers[threadId] == 1);

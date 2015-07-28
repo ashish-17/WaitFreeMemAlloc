@@ -25,8 +25,8 @@ void destroyFullPool(StackPool *pool) {
 
 bool isFullPoolEmpty(StackPool* pool, int threadIndex) {
 	LOG_PROLOG();
-	StackThread* thread = getStackThread(pool, threadIndex);
-	bool flag = (stackIsEmpty(thread->stack));
+	StackThread* thread = GET_STACK_THREAD(pool, threadIndex);
+	bool flag = (STACK_IS_EMPTY(thread->stack));
 	LOG_EPILOG();
 	return flag;
 }
@@ -35,7 +35,7 @@ Chunk* getFromOtherFullPool(StackPool* pool, int otherThreadId, int threadIndex)
 	LOG_PROLOG();
 	//printf("inside getFromOtherFullPool\n");
 	//printf("getFromOtheFullPool: is victim %d stack Empty %d\n", threadIndex, stackIsEmpty(getThread(pool,threadIndex)->stack));
-	StackThread* thread = getStackThread(pool, otherThreadId);
+	StackThread* thread = GET_STACK_THREAD(pool, otherThreadId);
 	//printf("getFromOtheFullPool: thread ptr = %u\n", thread);
 	Chunk* chunk = stackPopOther(thread->stack, threadIndex);
 	//printf("getFromOtheFullPool: chunk ptr = %u\n", chunk);
@@ -45,7 +45,7 @@ Chunk* getFromOtherFullPool(StackPool* pool, int otherThreadId, int threadIndex)
 
 Chunk* getFromOwnFullPool(StackPool* pool, int threadIndex) {
 	LOG_PROLOG();
-	StackThread* thread = getStackThread(pool, threadIndex);
+	StackThread* thread = GET_STACK_THREAD(pool, threadIndex);
 	Chunk * chunk = (Chunk*)stackPopOwner(thread->stack, threadIndex);
 	LOG_EPILOG();
 	return chunk;
@@ -53,7 +53,7 @@ Chunk* getFromOwnFullPool(StackPool* pool, int threadIndex) {
 
 bool putInOtherFullPool(StackPool* pool, int otherThreadId, Chunk* chunk, ReferenceIntegerPair* oldTop, int threadIndex) {
 	LOG_PROLOG();
-	StackThread* thread = getStackThread(pool, otherThreadId);
+	StackThread* thread = GET_STACK_THREAD(pool, otherThreadId);
 	bool flag = stackPushOther(thread->stack, chunk, oldTop, threadIndex);
 	LOG_EPILOG();
 	return flag;
@@ -61,7 +61,7 @@ bool putInOtherFullPool(StackPool* pool, int otherThreadId, Chunk* chunk, Refere
 
 bool putInOwnFullPool(StackPool* pool, int threadIndex, Chunk* chunk) {
 	LOG_PROLOG();
-	StackThread* thread = getStackThread(pool, threadIndex);
+	StackThread* thread = GET_STACK_THREAD(pool, threadIndex);
 	bool flag = stackPushOwner(thread->stack, chunk, threadIndex);
 	LOG_EPILOG();
 	return flag;

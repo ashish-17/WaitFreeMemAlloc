@@ -97,7 +97,7 @@ bool stackArrayIsEmpty(const StackArrayElement *top, const StackArrayElement *ba
 	return flag;
 }
 
-bool StackArrayIsFull(const StackArrayElement *top, const StackArrayElement *baseAddress, int sizeOfStack) {
+bool stackArrayIsFull(const StackArrayElement *top, const StackArrayElement *baseAddress, int sizeOfStack) {
 	LOG_PROLOG();
 	bool flag = false;
 
@@ -118,7 +118,7 @@ bool stackArrayPushUncontended(StackArray *stack, void* element) {
 
 	if (stack != NULL) {
         if (element != NULL) {
-            if (StackArrayIsFull(stack->top, stack->elements, stack->maxElements)) {
+            if (stackArrayIsFull(stack->top, stack->elements, stack->maxElements)) {
                 LOG_WARN("Push uncontended failed as array is full");
             } else {
                 if (stack->top != NULL) {
@@ -169,7 +169,7 @@ bool stackArrayPushContended(StackArray *stack, const void* element) {
 	if (stack != NULL) {
         if (element != NULL) {
             StackArrayElement *oldTop = stack->top;
-            if (StackArrayIsFull(oldTop, stack->elements, stack->maxElements)) {
+            if (stackArrayIsFull(oldTop, stack->elements, stack->maxElements)) {
                 LOG_WARN("Push contended failed as array is full");
             } else {
                 void *nullptr = NULL;

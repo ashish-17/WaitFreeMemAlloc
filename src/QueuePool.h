@@ -19,11 +19,11 @@ typedef struct {
 	int numberOfThreads;
 } QueuePool;
 
+#define GET_QUEUE_THREAD(pool, index) ((pool->threads + index))
+
 QueuePool* createQueuePool(int threads, int elementSize);
 
 void deleteQueuePool(QueuePool* pool);
-
-QueueThread* getQueueThread(QueuePool* pool, int index);
 
 
 #endif /* WAITFREEMEMALLOC_SRC_QUEUEPOOL_H_ */
