@@ -320,12 +320,12 @@ void testStackArray(TestConfigStackArray cfg) {
 	}
 }
 
-int main() {
+int testSAmain() {
 	//int mainTestStackArray() {
 	LOG_INIT_CONSOLE();
 	LOG_INIT_FILE();
 
-	const int COUNT_TEST_CFG = 3;
+	const int COUNT_TEST_CFG = 10;
 	TestConfigStackArray cfg[COUNT_TEST_CFG];
 
 	cfg[0].numBlocksInStack = 1;

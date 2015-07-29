@@ -348,7 +348,7 @@ void tester(TestConfig cfg) {
 	LOG_EPILOG();
 }
 
-int vfvfmain() {
+int main() {
 	LOG_INIT_CONSOLE();
 	LOG_INIT_FILE();
 
@@ -404,7 +404,7 @@ int vfvfmain() {
 	config1.counsumer = consumer1;
 	config1.normalExec = normalExec;
 
-	//tester(config1);
+	tester(config1);
 	LOG_INFO("Config 1.3 successful");
 
 	config1.numChunksPerThread = 2;
@@ -421,7 +421,7 @@ int vfvfmain() {
 	config1.counsumer = consumer1;
 	config1.normalExec = normalExec;
 
-	//	tester(config1);
+		tester(config1);
 	LOG_INFO("Config 1.4 successful");
 
 	// config2 had multiple producers sending to same consumer

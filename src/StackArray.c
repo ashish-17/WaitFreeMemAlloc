@@ -37,6 +37,7 @@ StackArray* stackArrayCreate(int elementSize, int maxElements) {
             stack->top = stack->elements;
             stack->elementSize = elementSize;
             stack->maxElements = maxElements;
+            memset(stack->elements, 0, sizeof(StackArrayElement) * (maxElements + 1));
         } else {
             LOG_ERROR("Error allocating memory to elements in stackArray");
             my_free(stack);

@@ -7,7 +7,7 @@ ASM_SRCS :=
 C_SRCS := 
 O_SRCS := 
 S_UPPER_SRCS := 
-EXECUTABLES := 
+ARCHIVES := 
 OBJS := 
 C_DEPS := 
 
