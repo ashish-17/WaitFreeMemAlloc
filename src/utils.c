@@ -3,8 +3,9 @@
 #include <time.h>
 #include "logger.h"
 #include <string.h>
+#include <errno.h>
 
-extern int errno;
+//extern int errno;
 
 typedef struct {
 	unsigned int isDirty;

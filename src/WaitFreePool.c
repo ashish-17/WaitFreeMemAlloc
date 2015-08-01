@@ -97,7 +97,7 @@ void createWaitFreePool(int m, int n, int c, int C, int blkSize) {
 
 	Chunk *chunk;
 	BLOCK_MEM block;
-	//int blockNumber = 0;
+	int blockNumber = 0;
 
 	// Set-up of initial local pools
 	for(int j = 0; j < numOfThreads ; j++) {
@@ -105,8 +105,8 @@ void createWaitFreePool(int m, int n, int c, int C, int blkSize) {
 			chunk = createChunk(numOfBlocksPerChunk);
 			for(int k = 0; k < numOfBlocksPerChunk; k++) {
 				block = createBlock(blkSize); //set the owner of the block to be -1 initially
-				//*((int*)block) = blockNumber;
-				//blockNumber++;
+				*((int*)block) = blockNumber;
+				blockNumber++;
 				putInChunkUncontended(chunk, block);
 			}
 			putInLocalPool(memory->localPool,j,chunk);
@@ -120,8 +120,8 @@ void createWaitFreePool(int m, int n, int c, int C, int blkSize) {
 			chunk = createChunk(numOfBlocksPerChunk);
 			for(int k = 0; k < numOfBlocksPerChunk; k++) {
 				block = createBlock(blkSize);
-				//*((int*)block) = blockNumber;
-				//blockNumber++;
+				*((int*)block) = blockNumber;
+				blockNumber++;
 				putInChunkUncontended(chunk, block);
 			}
 			//LOG_INFO("created the chunk for FP\n");
