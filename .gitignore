@@ -39,3 +39,4 @@
 *.txt
 /Debug/
 /staticLib/
+/Release/
