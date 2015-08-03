@@ -9,6 +9,7 @@ RM := rm -rf
 # All of the sources participating in the build are defined here
 -include sources.mk
 -include src/test/subdir.mk
+-include src/mini-logger/subdir.mk
 -include src/subdir.mk
 -include subdir.mk
 -include objects.mk
@@ -24,19 +25,19 @@ endif
 # Add inputs and outputs from these tool invocations to the build variables 
 
 # All Target
-all: libWaitFreePool.a
+all: WaitFreeMemAlloc
 
 # Tool invocations
-libWaitFreePool.a: $(OBJS) $(USER_OBJS)
+WaitFreeMemAlloc: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
-	@echo 'Invoking: GCC Archiver'
-	ar -r  "libWaitFreePool.a" $(OBJS) $(USER_OBJS) $(LIBS)
+	@echo 'Invoking: GCC C Linker'
+	gcc  -o "WaitFreeMemAlloc" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 
 # Other Targets
 clean:
-	-$(RM) $(ARCHIVES)$(OBJS)$(C_DEPS) libWaitFreePool.a
+	-$(RM) $(EXECUTABLES)$(OBJS)$(C_DEPS) WaitFreeMemAlloc
 	-@echo ' '
 
 .PHONY: all clean dependents

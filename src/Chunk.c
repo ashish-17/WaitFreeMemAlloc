@@ -1,5 +1,5 @@
 #include "Chunk.h"
-#include "logger.h"
+#include "mini-logger/logger.h"
 #include "utils.h"
 
 Chunk* createChunk(int number) {

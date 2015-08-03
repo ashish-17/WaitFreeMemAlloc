@@ -1,0 +1,3 @@
+[submodule "src/mini-logger"]
+	path = src/mini-logger
+	url = https://github.com/ashish-17/mini-logger.git

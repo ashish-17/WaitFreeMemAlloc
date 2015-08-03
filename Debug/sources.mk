@@ -7,12 +7,13 @@ ASM_SRCS :=
 C_SRCS := 
 O_SRCS := 
 S_UPPER_SRCS := 
-ARCHIVES := 
+EXECUTABLES := 
 OBJS := 
 C_DEPS := 
 
 # Every subdirectory with source files must be described here
 SUBDIRS := \
 src \
+src/mini-logger \
 src/test \
 

@@ -65,7 +65,7 @@ C_DEPS += \
 src/%.o: ../src/%.c
 	@echo 'Building file: $<'
 	@echo 'Invoking: GCC C Compiler'
-	gcc -I/Users/architaagarwal/hpc-gcc/lib/gcc/x86_64-apple-darwin14.0.0/4.9.2/include -I"/Users/architaagarwal/Documents/workspace/Logger" -I/Users/architaagarwal/hpc-gcc/include/c++/4.9.2 -O3 -g3 -Wall -Wextra -Werror -c -fmessage-length=0 -std=c11 -pg -O3 -finline-limit=20000 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
+	gcc -std=c11 -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
 	@echo 'Finished building: $<'
 	@echo ' '
 

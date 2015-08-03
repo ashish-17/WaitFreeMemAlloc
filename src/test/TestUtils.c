@@ -10,7 +10,7 @@
  */
 
 #include "../utils.h"
-#include "logger.h"
+#include "../mini-logger/logger.h"
 #include <string.h>
 
 int utilsmain() {

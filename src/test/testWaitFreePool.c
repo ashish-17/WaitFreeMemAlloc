@@ -130,11 +130,7 @@ void* producer1(void *data) {
 	int con;
 	for (int i = 1; i <= cfg->numBlocksToBePassed; i++) {
 		int* block = allocate(threadId, 1);
-		bool flag = setFlagForAllocatedBlock(*block);
-		if (!flag) {
-			LOG_ERROR("Block %d was already allocated to some other thread", *block);
-			break;
-		}
+
 		int con1 = 2*threadId + cfg->numProducers + cfg->numNormalThreads;
 		int con2 = con1 + 1;
 
@@ -185,11 +181,6 @@ void* consumer1(void *data) {
 		//LOG_INFO("Consumer %d consumed the block %d\n", threadId, block->memBlock);
 		freeMem(threadId, block);
 		LOG_INFO("Consumer consumed the block %d", *block);
-		bool flag = clearFlagForAllocatedBlock(*block);
-		if (!flag) {
-			LOG_ERROR("Block %d was already free. Tried to free again", *block);
-			break;
-		}
 	}
 	LOG_INFO("CONSUMER FINISHED");
 
@@ -220,11 +211,6 @@ void* producer2(void *data) {
 	for (int i = 1; i <= cfg->numBlocksToBePassed; i++) {
 
 		int* block = allocate(threadId, 1);
-		bool flag = setFlagForAllocatedBlock(*block);
-		if (!flag) {
-			LOG_ERROR("Block %d was already allocated to some other thread", *block);
-			break;
-		}
 
 		pthread_mutex_lock(&threadData[con].the_mutex);	// protect buffer
 		while (threadData[con].buffer != NULL)	{	       // If there is something in the buffer then wait
@@ -270,11 +256,6 @@ void* consumer2(void *data) {
 		//LOG_INFO("Consumer %d consumed the block %d\n", threadId, block->memBlock);
 		freeMem(threadId, block);
 		LOG_INFO("Consumer consumed the block %d", *block);
-		bool flag = clearFlagForAllocatedBlock(*block);
-		if (!flag) {
-			LOG_ERROR("Block %d was already free. Tried to free again", *block);
-			break;
-		}
 	}
 	LOG_INFO("CONSUMER FINISHED");
 
@@ -303,7 +284,6 @@ void tester(TestConfig cfg) {
 	LOG_INFO("created all the arrays");
 
 	createWaitFreePool(cfg.numBlocks, cfg.numThreads, cfg.chunkSize, cfg.numDonationSteps, 8);
-	hashTableCreate(cfg.numBlocks);
 
 
 	int rc;
@@ -342,13 +322,12 @@ void tester(TestConfig cfg) {
 
 	my_free(threadData);
 	threadData = NULL;
-	hashTableFree(cfg.numBlocks);
 	destroyWaitFreePool();
 
 	LOG_EPILOG();
 }
 
-int testWFPmain() {
+int main() {
 	LOG_INIT_CONSOLE();
 	LOG_INIT_FILE();
 
