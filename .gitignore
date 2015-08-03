@@ -3,6 +3,7 @@
 *.ko
 *.obj
 *.elf
+*.d
 
 # Precompiled Headers
 *.gch
@@ -34,3 +35,4 @@
 # My log files (Archita)
 *.txt
 /Debug/
+/staticLib/
