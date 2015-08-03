@@ -25,19 +25,19 @@ endif
 # Add inputs and outputs from these tool invocations to the build variables 
 
 # All Target
-all: WaitFreePool
+all: libWaitFreePool.a
 
 # Tool invocations
-WaitFreePool: $(OBJS) $(USER_OBJS)
+libWaitFreePool.a: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
-	@echo 'Invoking: GCC C Linker'
-	gcc  -o "WaitFreePool" $(OBJS) $(USER_OBJS) $(LIBS)
+	@echo 'Invoking: GCC Archiver'
+	ar -r  "libWaitFreePool.a" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 
 # Other Targets
 clean:
-	-$(RM) $(EXECUTABLES)$(OBJS)$(C_DEPS) WaitFreePool
+	-$(RM) $(ARCHIVES)$(OBJS)$(C_DEPS) libWaitFreePool.a
 	-@echo ' '
 
 .PHONY: all clean dependents
